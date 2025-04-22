@@ -1,0 +1,188 @@
+# Overview
+The Farmer's Market application uses a modern, scalable architecture built on Next.js and Supabase. This architecture prioritizes developer experience, performance, and maintainability while providing a robust foundation for future growth.
+
+# Core Architecture Components
+
+## 1. Backend Infrastructure
+**Supabase Platform**
+- What it does: Provides database, authentication, and file storage
+- Why it's important: Simplifies infrastructure management and provides real-time capabilities
+- How it works: Managed PostgreSQL database with built-in APIs and authentication
+
+## 2. Frontend Framework
+**Next.js + React**
+- What it does: Powers the user interface and application logic
+- Why it's important: Enables server-side rendering, optimized performance, and excellent developer experience
+- How it works: React-based framework with file-system routing and API routes
+
+## 3. Data Management
+**React Query (TanStack Query)**
+- What it does: Handles server state management and data fetching
+- Why it's important: Provides caching, real-time updates, and optimistic updates
+- How it works: Declarative data synchronization with automatic background updates
+
+## 4. UI Components
+**Shadcn/ui + TailwindCSS**
+- What it does: Provides accessible, customizable UI components
+- Why it's important: Ensures consistent design and reduces development time
+- How it works: Utility-first CSS with composable React components
+
+# User Experience Considerations
+
+## Performance Optimization
+- Next.js automatic code splitting
+- Image optimization with next/image
+- React Query caching strategies
+- TailwindCSS for minimal CSS bundles
+
+## Developer Experience
+- TypeScript for type safety
+- ESLint and Prettier for code quality
+- Husky for git hooks
+- Comprehensive testing setup
+
+# Technical Architecture
+
+## System Components
+
+### Database Schema (Supabase)
+```sql
+-- Core tables structure
+profiles
+vendor_profiles
+products
+orders
+order_items
+market_days
+```
+
+### Frontend Structure
+```
+src/
+├── app/ # Next.js app directory
+├── components/ # React components
+├── lib/ # Utilities
+├── services/ # API services
+├── stores/ # State management
+└── types/ # TypeScript types
+```
+
+### API Integration
+- Supabase client for data access
+- Next.js API routes for custom endpoints
+- React Query for data fetching
+
+## Core Dependencies
+```json
+{
+  "dependencies": {
+    "next": "^14.x",
+    "react": "^18.x",
+    "@tanstack/react-query": "^5.x",
+    "@supabase/supabase-js": "^2.x",
+    "zustand": "^4.x",
+    "react-hook-form": "^7.x",
+    "zod": "^3.x",
+    "tailwindcss": "^3.x",
+    "dayjs": "^1.x"
+  }
+}
+```
+
+# Development Roadmap
+
+## Phase 1 (Foundation)
+- Set up Next.js project with TypeScript
+- Configure Supabase integration
+- Implement basic authentication
+- Create core database schema
+
+## Phase 2 (Core Features)
+- Build vendor dashboard
+- Implement product management
+- Create shopping experience
+- Set up payment processing
+
+## Phase 3 (Enhancement)
+- Add real-time features
+- Implement analytics
+- Optimize performance
+- Add advanced search
+
+# Logical Dependency Chain
+
+1. Project Setup
+   - Next.js configuration
+   - Supabase integration
+   - TypeScript setup
+
+2. Authentication Layer
+   - User registration
+   - Login system
+   - Role-based access
+
+3. Data Layer
+   - Database schema
+   - API routes
+   - React Query setup
+
+4. UI Implementation
+   - Component library
+   - Layout system
+   - Responsive design
+
+5. Feature Implementation
+   - Vendor features
+   - Customer features
+   - Admin features
+
+# Risks and Mitigations
+
+## Technical Risks
+
+### Performance
+Risk: Large product catalogs affecting performance
+Mitigation: 
+- Implement pagination
+- Use React Query caching
+- Optimize image loading
+
+### Data Consistency
+Risk: Real-time updates causing race conditions
+Mitigation:
+- Implement optimistic updates
+- Use Supabase real-time features
+- Add proper error handling
+
+### Security
+Risk: Unauthorized data access
+Mitigation:
+- Row Level Security in Supabase
+- Strong authentication
+- Input validation
+
+## Resource Constraints
+Risk: Development complexity
+Mitigation:
+- Use established component library
+- Follow Next.js conventions
+- Leverage TypeScript for code quality
+
+# Appendix
+
+## Development Tools
+- VS Code with recommended extensions
+- Supabase CLI
+- Next.js development server
+- Jest and Playwright for testing
+
+## Coding Standards
+- Strict TypeScript usage
+- Component-driven development
+- Test coverage requirements
+- Documentation requirements
+
+## Performance Metrics
+- Core Web Vitals targets
+- API response time goals
+- Bundle size limits

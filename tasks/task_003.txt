@@ -1,0 +1,11 @@
+# Task ID: 3
+# Title: Build Vendor Profile Management
+# Status: pending
+# Dependencies: 2
+# Priority: high
+# Description: Develop functionality for vendors to create and manage their store profiles with basic information and images.
+# Details:
+Create database models for vendor profiles. Implement API endpoints for profile CRUD operations. Develop image upload functionality for store images. Build frontend components for vendor profile creation and editing. Implement form validation for vendor information. Create vendor dashboard layout and navigation.
+
+# Test Strategy:
+Test vendor profile creation, editing, and image upload functionality. Verify data validation and proper storage of profile information.

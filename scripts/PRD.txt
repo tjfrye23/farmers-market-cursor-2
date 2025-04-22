@@ -1,0 +1,179 @@
+# Overview
+The Farmer's Market app is a digital marketplace that connects local farmers with customers, enabling direct purchase of fresh, local products. The platform simplifies the process of buying from multiple vendors through a single transaction while providing farmers with a straightforward way to establish their digital presence.
+
+Target Users:
+- Vendors (local farmers and producers)
+- Customers (community members seeking local products)
+- Administrators (marketplace overseers)
+
+# Core Features
+
+## 1. Authentication & User Management
+- Secure login and registration system for all user types
+- Role-based access control (vendor, customer, admin)
+- Basic profile management for each user type
+
+Why it's important: Provides security and personalized experiences while maintaining marketplace integrity
+How it works: Email-based registration with secure password authentication and role-specific access permissions
+
+## 2. Vendor Features
+- Profile Creation & Management
+  - Store name, description, contact info, location
+  - Basic store images upload
+  - Simple profile editing capabilities
+- Product Management
+  - Add/edit/delete products
+  - Product details: name, price, description, image, quantity
+  - Inventory status management (in/out of stock)
+- Order Management Dashboard
+  - View incoming orders
+  - Update order status
+  - Basic sales overview
+
+Why it's important: Enables vendors to establish online presence and manage their digital storefront
+How it works: Intuitive dashboard interface with straightforward CRUD operations for products and orders
+
+## 3. Customer Features
+- Product Discovery
+  - Browse products without account requirement
+  - Basic search functionality
+  - Filter by category and vendor
+- Shopping Experience
+  - Shopping cart management
+  - Multi-vendor checkout process
+  - Secure payment processing
+- Order Management
+  - View order history
+  - Track current orders
+  - Basic profile preferences
+
+Why it's important: Provides essential shopping functionality while maintaining simplicity
+How it works: Responsive interface with intuitive shopping cart and checkout flow
+
+## 4. Admin Features
+- Vendor Management
+  - Review and approve vendor applications
+  - Monitor vendor listings
+- Marketplace Management
+  - Post announcements
+  - Manage product categories
+  - Basic marketplace oversight
+
+Why it's important: Ensures marketplace quality and provides necessary oversight
+How it works: Admin dashboard with moderation tools and marketplace management capabilities
+
+## 5. Market Day Management
+- Basic scheduling system for market days
+- Simple notification system for market day reminders
+- Inventory update requirements for vendors
+
+Why it's important: Maintains alignment with physical market operations
+How it works: Automated scheduling system with basic notification triggers
+
+# User Experience
+
+## User Personas
+
+### Vendor - Sarah the Small Farm Owner
+- Needs easy way to manage online presence
+- Values simple product management
+- Wants to track orders efficiently
+
+### Customer - Mike the Local Food Enthusiast
+- Seeks fresh, local produce
+- Values convenience of online ordering
+- Wants transparent product information
+
+### Admin - Alex the Market Manager
+- Needs to ensure marketplace quality
+- Requires vendor oversight tools
+- Manages market day operations
+
+## Key User Flows
+
+### Vendor Flow
+1. Register and create profile
+2. Add products to store
+3. Manage orders and inventory
+
+### Customer Flow
+1. Browse products (no account required)
+2. Create account for purchase
+3. Add items to cart
+4. Complete multi-vendor checkout
+
+### Admin Flow
+1. Review vendor applications
+2. Monitor marketplace activity
+3. Manage market day schedule
+
+# Technical Architecture
+
+## System Components
+- Frontend: Responsive web application
+- Backend: RESTful API service
+- Database: Relational database for user, product, and order management
+- Authentication: JWT-based auth system
+- Payment Processing: Integration with secure payment gateway
+
+## Core Data Models
+- Users (vendors, customers, admins)
+- Products
+- Orders
+- Market Schedules
+
+## Key Integrations
+- Payment processing system
+- Email notification service
+
+# Development Roadmap
+
+## Phase 1 (MVP)
+- Basic authentication system
+- Essential vendor profile and product management
+- Core shopping experience
+- Basic admin tools
+- Simple market day scheduling
+
+## Phase 2 (Enhancement)
+- Advanced product search and filtering
+- Enhanced vendor analytics
+- Customer reviews and ratings
+- Improved notification system
+
+## Phase 3 (Scale)
+- Inventory forecasting
+- Advanced analytics
+- Social features
+- Personalized recommendations
+
+# Logical Dependency Chain
+1. User authentication and profile management
+2. Vendor store and product management
+3. Product browsing and search
+4. Shopping cart and checkout
+5. Order management
+6. Market day scheduling
+7. Admin tools
+
+# Risks and Mitigations
+
+## Technical Risks
+- Payment processing security
+  - Mitigation: Use established payment gateway with strong security
+- Data consistency across multi-vendor transactions
+  - Mitigation: Implement robust transaction management
+
+## Business Risks
+- Vendor adoption
+  - Mitigation: Focus on simple, intuitive vendor tools
+- Customer engagement
+  - Mitigation: Ensure smooth, friction-free shopping experience
+
+# Appendix
+
+## Success Metrics
+- Vendor registration and active usage
+- Customer registration and orders
+- Transaction volume
+- Market day participation

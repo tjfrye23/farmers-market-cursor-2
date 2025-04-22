@@ -1,0 +1,129 @@
+# Task ID: 6
+# Title: Implement Shopping Cart and Checkout
+# Status: pending
+# Dependencies: 5
+# Priority: high
+# Description: Build shopping cart management and multi-vendor checkout process with payment integration.
+# Details:
+Design and implement shopping cart data model. Create API endpoints for cart management. Develop multi-vendor checkout process. Integrate with payment gateway for secure transactions. Build frontend components for cart management and checkout flow. Implement order creation upon successful payment. Create order confirmation notifications.
+
+# Test Strategy:
+Test adding/removing items from cart. Verify multi-vendor checkout process. Test payment processing with test credentials. Ensure proper order creation after successful payment.
+
+# Subtasks:
+## 1. Design and implement shopping cart data model [pending]
+### Dependencies: None
+### Description: Create the database schema and models for the shopping cart system that supports multi-vendor products
+### Details:
+Implementation details:
+1. Design database schema for cart items with fields: id, user_id, product_id, vendor_id, quantity, price, created_at, updated_at
+2. Create a Cart model that aggregates cart items by user
+3. Implement relationships between Cart, CartItem, Product, and User models
+4. Add methods for calculating subtotals per vendor and cart total
+5. Include validation rules for quantity limits and product availability
+6. Create database migrations
+7. Write unit tests for the cart model methods
+8. Test with different scenarios: adding items, updating quantities, removing items
+
+## 2. Develop API endpoints for cart management [pending]
+### Dependencies: 6.1
+### Description: Create RESTful API endpoints to handle all cart operations
+### Details:
+Implementation details:
+1. Create routes for cart operations: GET /cart, POST /cart/items, PUT /cart/items/:id, DELETE /cart/items/:id
+2. Implement controller methods for each endpoint:
+   - Fetch cart contents
+   - Add item to cart
+   - Update item quantity
+   - Remove item from cart
+   - Clear entire cart
+3. Add authentication middleware to protect cart endpoints
+4. Implement request validation for all inputs
+5. Add error handling for common scenarios (product unavailable, quantity limits)
+6. Create API documentation
+7. Write integration tests for each endpoint
+8. Test concurrent cart operations for race conditions
+
+## 3. Build frontend cart management components [pending]
+### Dependencies: 6.2
+### Description: Develop UI components for displaying and managing the shopping cart
+### Details:
+Implementation details:
+1. Create a CartContext for state management
+2. Build CartItem component to display individual items with quantity controls
+3. Implement CartSummary component showing totals per vendor and overall
+4. Add CartIcon component with item count for navigation bar
+5. Create CartPage component for full cart management
+6. Implement add/remove/update quantity functionality with API integration
+7. Add loading states and error handling
+8. Style components according to design system
+9. Write unit tests for components
+10. Test responsive behavior on different screen sizes
+
+## 4. Implement multi-vendor checkout process logic [pending]
+### Dependencies: 6.1, 6.2
+### Description: Create the backend logic to handle checkout process with multiple vendors
+### Details:
+Implementation details:
+1. Design checkout data model with order grouping by vendor
+2. Create checkout initialization endpoint that validates cart items and availability
+3. Implement logic to split orders by vendor while maintaining a single checkout session
+4. Add inventory reservation during checkout process
+5. Create checkout session timeout and inventory release mechanism
+6. Implement shipping calculation per vendor
+7. Add tax calculation logic
+8. Create checkout summary generation with breakdown by vendor
+9. Write unit tests for order splitting and calculation logic
+10. Test edge cases like partial inventory availability
+
+## 5. Integrate with payment gateway [pending]
+### Dependencies: 6.4
+### Description: Connect the checkout process with a payment gateway for secure transactions
+### Details:
+Implementation details:
+1. Research and select appropriate payment gateway with multi-vendor support
+2. Create payment service abstraction layer
+3. Implement payment initialization endpoint that creates payment intent/session
+4. Add webhook endpoint for payment confirmations and failures
+5. Implement client-side payment form integration
+6. Add security measures (HTTPS, input sanitization, etc.)
+7. Create transaction logging system
+8. Implement error handling for payment failures
+9. Add retry mechanism for failed payments
+10. Test with sandbox/test payment credentials
+11. Create mock payment gateway for development and testing
+
+## 6. Build checkout flow UI components [pending]
+### Dependencies: 6.3, 6.4, 6.5
+### Description: Develop the frontend components for the complete checkout process
+### Details:
+Implementation details:
+1. Create multi-step checkout process UI (shipping, payment, review)
+2. Build CheckoutContext for state management across steps
+3. Implement ShippingForm component with address validation
+4. Create VendorOrderSummary component showing items grouped by vendor
+5. Build PaymentForm component integrated with payment gateway
+6. Implement OrderReview component showing complete order details
+7. Add checkout progress indicator
+8. Create loading and success/error states
+9. Implement form validation for all inputs
+10. Add responsive design for mobile checkout
+11. Write unit tests for components and integration tests for the complete flow
+
+## 7. Implement order creation and confirmation system [pending]
+### Dependencies: 6.4, 6.5
+### Description: Create the system to handle order creation upon successful payment and send confirmations
+### Details:
+Implementation details:
+1. Create Order and OrderItem models with appropriate statuses
+2. Implement order creation logic triggered by successful payment
+3. Add database transaction handling to ensure data consistency
+4. Create order confirmation email templates for customers
+5. Implement vendor notification system for new orders
+6. Add order history endpoint for customer account
+7. Create order details page showing status and items
+8. Implement order receipt generation
+9. Add logging for order creation events
+10. Write unit tests for order creation logic
+11. Test the complete flow from cart to order confirmation
+

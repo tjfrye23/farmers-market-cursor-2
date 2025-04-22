@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "generatedAt": "2025-04-21T23:54:37.778Z",
+    "tasksAnalyzed": 10,
+    "thresholdScore": 5,
+    "projectName": "Your Project Name",
+    "usedResearch": false
+  },
+  "complexityAnalysis": [
+    {
+      "taskId": 1,
+      "taskTitle": "Setup Project Infrastructure",
+      "complexityScore": 8,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Break down the project infrastructure setup into specific technical subtasks covering frontend framework initialization, backend API structure, database schema design, repository configuration, environment setup, and CI/CD pipeline implementation.",
+      "reasoning": "This task involves setting up the entire project foundation across multiple technology stacks (frontend, backend, database) and environments. It requires architectural decisions that will impact the entire project, making it highly complex and foundational."
+    },
+    {
+      "taskId": 2,
+      "taskTitle": "Implement Authentication System",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Divide the authentication system implementation into specific subtasks covering user registration flow, login functionality, JWT token management, role-based access control middleware, password reset functionality, and frontend authentication components.",
+      "reasoning": "Authentication is security-critical and involves both frontend and backend components. The JWT implementation, role-based access control, and multiple user flows (registration, login, password reset) add significant complexity."
+    },
+    {
+      "taskId": 3,
+      "taskTitle": "Build Vendor Profile Management",
+      "complexityScore": 5,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Break down the vendor profile management into subtasks covering database model creation, API endpoint implementation, image upload functionality, frontend form components, and dashboard integration.",
+      "reasoning": "This task involves standard CRUD operations with moderate complexity due to image handling and form validation. It builds on the authentication system but follows common patterns for profile management."
+    },
+    {
+      "taskId": 4,
+      "taskTitle": "Implement Product Management",
+      "complexityScore": 6,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Divide product management implementation into subtasks covering product database schema design, inventory tracking logic, product CRUD API endpoints, image upload functionality, and frontend product management interface.",
+      "reasoning": "Product management adds complexity through inventory status tracking and image handling. The relationship between products and vendors adds data modeling complexity, and the frontend requires multiple form components."
+    },
+    {
+      "taskId": 5,
+      "taskTitle": "Develop Product Browsing and Search",
+      "complexityScore": 7,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Break down product browsing and search into subtasks covering search algorithm implementation, filter functionality, product listing API endpoints, responsive frontend components, and product detail view implementation.",
+      "reasoning": "Search functionality adds significant complexity, especially with filtering capabilities. The frontend requires responsive design considerations and multiple interactive components for browsing, searching, and viewing products."
+    },
+    {
+      "taskId": 6,
+      "taskTitle": "Implement Shopping Cart and Checkout",
+      "complexityScore": 9,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Divide shopping cart and checkout implementation into subtasks covering cart data model design, cart management API, multi-vendor order processing logic, payment gateway integration, frontend cart components, checkout flow implementation, and order confirmation system.",
+      "reasoning": "This is one of the most complex tasks due to multi-vendor checkout processing, payment integration (which involves security considerations), and the critical nature of the transaction flow. Multiple systems must work together seamlessly."
+    },
+    {
+      "taskId": 7,
+      "taskTitle": "Create Order Management System",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Break down order management system into subtasks covering order data model design, order status workflow implementation, vendor order dashboard, customer order history interface, sales reporting functionality, and notification integration.",
+      "reasoning": "Order management involves complex state transitions and different views for vendors and customers. The reporting functionality and integration with notifications add additional complexity layers."
+    },
+    {
+      "taskId": 8,
+      "taskTitle": "Build Market Day Management",
+      "complexityScore": 6,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Divide market day management into subtasks covering scheduling data model design, market day CRUD operations, inventory requirement logic, notification integration, and admin scheduling interface implementation.",
+      "reasoning": "This task involves scheduling logic and coordination between market days, vendors, and inventory. The notification requirements and admin interface add moderate complexity."
+    },
+    {
+      "taskId": 9,
+      "taskTitle": "Develop Admin Dashboard",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Break down admin dashboard development into subtasks covering vendor approval workflow, marketplace management tools, reporting and analytics implementation, vendor monitoring system, notification integration, and administrative UI components.",
+      "reasoning": "The admin dashboard touches multiple aspects of the system and requires privileged access controls. The reporting functionality and vendor approval workflow add significant complexity to this administrative tool."
+    },
+    {
+      "taskId": 10,
+      "taskTitle": "Implement Notification System",
+      "complexityScore": 6,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Divide notification system implementation into subtasks covering email service integration, in-app notification mechanism, notification template system, user preference management, and notification scheduling functionality.",
+      "reasoning": "The notification system spans multiple communication channels (email, in-app) and requires integration with various system events. Template management and scheduling add moderate complexity."
+    }
+  ]
+}
