@@ -9,3 +9,100 @@ Integrate with email notification service. Implement in-app notification system.
 
 # Test Strategy:
 Test email delivery for various notification types. Verify in-app notifications appear correctly. Ensure notification preferences are respected.
+
+# Subtasks:
+## 1. Implement Email Notification Service Integration [pending]
+### Dependencies: None
+### Description: Integrate with an email service provider to enable sending email notifications to users
+### Details:
+Implementation steps:
+1. Select an email service provider (e.g., SendGrid, Mailgun, AWS SES)
+2. Create an account and obtain API keys
+3. Implement a NotificationService class with methods for sending emails
+4. Create email sending functionality with proper error handling and retry logic
+5. Implement logging for email sending attempts and results
+6. Create unit tests for the email service using mocks
+7. Test the integration with the actual email provider in a staging environment
+
+Testing approach:
+- Unit test the NotificationService class with mocked responses
+- Integration test with actual email provider in staging
+- Verify email delivery to test accounts
+
+## 2. Build In-App Notification Mechanism [pending]
+### Dependencies: None
+### Description: Create a system for storing, displaying, and managing in-app notifications
+### Details:
+Implementation steps:
+1. Design database schema for storing notifications (notification_id, user_id, content, type, read_status, created_at, etc.)
+2. Create API endpoints for fetching, marking as read, and deleting notifications
+3. Implement a NotificationManager class to handle creating and storing notifications
+4. Add methods to query notifications by user, type, and read status
+5. Implement real-time notification delivery using WebSockets (optional)
+6. Create notification badge counter logic
+
+Testing approach:
+- Unit test the NotificationManager class
+- API tests for notification endpoints
+- Test notification creation, retrieval, and status updates
+- Verify notification counts and filtering work correctly
+
+## 3. Develop Notification Templates System [pending]
+### Dependencies: 10.1, 10.2
+### Description: Create a template system for different types of notifications with variable content
+### Details:
+Implementation steps:
+1. Identify all notification types (order status, market days, vendor approvals, etc.)
+2. Design a template structure with placeholders for variable content
+3. Create template storage mechanism (database or file-based)
+4. Implement a TemplateEngine class to render templates with provided variables
+5. Create default templates for each notification type
+6. Add support for both email (HTML/text) and in-app notification formats
+7. Implement template versioning or localization if needed
+
+Testing approach:
+- Unit test template rendering with various inputs
+- Verify all placeholders are correctly replaced
+- Test template retrieval and selection logic
+- Validate HTML output for email templates
+
+## 4. Implement User Notification Preferences [pending]
+### Dependencies: 10.2, 10.3
+### Description: Allow users to set and manage their notification preferences for different notification types
+### Details:
+Implementation steps:
+1. Design database schema for user notification preferences
+2. Create UI components for users to manage notification settings
+3. Implement API endpoints for getting and updating preferences
+4. Add preference checking logic in the notification sending flow
+5. Create default preference settings for new users
+6. Implement channel preferences (email, in-app, or both)
+7. Add frequency settings for scheduled notifications
+
+Testing approach:
+- Unit test preference retrieval and update logic
+- API tests for preference endpoints
+- UI tests for preference management interface
+- Verify notifications respect user preferences
+- Test default settings for new users
+
+## 5. Create Scheduled Notification System [pending]
+### Dependencies: 10.1, 10.2, 10.3, 10.4
+### Description: Implement functionality to schedule notifications for future events like upcoming market days
+### Details:
+Implementation steps:
+1. Design database schema for scheduled notifications
+2. Implement a scheduler service using a job queue (e.g., Bull, Agenda)
+3. Create logic to generate notifications for upcoming market days
+4. Add configurable timing for scheduled notifications (e.g., 1 day before, 1 week before)
+5. Implement a background worker to process the notification queue
+6. Add admin interface to manage scheduled notifications
+7. Implement retry logic for failed notification attempts
+
+Testing approach:
+- Unit test scheduling logic and timing calculations
+- Integration test with the job queue
+- Test notification generation for sample events
+- Verify scheduled notifications respect user preferences
+- Test the admin interface functionality
+

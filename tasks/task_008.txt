@@ -9,3 +9,118 @@ Design and implement market day scheduling data model. Create API endpoints for 
 
 # Test Strategy:
 Test market day creation and scheduling. Verify notifications are sent appropriately. Ensure vendors can update inventory for upcoming market days.
+
+# Subtasks:
+## 1. Design and implement market day scheduling data model [pending]
+### Dependencies: None
+### Description: Create the database schema and models for market day scheduling, including date, location, operating hours, vendor participation, and inventory requirements.
+### Details:
+Implementation steps:
+1. Design database schema with tables for MarketDay (id, date, location, start_time, end_time, status, etc.), VendorParticipation (market_day_id, vendor_id, status, etc.), and InventoryRequirement (market_day_id, product_category, minimum_quantity, etc.)
+2. Implement model classes with appropriate relationships
+3. Create database migrations
+4. Add validation rules for date/time constraints and business rules
+5. Write unit tests for model relationships and validation
+6. Document the data model for other developers
+
+Testing approach:
+- Unit tests for model validation rules
+- Tests for relationship integrity between models
+- Test edge cases like market day cancellations
+
+## 2. Implement API endpoints for market day CRUD operations [pending]
+### Dependencies: 8.1
+### Description: Create RESTful API endpoints for creating, reading, updating, and deleting market days, including vendor participation management.
+### Details:
+Implementation steps:
+1. Create controller for MarketDay with endpoints for:
+   - GET /api/market-days (list all)
+   - GET /api/market-days/{id} (get details)
+   - POST /api/market-days (create new)
+   - PUT /api/market-days/{id} (update existing)
+   - DELETE /api/market-days/{id} (cancel/delete)
+2. Create controller for VendorParticipation with endpoints for:
+   - GET /api/market-days/{id}/vendors (list participants)
+   - POST /api/market-days/{id}/vendors (add vendor)
+   - DELETE /api/market-days/{id}/vendors/{vendor_id} (remove vendor)
+   - PUT /api/market-days/{id}/vendors/{vendor_id} (update status)
+3. Implement request validation
+4. Add authentication and authorization checks
+5. Create response serializers/transformers
+
+Testing approach:
+- API integration tests for each endpoint
+- Authorization test cases
+- Input validation test cases
+
+## 3. Develop inventory requirement system for market days [pending]
+### Dependencies: 8.1, 8.2
+### Description: Build functionality to define, track, and enforce inventory requirements for vendors participating in market days.
+### Details:
+Implementation steps:
+1. Create API endpoints for inventory requirements:
+   - GET /api/market-days/{id}/inventory-requirements
+   - POST /api/market-days/{id}/inventory-requirements
+   - PUT /api/market-days/{id}/inventory-requirements/{id}
+   - DELETE /api/market-days/{id}/inventory-requirements/{id}
+2. Implement logic to check vendor inventory against requirements
+3. Create a service to validate if vendors meet requirements for participation
+4. Build a notification mechanism to alert vendors of unmet requirements
+5. Implement a dashboard view for vendors to see their inventory status relative to requirements
+6. Add reporting functionality for admins to see compliance across vendors
+
+Testing approach:
+- Unit tests for inventory validation logic
+- Integration tests for requirement enforcement
+- Test scenarios with various inventory levels
+
+## 4. Implement notification system for market day reminders [pending]
+### Dependencies: 8.1, 8.2, 8.3
+### Description: Create a notification system to send reminders to vendors about upcoming market days, inventory requirements, and schedule changes.
+### Details:
+Implementation steps:
+1. Design notification templates for different event types:
+   - Market day announcement
+   - Reminder (1 week before)
+   - Last call reminder (1 day before)
+   - Inventory requirement alert
+   - Schedule change/cancellation
+2. Implement notification service with support for multiple channels (email, SMS, in-app)
+3. Create scheduled jobs to trigger notifications at appropriate times
+4. Build preference settings for vendors to control notification frequency and channels
+5. Implement notification history tracking
+6. Add admin interface to manually trigger notifications
+
+Testing approach:
+- Unit tests for notification generation
+- Integration tests with mock notification services
+- End-to-end tests for scheduled notifications
+- Test notification preferences and opt-outs
+
+## 5. Build admin interface for market day schedule management [pending]
+### Dependencies: 8.1, 8.2, 8.3, 8.4
+### Description: Create a comprehensive admin interface for creating and managing market day schedules, vendor participation, and inventory requirements.
+### Details:
+Implementation steps:
+1. Design and implement market day calendar view with:
+   - Month/week/day views
+   - Drag-and-drop scheduling
+   - Color coding for different statuses
+2. Create market day detail view with:
+   - Vendor participation list and management
+   - Inventory requirement configuration
+   - Notification history and manual triggers
+3. Implement bulk operations:
+   - Create recurring market days
+   - Send notifications to multiple vendors
+   - Update multiple market days
+4. Add reporting dashboard with metrics on vendor participation and inventory compliance
+5. Implement filtering and search functionality
+6. Create print/export options for schedules
+
+Testing approach:
+- Component tests for UI elements
+- Integration tests for admin workflows
+- Usability testing with admin users
+- Cross-browser compatibility testing
+
