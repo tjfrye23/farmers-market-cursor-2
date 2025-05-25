@@ -3,11 +3,11 @@
     {
       "id": 1,
       "title": "Setup Project Infrastructure",
-      "description": "Initialize the project structure with frontend and backend components, configure database, and establish core architecture.",
+      "description": "Initialize the project structure with frontend and backend components, configure MySQL database, and establish core architecture with NextAuth.js for authentication.",
       "status": "pending",
       "dependencies": [],
       "priority": "high",
-      "details": "Create a responsive web application frontend using a modern framework. Set up a RESTful API backend with appropriate routing structure. Configure a relational database with initial schema for users, products, orders, and market schedules. Establish project repository with proper structure for frontend and backend code. Set up development, testing, and production environments.",
+      "details": "Create a responsive web application frontend using a modern framework. Set up a RESTful API backend with appropriate routing structure. Configure a MySQL relational database with initial schema for users, products, orders, and market schedules. Establish project repository with proper structure for frontend and backend code. Set up development, testing, and production environments.",
       "testStrategy": "Verify successful project initialization, database connection, and basic API endpoint functionality. Ensure frontend can communicate with backend endpoints.",
       "subtasks": [
         {
@@ -21,34 +21,27 @@
         },
         {
           "id": 2,
-          "title": "Configure Supabase Integration and Authentication",
-          "description": "Set up Supabase project, configure authentication, and establish the connection between the frontend and Supabase backend.",
-          "dependencies": [
-            1
-          ],
-          "details": "Implementation steps:\n1. Create a new Supabase project through the Supabase dashboard\n2. Install Supabase client libraries: `npm install @supabase/supabase-js @supabase/auth-helpers-nextjs`\n3. Set up environment variables for Supabase URL and API keys\n4. Create a Supabase client utility in the lib/ directory\n5. Implement authentication hooks and context for user management\n6. Set up authentication API routes for server-side authentication\n7. Create basic sign-up, sign-in, and sign-out functionality\n8. Configure authentication middleware for protected routes\n\nTesting approach:\n- Test user registration flow\n- Verify login functionality works correctly\n- Confirm authentication state persists across page refreshes\n- Check that protected routes redirect unauthenticated users",
+          "title": "Configure MySQL Integration and NextAuth.js Authentication",
+          "description": "Set up MySQL database, configure NextAuth.js for authentication, and establish the connection between the frontend, backend, and MySQL.",
+          "dependencies": [1],
+          "details": "Implementation steps:\n1. Set up a MySQL database instance (local or managed)\n2. Install MySQL client libraries and ORM (e.g., Prisma): `npm install @prisma/client prisma mysql2`\n3. Initialize Prisma and configure the schema for MySQL\n4. Set up environment variables for MySQL connection\n5. Generate and apply Prisma migrations for initial schema (users, products, orders, market_days, etc.)\n6. Install NextAuth.js: `npm install next-auth`\n7. Configure NextAuth.js with MySQL adapter and providers (e.g., email, OAuth)\n8. Implement authentication hooks and context for user management\n9. Set up authentication API routes for NextAuth.js\n10. Create basic sign-up, sign-in, and sign-out functionality\n11. Configure authentication middleware for protected routes\n\nTesting approach:\n- Test user registration and login flow via NextAuth.js\n- Verify authentication state persists across page refreshes\n- Confirm protected routes redirect unauthenticated users\n- Test database connection and user creation in MySQL",
           "status": "pending",
           "parentTaskId": 1
         },
         {
           "id": 3,
           "title": "Design and Implement Database Schema",
-          "description": "Create the core database schema in Supabase for users, products, orders, and market schedules according to the architectural plan.",
-          "dependencies": [
-            2
-          ],
-          "details": "Implementation steps:\n1. Design the database schema for core tables: profiles, vendor_profiles, products, orders, order_items, market_days\n2. Create SQL migration scripts for each table\n3. Set up foreign key relationships between tables\n4. Configure Row Level Security (RLS) policies for each table\n5. Create database indexes for performance optimization\n6. Set up initial seed data for testing\n7. Document the schema design and relationships\n8. Implement database triggers for automated timestamps and other functionality\n\nTesting approach:\n- Verify all tables are created correctly with proper relationships\n- Test RLS policies to ensure proper data access control\n- Confirm indexes are working as expected for query performance\n- Validate that seed data is properly inserted",
+          "description": "Create the core database schema in MySQL for users, products, orders, and market schedules according to the architectural plan.",
+          "dependencies": [2],
+          "details": "Implementation steps:\n1. Design the database schema for core tables: users, vendor_profiles, products, orders, order_items, market_days\n2. Create and apply Prisma migration scripts for each table\n3. Set up foreign key relationships between tables\n4. Configure appropriate access controls and indexes for performance optimization\n5. Set up initial seed data for testing\n6. Document the schema design and relationships\n7. Implement database triggers or use Prisma middleware for automated timestamps and other functionality\n\nTesting approach:\n- Verify all tables are created correctly with proper relationships\n- Test access controls to ensure proper data access\n- Confirm indexes are working as expected for query performance\n- Validate that seed data is properly inserted",
           "status": "pending",
           "parentTaskId": 1
         },
         {
           "id": 4,
           "title": "Implement Data Layer with React Query",
-          "description": "Set up React Query (TanStack Query) for data fetching, caching, and state management, and create API services for interacting with Supabase.",
-          "dependencies": [
-            2,
-            3
-          ],
+          "description": "Set up React Query (TanStack Query) for data fetching, caching, and state management, and create API services for interacting with the MySQL database.",
+          "dependencies": [2, 3],
           "details": "Implementation steps:\n1. Install React Query: `npm install @tanstack/react-query @tanstack/react-query-devtools`\n2. Set up React Query provider in the application root\n3. Create API service modules in the services/ directory for each entity (users, products, orders, etc.)\n4. Implement custom hooks for data fetching using React Query\n5. Set up optimistic updates for better user experience\n6. Configure query invalidation strategies\n7. Implement error handling and loading states\n8. Add React Query DevTools for development environment\n\nTesting approach:\n- Test data fetching functionality for each entity\n- Verify caching behavior works as expected\n- Confirm optimistic updates provide a smooth user experience\n- Check error handling for various failure scenarios",
           "status": "pending",
           "parentTaskId": 1
@@ -56,12 +49,9 @@
         {
           "id": 5,
           "title": "Create API Routes and Server-Side Functions",
-          "description": "Implement Next.js API routes for custom endpoints and server-side functions that interact with Supabase.",
-          "dependencies": [
-            3,
-            4
-          ],
-          "details": "Implementation steps:\n1. Create API route structure in the app/api/ directory\n2. Implement authentication middleware for API routes\n3. Create CRUD endpoints for each entity (users, products, orders, etc.)\n4. Set up validation using Zod for API request data\n5. Implement error handling and appropriate HTTP status codes\n6. Create server actions for form submissions and data mutations\n7. Set up rate limiting for API endpoints\n8. Document API endpoints with examples\n\nTesting approach:\n- Test each API endpoint with various input scenarios\n- Verify authentication and authorization are working correctly\n- Confirm validation prevents invalid data\n- Check error responses provide useful information",
+          "description": "Implement Next.js API routes for custom endpoints and server-side functions that interact with the MySQL database.",
+          "dependencies": [3, 4],
+          "details": "Implementation steps:\n1. Create API route structure in the app/api/ directory\n2. Implement authentication middleware for API routes using NextAuth.js\n3. Create CRUD endpoints for each entity (users, products, orders, etc.)\n4. Set up validation using Zod for API request data\n5. Implement error handling and appropriate HTTP status codes\n6. Create server actions for form submissions and data mutations\n7. Set up rate limiting for API endpoints\n8. Document API endpoints with examples\n\nTesting approach:\n- Test each API endpoint with various input scenarios\n- Verify authentication and authorization are working correctly\n- Confirm validation prevents invalid data\n- Check error responses provide useful information",
           "status": "pending",
           "parentTaskId": 1
         },
@@ -69,14 +59,8 @@
           "id": 6,
           "title": "Configure Development, Testing, and CI/CD Pipeline",
           "description": "Set up development, testing, and production environments, and implement a CI/CD pipeline for automated testing and deployment.",
-          "dependencies": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "details": "Implementation steps:\n1. Configure environment-specific settings for development, testing, and production\n2. Set up Jest and React Testing Library for unit testing\n3. Implement Playwright for end-to-end testing\n4. Create test scripts and add them to package.json\n5. Set up GitHub Actions or similar CI/CD service\n6. Configure automated testing in the CI pipeline\n7. Set up deployment workflows for different environments\n8. Implement environment-specific Supabase projects\n9. Configure monitoring and error tracking (e.g., Sentry)\n\nTesting approach:\n- Run the test suite to verify all tests pass\n- Test the CI pipeline with a sample pull request\n- Verify deployment to development environment works correctly\n- Confirm environment-specific configurations are applied properly",
+          "dependencies": [1, 2, 3, 4, 5],
+          "details": "Implementation steps:\n1. Configure environment-specific settings for development, testing, and production\n2. Set up Jest and React Testing Library for unit testing\n3. Implement Playwright for end-to-end testing\n4. Create test scripts and add them to package.json\n5. Set up GitHub Actions or similar CI/CD service\n6. Configure automated testing in the CI pipeline\n7. Set up deployment workflows for different environments\n8. Configure monitoring and error tracking (e.g., Sentry)\n\nTesting approach:\n- Run the test suite to verify all tests pass\n- Test the CI pipeline with a sample pull request\n- Verify deployment to development environment works correctly\n- Confirm environment-specific configurations are applied properly",
           "status": "pending",
           "parentTaskId": 1
         }
@@ -87,9 +71,7 @@
       "title": "Implement Authentication System",
       "description": "Create a secure JWT-based authentication system with role-based access control for vendors, customers, and admins.",
       "status": "pending",
-      "dependencies": [
-        1
-      ],
+      "dependencies": [1],
       "priority": "high",
       "details": "Implement user registration and login endpoints. Create JWT token generation and validation. Develop role-based middleware for access control. Build user profile models and endpoints for basic profile management. Implement password reset functionality and email verification. Create frontend components for login, registration, and profile management.",
       "testStrategy": "Test user registration, login, and authentication flows. Verify role-based access restrictions. Ensure JWT tokens are properly generated, validated, and refreshed.",
@@ -107,9 +89,7 @@
           "id": 2,
           "title": "Implement Login System and JWT Token Management",
           "description": "Create login endpoints with JWT token generation, refresh tokens, and token validation middleware",
-          "dependencies": [
-            1
-          ],
+          "dependencies": [1],
           "details": "Implementation details:\n1. Create login endpoint that validates credentials against the database\n2. Implement JWT token generation with appropriate payload (user ID, role, etc.)\n3. Set up refresh token mechanism for extended sessions\n4. Create token validation middleware that verifies JWT signatures\n5. Implement token blacklisting for logout functionality\n6. Create endpoints for token refresh and logout\n7. Set up secure cookie handling for token storage\n8. Write unit tests for login flow, token generation, and validation\n9. Test token expiration and refresh flows\n10. Implement rate limiting for login attempts to prevent brute force attacks",
           "status": "pending",
           "parentTaskId": 2
@@ -118,9 +98,7 @@
           "id": 3,
           "title": "Implement Role-Based Access Control Middleware",
           "description": "Create middleware for protecting routes based on user roles and permissions",
-          "dependencies": [
-            2
-          ],
+          "dependencies": [2],
           "details": "Implementation details:\n1. Design role-based permission structure for different user types\n2. Create middleware that extracts user role from JWT token\n3. Implement route protection based on required roles\n4. Add support for fine-grained permissions within roles if needed\n5. Create helper functions for checking permissions in controllers\n6. Implement middleware for handling unauthorized access attempts\n7. Write unit tests for the middleware with different role scenarios\n8. Test integration with protected routes\n9. Document the permission system for other developers",
           "status": "pending",
           "parentTaskId": 2
@@ -129,10 +107,7 @@
           "id": 4,
           "title": "Implement User Profile Management",
           "description": "Create endpoints and models for user profile data and management",
-          "dependencies": [
-            1,
-            2
-          ],
+          "dependencies": [1, 2],
           "details": "Implementation details:\n1. Extend User model with profile-related fields (name, address, phone, etc.)\n2. Create endpoints for retrieving user profile data\n3. Implement endpoints for updating profile information\n4. Add validation for profile data updates\n5. Implement profile picture upload functionality\n6. Create endpoints for changing email (with verification)\n7. Write unit tests for profile CRUD operations\n8. Test with different user roles\n9. Implement proper error handling for profile operations",
           "status": "pending",
           "parentTaskId": 2
@@ -141,10 +116,7 @@
           "id": 5,
           "title": "Implement Password Reset Functionality",
           "description": "Create secure password reset flow with email notifications",
-          "dependencies": [
-            1,
-            2
-          ],
+          "dependencies": [1, 2],
           "details": "Implementation details:\n1. Create endpoint for requesting password reset\n2. Implement secure token generation for password reset\n3. Set up email service to send password reset links\n4. Create endpoint for validating reset tokens\n5. Implement endpoint for setting new password with token\n6. Add password strength validation\n7. Implement notification for successful password change\n8. Create mechanism to invalidate all existing sessions after password change\n9. Write unit tests for the complete password reset flow\n10. Test token expiration and security edge cases",
           "status": "pending",
           "parentTaskId": 2
@@ -153,13 +125,7 @@
           "id": 6,
           "title": "Implement Frontend Authentication Components",
           "description": "Create frontend components and services for authentication flows",
-          "dependencies": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
+          "dependencies": [1, 2, 3, 4, 5],
           "details": "Implementation details:\n1. Create registration form component with validation\n2. Implement login form component\n3. Build profile management interface\n4. Create password reset request and confirmation forms\n5. Implement JWT token storage in browser (secure cookies or localStorage)\n6. Create authentication service for managing login state\n7. Implement route guards for protected frontend routes\n8. Add user role-based UI elements and navigation\n9. Create logout functionality\n10. Implement form validation matching backend requirements\n11. Add loading states and error handling for authentication operations\n12. Write unit tests for components and authentication service\n13. Test the complete authentication flow from registration to logout",
           "status": "pending",
           "parentTaskId": 2
@@ -171,9 +137,7 @@
       "title": "Build Vendor Profile Management",
       "description": "Develop functionality for vendors to create and manage their store profiles with basic information and images.",
       "status": "pending",
-      "dependencies": [
-        2
-      ],
+      "dependencies": [2],
       "priority": "high",
       "details": "Create database models for vendor profiles. Implement API endpoints for profile CRUD operations. Develop image upload functionality for store images. Build frontend components for vendor profile creation and editing. Implement form validation for vendor information. Create vendor dashboard layout and navigation.",
       "testStrategy": "Test vendor profile creation, editing, and image upload functionality. Verify data validation and proper storage of profile information.",
@@ -191,9 +155,7 @@
           "id": 2,
           "title": "Implement Vendor Profile API Endpoints",
           "description": "Create RESTful API endpoints for vendor profile CRUD operations with proper authentication and validation",
-          "dependencies": [
-            1
-          ],
+          "dependencies": [1],
           "details": "Implementation details:\n1. Create controller for vendor profile operations\n2. Implement the following endpoints:\n   - GET /api/vendor/profile - Retrieve vendor profile\n   - POST /api/vendor/profile - Create new vendor profile\n   - PUT /api/vendor/profile - Update existing vendor profile\n   - DELETE /api/vendor/profile - Delete vendor profile (or mark as inactive)\n3. Add authentication middleware to ensure only authorized users can access/modify profiles\n4. Implement request validation for all endpoints\n5. Add proper error handling and response formatting\n6. Write integration tests for each endpoint\n7. Document the API endpoints using OpenAPI/Swagger",
           "status": "pending",
           "parentTaskId": 3
@@ -202,10 +164,7 @@
           "id": 3,
           "title": "Develop Image Upload Functionality",
           "description": "Create functionality for vendors to upload and manage profile images (logo and banner)",
-          "dependencies": [
-            1,
-            2
-          ],
+          "dependencies": [1, 2],
           "details": "Implementation details:\n1. Set up cloud storage integration (e.g., AWS S3, Google Cloud Storage) for image files\n2. Create API endpoints for image upload:\n   - POST /api/vendor/profile/logo - Upload vendor logo\n   - POST /api/vendor/profile/banner - Upload vendor banner\n3. Implement image processing functionality:\n   - Validate file types (jpg, png, etc.)\n   - Resize images to appropriate dimensions\n   - Optimize images for web display\n4. Update vendor profile model to store image URLs\n5. Add image deletion functionality when profile is updated or deleted\n6. Implement error handling for failed uploads\n7. Write tests for image upload and processing\n8. Document the image requirements and limitations",
           "status": "pending",
           "parentTaskId": 3
@@ -214,10 +173,7 @@
           "id": 4,
           "title": "Build Frontend Profile Management Components",
           "description": "Create frontend components for vendor profile creation, viewing, and editing with form validation",
-          "dependencies": [
-            2,
-            3
-          ],
+          "dependencies": [2, 3],
           "details": "Implementation details:\n1. Create reusable form components for vendor profile data:\n   - Text inputs for name, description, contact info\n   - Address input with validation\n   - Business hours selector\n   - Image upload components with preview\n2. Implement form validation:\n   - Required field validation\n   - Format validation for email, phone, etc.\n   - Error message display\n3. Create profile view component to display vendor information\n4. Build profile edit component with pre-populated data\n5. Implement API service to connect with backend endpoints\n6. Add loading states and error handling\n7. Write unit tests for components\n8. Ensure responsive design for all screen sizes",
           "status": "pending",
           "parentTaskId": 3
@@ -226,9 +182,7 @@
           "id": 5,
           "title": "Integrate Vendor Dashboard Layout and Navigation",
           "description": "Create vendor dashboard layout with navigation and integrate profile management components",
-          "dependencies": [
-            4
-          ],
+          "dependencies": [4],
           "details": "Implementation details:\n1. Design and implement dashboard layout with:\n   - Sidebar navigation\n   - Header with vendor info and actions\n   - Main content area\n2. Create navigation menu with links to different sections:\n   - Profile management\n   - Products/services (placeholder for future)\n   - Orders (placeholder for future)\n   - Analytics (placeholder for future)\n3. Integrate profile management components into dashboard\n4. Implement routing for different dashboard sections\n5. Add authentication checks and redirects for unauthorized access\n6. Create welcome/onboarding flow for new vendors\n7. Ensure responsive design for dashboard layout\n8. Write tests for navigation and routing\n9. Add analytics tracking for dashboard usage",
           "status": "pending",
           "parentTaskId": 3
@@ -240,9 +194,7 @@
       "title": "Implement Product Management",
       "description": "Create functionality for vendors to add, edit, and manage their product listings with inventory status.",
       "status": "pending",
-      "dependencies": [
-        3
-      ],
+      "dependencies": [3],
       "priority": "high",
       "details": "Design and implement product database models. Create API endpoints for product CRUD operations. Develop inventory status management functionality. Build frontend components for product management including forms for adding/editing products. Implement product image upload functionality. Create product listing views for vendor dashboard.",
       "testStrategy": "Test product creation, editing, and deletion. Verify inventory status updates. Ensure product images are properly uploaded and displayed.",
@@ -260,9 +212,7 @@
           "id": 2,
           "title": "Develop product CRUD API endpoints",
           "description": "Create RESTful API endpoints for product creation, retrieval, updating, and deletion",
-          "dependencies": [
-            1
-          ],
+          "dependencies": [1],
           "details": "Implementation details:\n1. Create API routes for product operations:\n   - GET /api/products (list all products)\n   - GET /api/products/:id (get single product)\n   - POST /api/products (create product)\n   - PUT /api/products/:id (update product)\n   - DELETE /api/products/:id (delete/deactivate product)\n2. Implement controller methods for each endpoint\n3. Add vendor authentication middleware to ensure vendors can only manage their own products\n4. Implement input validation and sanitization\n5. Add error handling for all endpoints\n6. Create response formatting for consistent API responses\n\nTesting approach:\n- API integration tests for each endpoint\n- Authentication/authorization tests\n- Input validation tests\n- Error handling tests",
           "status": "pending",
           "parentTaskId": 4
@@ -271,10 +221,7 @@
           "id": 3,
           "title": "Implement product image upload functionality",
           "description": "Create system for uploading, storing, and serving product images",
-          "dependencies": [
-            1,
-            2
-          ],
+          "dependencies": [1, 2],
           "details": "Implementation details:\n1. Set up cloud storage integration (e.g., AWS S3, Google Cloud Storage)\n2. Create image upload API endpoint at POST /api/products/:id/images\n3. Implement server-side image processing:\n   - Validate file types (jpg, png, etc.)\n   - Resize images to standard dimensions\n   - Generate thumbnails\n   - Optimize for web delivery\n4. Update product model to store image URLs\n5. Implement image deletion when products are removed\n6. Add functionality to manage multiple images per product\n\nTesting approach:\n- Test image upload with various file types and sizes\n- Verify image storage and retrieval\n- Test image deletion\n- Verify error handling for invalid uploads",
           "status": "pending",
           "parentTaskId": 4
@@ -283,10 +230,7 @@
           "id": 4,
           "title": "Develop inventory status management functionality",
           "description": "Create system for tracking and updating product inventory levels",
-          "dependencies": [
-            1,
-            2
-          ],
+          "dependencies": [1, 2],
           "details": "Implementation details:\n1. Extend product API to include inventory-specific endpoints:\n   - PUT /api/products/:id/inventory (update inventory count)\n   - GET /api/products/low-stock (get products below threshold)\n2. Implement inventory update logic with transaction support\n3. Create inventory history tracking for audit purposes\n4. Add notifications for low stock items\n5. Implement batch inventory update functionality\n6. Create inventory reports generation\n7. Add automatic status changes based on inventory (e.g., mark as out of stock)\n\nTesting approach:\n- Test inventory updates with concurrent requests\n- Verify low stock detection\n- Test inventory history tracking\n- Verify notification system for low stock",
           "status": "pending",
           "parentTaskId": 4
@@ -295,12 +239,7 @@
           "id": 5,
           "title": "Build frontend product management interface",
           "description": "Create user interface components for vendors to manage their products",
-          "dependencies": [
-            1,
-            2,
-            3,
-            4
-          ],
+          "dependencies": [1, 2, 3, 4],
           "details": "Implementation details:\n1. Create product listing view for vendor dashboard with:\n   - Sortable/filterable product table\n   - Inventory status indicators\n   - Quick edit options\n   - Bulk action capabilities\n2. Build product detail form with:\n   - Product information fields\n   - Image upload interface with drag-and-drop\n   - Inventory management controls\n   - Category selection\n   - Validation feedback\n3. Implement product creation workflow\n4. Create product edit/update interface\n5. Add confirmation dialogs for destructive actions\n6. Implement responsive design for mobile/tablet use\n\nTesting approach:\n- Unit tests for UI components\n- Integration tests for form submission\n- User acceptance testing\n- Cross-browser compatibility testing\n- Responsive design testing",
           "status": "pending",
           "parentTaskId": 4
@@ -312,9 +251,7 @@
       "title": "Develop Product Browsing and Search",
       "description": "Create product discovery functionality with browsing, basic search, and category filtering.",
       "status": "pending",
-      "dependencies": [
-        4
-      ],
+      "dependencies": [4],
       "priority": "medium",
       "details": "Implement API endpoints for product listing and filtering. Create search functionality with basic text matching. Develop category and vendor filtering capabilities. Build frontend components for product browsing, search interface, and filter controls. Create product detail view component. Ensure responsive design for various screen sizes.",
       "testStrategy": "Test product browsing, search functionality, and filtering. Verify product details are displayed correctly. Ensure performance with larger product datasets.",
@@ -332,9 +269,7 @@
           "id": 2,
           "title": "Develop Search Algorithm and API",
           "description": "Implement text-based search functionality with an API endpoint for searching products",
-          "dependencies": [
-            1
-          ],
+          "dependencies": [1],
           "details": "Implementation details:\n1. Create a search endpoint (/api/products/search)\n2. Implement basic text matching algorithm for product names and descriptions\n3. Add relevance scoring to prioritize matches in product names over descriptions\n4. Support partial word matching and case insensitivity\n5. Optimize database queries for search performance\n6. Return search results with highlighting of matched terms\n7. Include pagination for search results\n\nTesting approach:\n- Test search functionality with various query terms\n- Verify partial matching works correctly\n- Test with special characters and edge cases\n- Benchmark search performance with large datasets\n- Validate relevance scoring with different search scenarios",
           "status": "pending",
           "parentTaskId": 5
@@ -343,10 +278,7 @@
           "id": 3,
           "title": "Implement Category and Vendor Filtering",
           "description": "Add filtering capabilities to product listing and search APIs based on categories and vendors",
-          "dependencies": [
-            1,
-            2
-          ],
+          "dependencies": [1, 2],
           "details": "Implementation details:\n1. Extend product listing and search APIs to accept filter parameters\n2. Implement database queries for filtering by category, subcategory, and vendor\n3. Allow multiple filter selections (e.g., multiple categories)\n4. Create an endpoint to retrieve available filter options (/api/filters)\n5. Ensure filters can be combined with search queries and pagination\n6. Optimize query performance for filtered results\n7. Add count of available products for each filter option\n\nTesting approach:\n- Test filtering with single and multiple filter selections\n- Verify filters work correctly when combined with search\n- Test edge cases like filtering with no results\n- Validate performance of complex filter combinations\n- Ensure filter counts are accurate",
           "status": "pending",
           "parentTaskId": 5
@@ -355,11 +287,7 @@
           "id": 4,
           "title": "Build Product Browsing and Search Frontend Components",
           "description": "Create responsive frontend components for product browsing, search interface, and filter controls",
-          "dependencies": [
-            1,
-            2,
-            3
-          ],
+          "dependencies": [1, 2, 3],
           "details": "Implementation details:\n1. Develop a product grid/list component with toggle between views\n2. Create a search bar component with auto-suggestions\n3. Implement filter sidebar/dropdown components for categories and vendors\n4. Add pagination controls with page size selection\n5. Create sort controls for different sorting options\n6. Implement loading states and empty state handling\n7. Ensure responsive design with grid adjustments for different screen sizes\n8. Add animations for loading and filtering transitions\n\nTesting approach:\n- Test components across different screen sizes\n- Verify UI state handling (loading, empty, error states)\n- Test keyboard navigation and accessibility\n- Validate filter and search interactions\n- Test component rendering performance with large datasets",
           "status": "pending",
           "parentTaskId": 5
@@ -368,9 +296,7 @@
           "id": 5,
           "title": "Implement Product Detail View",
           "description": "Create a comprehensive product detail page showing all product information and related products",
-          "dependencies": [
-            1
-          ],
+          "dependencies": [1],
           "details": "Implementation details:\n1. Create a product detail API endpoint (/api/products/{id})\n2. Develop a responsive product detail page layout\n3. Implement image gallery with zoom functionality\n4. Add product information sections (description, specifications, pricing)\n5. Create a related/similar products component\n6. Implement breadcrumb navigation for category context\n7. Add social sharing functionality\n8. Ensure mobile-friendly layout with appropriate content prioritization\n\nTesting approach:\n- Test product detail rendering with various product types\n- Verify image gallery functionality on different devices\n- Test breadcrumb navigation paths\n- Validate related products recommendations\n- Test responsive layout across screen sizes\n- Ensure all product information is displayed correctly",
           "status": "pending",
           "parentTaskId": 5
@@ -382,9 +308,7 @@
       "title": "Implement Shopping Cart and Checkout",
       "description": "Build shopping cart management and multi-vendor checkout process with payment integration.",
       "status": "pending",
-      "dependencies": [
-        5
-      ],
+      "dependencies": [5],
       "priority": "high",
       "details": "Design and implement shopping cart data model. Create API endpoints for cart management. Develop multi-vendor checkout process. Integrate with payment gateway for secure transactions. Build frontend components for cart management and checkout flow. Implement order creation upon successful payment. Create order confirmation notifications.",
       "testStrategy": "Test adding/removing items from cart. Verify multi-vendor checkout process. Test payment processing with test credentials. Ensure proper order creation after successful payment.",
@@ -402,9 +326,7 @@
           "id": 2,
           "title": "Develop API endpoints for cart management",
           "description": "Create RESTful API endpoints to handle all cart operations",
-          "dependencies": [
-            1
-          ],
+          "dependencies": [1],
           "details": "Implementation details:\n1. Create routes for cart operations: GET /cart, POST /cart/items, PUT /cart/items/:id, DELETE /cart/items/:id\n2. Implement controller methods for each endpoint:\n   - Fetch cart contents\n   - Add item to cart\n   - Update item quantity\n   - Remove item from cart\n   - Clear entire cart\n3. Add authentication middleware to protect cart endpoints\n4. Implement request validation for all inputs\n5. Add error handling for common scenarios (product unavailable, quantity limits)\n6. Create API documentation\n7. Write integration tests for each endpoint\n8. Test concurrent cart operations for race conditions",
           "status": "pending",
           "parentTaskId": 6
@@ -413,9 +335,7 @@
           "id": 3,
           "title": "Build frontend cart management components",
           "description": "Develop UI components for displaying and managing the shopping cart",
-          "dependencies": [
-            2
-          ],
+          "dependencies": [2],
           "details": "Implementation details:\n1. Create a CartContext for state management\n2. Build CartItem component to display individual items with quantity controls\n3. Implement CartSummary component showing totals per vendor and overall\n4. Add CartIcon component with item count for navigation bar\n5. Create CartPage component for full cart management\n6. Implement add/remove/update quantity functionality with API integration\n7. Add loading states and error handling\n8. Style components according to design system\n9. Write unit tests for components\n10. Test responsive behavior on different screen sizes",
           "status": "pending",
           "parentTaskId": 6
@@ -424,10 +344,7 @@
           "id": 4,
           "title": "Implement multi-vendor checkout process logic",
           "description": "Create the backend logic to handle checkout process with multiple vendors",
-          "dependencies": [
-            1,
-            2
-          ],
+          "dependencies": [1, 2],
           "details": "Implementation details:\n1. Design checkout data model with order grouping by vendor\n2. Create checkout initialization endpoint that validates cart items and availability\n3. Implement logic to split orders by vendor while maintaining a single checkout session\n4. Add inventory reservation during checkout process\n5. Create checkout session timeout and inventory release mechanism\n6. Implement shipping calculation per vendor\n7. Add tax calculation logic\n8. Create checkout summary generation with breakdown by vendor\n9. Write unit tests for order splitting and calculation logic\n10. Test edge cases like partial inventory availability",
           "status": "pending",
           "parentTaskId": 6
@@ -436,9 +353,7 @@
           "id": 5,
           "title": "Integrate with payment gateway",
           "description": "Connect the checkout process with a payment gateway for secure transactions",
-          "dependencies": [
-            4
-          ],
+          "dependencies": [4],
           "details": "Implementation details:\n1. Research and select appropriate payment gateway with multi-vendor support\n2. Create payment service abstraction layer\n3. Implement payment initialization endpoint that creates payment intent/session\n4. Add webhook endpoint for payment confirmations and failures\n5. Implement client-side payment form integration\n6. Add security measures (HTTPS, input sanitization, etc.)\n7. Create transaction logging system\n8. Implement error handling for payment failures\n9. Add retry mechanism for failed payments\n10. Test with sandbox/test payment credentials\n11. Create mock payment gateway for development and testing",
           "status": "pending",
           "parentTaskId": 6
@@ -447,11 +362,7 @@
           "id": 6,
           "title": "Build checkout flow UI components",
           "description": "Develop the frontend components for the complete checkout process",
-          "dependencies": [
-            3,
-            4,
-            5
-          ],
+          "dependencies": [3, 4, 5],
           "details": "Implementation details:\n1. Create multi-step checkout process UI (shipping, payment, review)\n2. Build CheckoutContext for state management across steps\n3. Implement ShippingForm component with address validation\n4. Create VendorOrderSummary component showing items grouped by vendor\n5. Build PaymentForm component integrated with payment gateway\n6. Implement OrderReview component showing complete order details\n7. Add checkout progress indicator\n8. Create loading and success/error states\n9. Implement form validation for all inputs\n10. Add responsive design for mobile checkout\n11. Write unit tests for components and integration tests for the complete flow",
           "status": "pending",
           "parentTaskId": 6
@@ -460,10 +371,7 @@
           "id": 7,
           "title": "Implement order creation and confirmation system",
           "description": "Create the system to handle order creation upon successful payment and send confirmations",
-          "dependencies": [
-            4,
-            5
-          ],
+          "dependencies": [4, 5],
           "details": "Implementation details:\n1. Create Order and OrderItem models with appropriate statuses\n2. Implement order creation logic triggered by successful payment\n3. Add database transaction handling to ensure data consistency\n4. Create order confirmation email templates for customers\n5. Implement vendor notification system for new orders\n6. Add order history endpoint for customer account\n7. Create order details page showing status and items\n8. Implement order receipt generation\n9. Add logging for order creation events\n10. Write unit tests for order creation logic\n11. Test the complete flow from cart to order confirmation",
           "status": "pending",
           "parentTaskId": 6
@@ -475,9 +383,7 @@
       "title": "Create Order Management System",
       "description": "Develop order tracking and management functionality for both vendors and customers.",
       "status": "pending",
-      "dependencies": [
-        6
-      ],
+      "dependencies": [6],
       "priority": "medium",
       "details": "Design and implement order data models. Create API endpoints for order management and status updates. Develop vendor order dashboard with status update capabilities. Build customer order history and tracking interface. Implement basic sales overview for vendors. Create email notifications for order status changes.",
       "testStrategy": "Test order creation and status updates. Verify vendors can view and manage their orders. Ensure customers can track their order status and view order history.",
@@ -495,9 +401,7 @@
           "id": 2,
           "title": "Implement order status workflow and API endpoints",
           "description": "Create RESTful API endpoints for order CRUD operations and status transitions with proper authorization",
-          "dependencies": [
-            1
-          ],
+          "dependencies": [1],
           "details": "Implementation details:\n1. Define order status transition rules (e.g., pending → processing → shipped → delivered)\n2. Create API endpoints for:\n   - Creating new orders (POST /api/orders)\n   - Retrieving order details (GET /api/orders/{id})\n   - Updating order information (PUT /api/orders/{id})\n   - Changing order status (PATCH /api/orders/{id}/status)\n   - Canceling orders (DELETE /api/orders/{id})\n3. Implement authorization middleware to ensure vendors can only access their orders\n4. Add input validation for all endpoints\n5. Create service layer for order business logic\n\nTesting approach:\n- API tests for each endpoint with different user roles\n- Test status transition validations\n- Test error handling for invalid inputs\n- Verify authorization rules are enforced",
           "status": "pending",
           "parentTaskId": 7
@@ -506,10 +410,7 @@
           "id": 3,
           "title": "Build vendor order dashboard",
           "description": "Create a dashboard interface for vendors to view, manage, and update status of their orders",
-          "dependencies": [
-            1,
-            2
-          ],
+          "dependencies": [1, 2],
           "details": "Implementation details:\n1. Design dashboard UI with order list and filtering options\n2. Implement order table with columns: order ID, customer name, date, amount, status\n3. Add sorting and filtering capabilities (by date, status, amount)\n4. Create order detail view with complete order information\n5. Implement status update functionality with dropdown and confirmation\n6. Add search functionality for finding specific orders\n7. Implement pagination for order list\n\nTesting approach:\n- Component tests for dashboard elements\n- Integration tests for API interactions\n- Test filtering and sorting functionality\n- Verify status updates are reflected correctly\n- Test responsive design for different screen sizes",
           "status": "pending",
           "parentTaskId": 7
@@ -518,10 +419,7 @@
           "id": 4,
           "title": "Develop customer order history and tracking interface",
           "description": "Create user interface for customers to view their order history and track current orders",
-          "dependencies": [
-            1,
-            2
-          ],
+          "dependencies": [1, 2],
           "details": "Implementation details:\n1. Design order history page showing all past and current orders\n2. Implement order list with essential information (date, amount, status)\n3. Create detailed order view showing all items, prices, and status\n4. Build order tracking interface with status timeline visualization\n5. Add filtering options for order history (by date, status)\n6. Implement order reordering functionality\n7. Create print/download invoice feature\n\nTesting approach:\n- User flow testing for order tracking\n- Verify correct display of order history\n- Test order detail rendering\n- Verify invoice generation\n- Test responsive design for mobile devices",
           "status": "pending",
           "parentTaskId": 7
@@ -530,11 +428,7 @@
           "id": 5,
           "title": "Implement basic sales reporting for vendors",
           "description": "Create sales overview dashboard with charts and metrics for vendors to analyze their order data",
-          "dependencies": [
-            1,
-            2,
-            3
-          ],
+          "dependencies": [1, 2, 3],
           "details": "Implementation details:\n1. Design sales overview dashboard with key metrics (total sales, average order value, order count)\n2. Implement time-based filtering (daily, weekly, monthly, custom range)\n3. Create sales trend chart showing orders over time\n4. Add product performance section showing top-selling items\n5. Implement order status distribution chart\n6. Create data export functionality (CSV, Excel)\n7. Add comparison with previous periods\n\nTesting approach:\n- Verify correct calculation of metrics\n- Test chart rendering with different data sets\n- Verify filtering functionality\n- Test data export format and content\n- Verify performance with large data sets",
           "status": "pending",
           "parentTaskId": 7
@@ -543,10 +437,7 @@
           "id": 6,
           "title": "Implement order notification system",
           "description": "Create email and in-app notifications for order status changes for both vendors and customers",
-          "dependencies": [
-            1,
-            2
-          ],
+          "dependencies": [1, 2],
           "details": "Implementation details:\n1. Design notification templates for different order events (creation, status change, cancellation)\n2. Implement email notification service using a template engine\n3. Create in-app notification system for real-time updates\n4. Set up event listeners for order status changes\n5. Implement notification preferences for users (email, in-app, or both)\n6. Add order summary in notifications with relevant details\n7. Create notification history/log for users\n\nTesting approach:\n- Test email rendering in different clients\n- Verify correct triggering of notifications on status changes\n- Test notification preferences are respected\n- Verify content of notifications includes correct order information\n- Test notification queuing and delivery under load",
           "status": "pending",
           "parentTaskId": 7
@@ -558,10 +449,7 @@
       "title": "Build Market Day Management",
       "description": "Implement scheduling system for market days with notifications and inventory requirements.",
       "status": "pending",
-      "dependencies": [
-        4,
-        7
-      ],
+      "dependencies": [4, 7],
       "priority": "medium",
       "details": "Design and implement market day scheduling data model. Create API endpoints for market day management. Develop notification system for market day reminders. Build frontend components for market day schedule viewing. Implement inventory update requirements for vendors before market days. Create admin interface for managing market day schedules.",
       "testStrategy": "Test market day creation and scheduling. Verify notifications are sent appropriately. Ensure vendors can update inventory for upcoming market days.",
@@ -579,9 +467,7 @@
           "id": 2,
           "title": "Implement API endpoints for market day CRUD operations",
           "description": "Create RESTful API endpoints for creating, reading, updating, and deleting market days, including vendor participation management.",
-          "dependencies": [
-            1
-          ],
+          "dependencies": [1],
           "details": "Implementation steps:\n1. Create controller for MarketDay with endpoints for:\n   - GET /api/market-days (list all)\n   - GET /api/market-days/{id} (get details)\n   - POST /api/market-days (create new)\n   - PUT /api/market-days/{id} (update existing)\n   - DELETE /api/market-days/{id} (cancel/delete)\n2. Create controller for VendorParticipation with endpoints for:\n   - GET /api/market-days/{id}/vendors (list participants)\n   - POST /api/market-days/{id}/vendors (add vendor)\n   - DELETE /api/market-days/{id}/vendors/{vendor_id} (remove vendor)\n   - PUT /api/market-days/{id}/vendors/{vendor_id} (update status)\n3. Implement request validation\n4. Add authentication and authorization checks\n5. Create response serializers/transformers\n\nTesting approach:\n- API integration tests for each endpoint\n- Authorization test cases\n- Input validation test cases",
           "status": "pending",
           "parentTaskId": 8
@@ -590,10 +476,7 @@
           "id": 3,
           "title": "Develop inventory requirement system for market days",
           "description": "Build functionality to define, track, and enforce inventory requirements for vendors participating in market days.",
-          "dependencies": [
-            1,
-            2
-          ],
+          "dependencies": [1, 2],
           "details": "Implementation steps:\n1. Create API endpoints for inventory requirements:\n   - GET /api/market-days/{id}/inventory-requirements\n   - POST /api/market-days/{id}/inventory-requirements\n   - PUT /api/market-days/{id}/inventory-requirements/{id}\n   - DELETE /api/market-days/{id}/inventory-requirements/{id}\n2. Implement logic to check vendor inventory against requirements\n3. Create a service to validate if vendors meet requirements for participation\n4. Build a notification mechanism to alert vendors of unmet requirements\n5. Implement a dashboard view for vendors to see their inventory status relative to requirements\n6. Add reporting functionality for admins to see compliance across vendors\n\nTesting approach:\n- Unit tests for inventory validation logic\n- Integration tests for requirement enforcement\n- Test scenarios with various inventory levels",
           "status": "pending",
           "parentTaskId": 8
@@ -602,11 +485,7 @@
           "id": 4,
           "title": "Implement notification system for market day reminders",
           "description": "Create a notification system to send reminders to vendors about upcoming market days, inventory requirements, and schedule changes.",
-          "dependencies": [
-            1,
-            2,
-            3
-          ],
+          "dependencies": [1, 2, 3],
           "details": "Implementation steps:\n1. Design notification templates for different event types:\n   - Market day announcement\n   - Reminder (1 week before)\n   - Last call reminder (1 day before)\n   - Inventory requirement alert\n   - Schedule change/cancellation\n2. Implement notification service with support for multiple channels (email, SMS, in-app)\n3. Create scheduled jobs to trigger notifications at appropriate times\n4. Build preference settings for vendors to control notification frequency and channels\n5. Implement notification history tracking\n6. Add admin interface to manually trigger notifications\n\nTesting approach:\n- Unit tests for notification generation\n- Integration tests with mock notification services\n- End-to-end tests for scheduled notifications\n- Test notification preferences and opt-outs",
           "status": "pending",
           "parentTaskId": 8
@@ -615,12 +494,7 @@
           "id": 5,
           "title": "Build admin interface for market day schedule management",
           "description": "Create a comprehensive admin interface for creating and managing market day schedules, vendor participation, and inventory requirements.",
-          "dependencies": [
-            1,
-            2,
-            3,
-            4
-          ],
+          "dependencies": [1, 2, 3, 4],
           "details": "Implementation steps:\n1. Design and implement market day calendar view with:\n   - Month/week/day views\n   - Drag-and-drop scheduling\n   - Color coding for different statuses\n2. Create market day detail view with:\n   - Vendor participation list and management\n   - Inventory requirement configuration\n   - Notification history and manual triggers\n3. Implement bulk operations:\n   - Create recurring market days\n   - Send notifications to multiple vendors\n   - Update multiple market days\n4. Add reporting dashboard with metrics on vendor participation and inventory compliance\n5. Implement filtering and search functionality\n6. Create print/export options for schedules\n\nTesting approach:\n- Component tests for UI elements\n- Integration tests for admin workflows\n- Usability testing with admin users\n- Cross-browser compatibility testing",
           "status": "pending",
           "parentTaskId": 8
@@ -632,11 +506,7 @@
       "title": "Develop Admin Dashboard",
       "description": "Create administrative tools for vendor approval, marketplace management, and oversight.",
       "status": "pending",
-      "dependencies": [
-        3,
-        4,
-        8
-      ],
+      "dependencies": [3, 4, 8],
       "priority": "medium",
       "details": "Implement vendor application review and approval workflow. Create marketplace management tools for product categories and announcements. Develop admin dashboard for marketplace oversight. Build reporting interface for basic marketplace metrics. Implement vendor monitoring capabilities. Create admin notification system for new vendor applications.",
       "testStrategy": "Test vendor approval process. Verify category management functionality. Ensure admin can post announcements and monitor marketplace activity.",
@@ -672,9 +542,7 @@
           "id": 4,
           "title": "Implement Vendor Monitoring System",
           "description": "Create tools for administrators to monitor vendor performance, compliance, and activity",
-          "dependencies": [
-            1
-          ],
+          "dependencies": [1],
           "details": "Implementation details:\n1. Develop vendor performance dashboard with key metrics (sales, returns, customer ratings)\n2. Create compliance monitoring tools for policy violations\n3. Implement vendor activity logs and audit trails\n4. Build vendor suspension and warning system\n5. Create automated flagging for suspicious activities or policy violations\n6. Implement vendor communication history tracking\n\nTesting approach:\n- Unit tests for performance metric calculations\n- Integration tests for flagging and warning systems\n- UI tests for monitoring dashboard components\n- Security testing for admin access controls to vendor data",
           "status": "pending",
           "parentTaskId": 9
@@ -683,11 +551,7 @@
           "id": 5,
           "title": "Create Admin Notification System",
           "description": "Develop a comprehensive notification system for administrators to receive alerts about important marketplace events",
-          "dependencies": [
-            1,
-            2,
-            4
-          ],
+          "dependencies": [1, 2, 4],
           "details": "Implementation details:\n1. Create notification preferences management for administrators\n2. Implement in-app notification center with read/unread status\n3. Develop email notification integration for critical alerts\n4. Build notification triggers for key events (new vendor applications, policy violations, etc.)\n5. Implement notification grouping and prioritization\n6. Create notification history and archiving functionality\n\nTesting approach:\n- Unit tests for notification generation logic\n- Integration tests for email delivery\n- UI tests for notification center interactions\n- Load testing for high-volume notification scenarios",
           "status": "pending",
           "parentTaskId": 9
@@ -696,13 +560,7 @@
           "id": 6,
           "title": "Develop Admin Dashboard UI Framework",
           "description": "Create a unified UI framework and navigation system for all administrative tools",
-          "dependencies": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
+          "dependencies": [1, 2, 3, 4, 5],
           "details": "Implementation details:\n1. Design and implement responsive dashboard layout with navigation sidebar\n2. Create unified styling and component library for admin interfaces\n3. Implement role-based access control for different admin functions\n4. Develop dashboard homepage with summary widgets from all sections\n5. Create consistent header with admin profile, notifications, and quick actions\n6. Implement search functionality across all admin tools\n\nTesting approach:\n- UI component tests for layout and responsiveness\n- Integration tests for navigation between different sections\n- Accessibility testing for all dashboard components\n- User acceptance testing with admin personas\n- Cross-browser compatibility testing",
           "status": "pending",
           "parentTaskId": 9
@@ -714,11 +572,7 @@
       "title": "Implement Notification System",
       "description": "Create a comprehensive notification system for market days, orders, and administrative alerts.",
       "status": "pending",
-      "dependencies": [
-        7,
-        8,
-        9
-      ],
+      "dependencies": [7, 8, 9],
       "priority": "low",
       "details": "Integrate with email notification service. Implement in-app notification system. Create notification templates for various events (order status, market days, vendor approvals). Develop notification preferences for users. Build notification center in user interface. Implement scheduled notifications for upcoming market days.",
       "testStrategy": "Test email delivery for various notification types. Verify in-app notifications appear correctly. Ensure notification preferences are respected.",
@@ -745,10 +599,7 @@
           "id": 3,
           "title": "Develop Notification Templates System",
           "description": "Create a template system for different types of notifications with variable content",
-          "dependencies": [
-            1,
-            2
-          ],
+          "dependencies": [1, 2],
           "details": "Implementation steps:\n1. Identify all notification types (order status, market days, vendor approvals, etc.)\n2. Design a template structure with placeholders for variable content\n3. Create template storage mechanism (database or file-based)\n4. Implement a TemplateEngine class to render templates with provided variables\n5. Create default templates for each notification type\n6. Add support for both email (HTML/text) and in-app notification formats\n7. Implement template versioning or localization if needed\n\nTesting approach:\n- Unit test template rendering with various inputs\n- Verify all placeholders are correctly replaced\n- Test template retrieval and selection logic\n- Validate HTML output for email templates",
           "status": "pending",
           "parentTaskId": 10
@@ -757,10 +608,7 @@
           "id": 4,
           "title": "Implement User Notification Preferences",
           "description": "Allow users to set and manage their notification preferences for different notification types",
-          "dependencies": [
-            2,
-            3
-          ],
+          "dependencies": [2, 3],
           "details": "Implementation steps:\n1. Design database schema for user notification preferences\n2. Create UI components for users to manage notification settings\n3. Implement API endpoints for getting and updating preferences\n4. Add preference checking logic in the notification sending flow\n5. Create default preference settings for new users\n6. Implement channel preferences (email, in-app, or both)\n7. Add frequency settings for scheduled notifications\n\nTesting approach:\n- Unit test preference retrieval and update logic\n- API tests for preference endpoints\n- UI tests for preference management interface\n- Verify notifications respect user preferences\n- Test default settings for new users",
           "status": "pending",
           "parentTaskId": 10
@@ -769,12 +617,7 @@
           "id": 5,
           "title": "Create Scheduled Notification System",
           "description": "Implement functionality to schedule notifications for future events like upcoming market days",
-          "dependencies": [
-            1,
-            2,
-            3,
-            4
-          ],
+          "dependencies": [1, 2, 3, 4],
           "details": "Implementation steps:\n1. Design database schema for scheduled notifications\n2. Implement a scheduler service using a job queue (e.g., Bull, Agenda)\n3. Create logic to generate notifications for upcoming market days\n4. Add configurable timing for scheduled notifications (e.g., 1 day before, 1 week before)\n5. Implement a background worker to process the notification queue\n6. Add admin interface to manage scheduled notifications\n7. Implement retry logic for failed notification attempts\n\nTesting approach:\n- Unit test scheduling logic and timing calculations\n- Integration test with the job queue\n- Test notification generation for sample events\n- Verify scheduled notifications respect user preferences\n- Test the admin interface functionality",
           "status": "pending",
           "parentTaskId": 10

@@ -2,19 +2,9 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/lib/providers/auth-provider'
-import { createBrowserDBClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 
 export function Header() {
   const { user, loading } = useAuth()
-  const router = useRouter()
-
-  const handleSignOut = async () => {
-    const supabase = createBrowserDBClient()
-    await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
-  }
 
   return (
     <header className="border-b">
@@ -43,7 +33,7 @@ export function Header() {
                 Dashboard
               </Link>
               <button
-                onClick={handleSignOut}
+                onClick={() => {}}
                 className="text-sm text-gray-600 hover:text-gray-900"
               >
                 Sign Out

@@ -1,10 +1,8 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { User } from '@supabase/supabase-js'
-import { createBrowserDBClient } from '../supabase/client'
 
-type AuthContextType = { user: User | null; loading: boolean }
+type AuthContextType = { user: null; loading: boolean }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
@@ -12,28 +10,12 @@ const AuthContext = createContext<AuthContextType>({
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const supabase = createBrowserDBClient()
-
-    // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    // Listen for changes on auth state
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
+    setUser(null)
+    setLoading(false)
   }, [])
 
   return (

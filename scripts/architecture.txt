@@ -4,10 +4,10 @@ The Farmer's Market application uses a modern, scalable architecture built on Ne
 # Core Architecture Components
 
 ## 1. Backend Infrastructure
-**Supabase Platform**
-- What it does: Provides database, authentication, and file storage
-- Why it's important: Simplifies infrastructure management and provides real-time capabilities
-- How it works: Managed PostgreSQL database with built-in APIs and authentication
+**NextAuth.js**
+- What it does: Handles authentication and user session management
+- Why it's important: Provides a secure, flexible, and provider-agnostic authentication solution for Next.js applications
+- How it works: Integrates with OAuth providers, email, or custom credentials, managing sessions via secure cookies
 
 ## 2. Frontend Framework
 **Next.js + React**
@@ -71,6 +71,7 @@ src/
 - Supabase client for data access
 - Next.js API routes for custom endpoints
 - React Query for data fetching
+- NextAuth.js for authentication and session management
 
 ## Core Dependencies
 ```json
@@ -80,6 +81,7 @@ src/
     "react": "^18.x",
     "@tanstack/react-query": "^5.x",
     "@supabase/supabase-js": "^2.x",
+    "next-auth": "^4.x",
     "zustand": "^4.x",
     "react-hook-form": "^7.x",
     "zod": "^3.x",
@@ -94,7 +96,7 @@ src/
 ## Phase 1 (Foundation)
 - Set up Next.js project with TypeScript
 - Configure Supabase integration
-- Implement basic authentication
+- Implement authentication with NextAuth.js
 - Create core database schema
 
 ## Phase 2 (Core Features)
@@ -117,8 +119,8 @@ src/
    - TypeScript setup
 
 2. Authentication Layer
-   - User registration
-   - Login system
+   - User registration (via NextAuth.js)
+   - Login system (via NextAuth.js)
    - Role-based access
 
 3. Data Layer
@@ -158,7 +160,7 @@ Mitigation:
 Risk: Unauthorized data access
 Mitigation:
 - Row Level Security in Supabase
-- Strong authentication
+- Strong authentication with NextAuth.js
 - Input validation
 
 ## Resource Constraints
