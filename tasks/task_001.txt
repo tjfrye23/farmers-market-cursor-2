@@ -11,7 +11,7 @@ Create a responsive web application frontend using a modern framework. Set up a 
 Verify successful project initialization, database connection, and basic API endpoint functionality. Ensure frontend can communicate with backend endpoints.
 
 # Subtasks:
-## 1. Initialize Next.js Frontend with TypeScript and TailwindCSS [pending]
+## 1. Initialize Next.js Frontend with TypeScript and TailwindCSS [done]
 ### Dependencies: None
 ### Description: Set up the Next.js project with TypeScript, configure TailwindCSS, and establish the basic folder structure following the architectural roadmap.
 ### Details:
@@ -39,7 +39,7 @@ Implementation steps:
 2. Install MySQL client libraries and ORM (e.g., Prisma): `npm install @prisma/client prisma mysql2`
 3. Initialize Prisma and configure the schema for MySQL
 4. Set up environment variables for MySQL connection
-5. Generate and apply Prisma migration scripts for initial schema (users, products, orders, market_days, etc.)
+5. Generate and apply Prisma migrations for initial schema (users, products, orders, market_days, etc.)
 6. Install NextAuth.js: `npm install next-auth`
 7. Configure NextAuth.js with MySQL adapter and providers (e.g., email, OAuth)
 8. Implement authentication hooks and context for user management
