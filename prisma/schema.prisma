@@ -15,46 +15,86 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String
-  email     String    @unique
-  password  String
-  role      String    @default("user")
-  createdAt DateTime  @default(now())
-  products  Product[]
-  orders    Order[]
-  Account   Account[]
-  Session   Session[]
-  emailVerified  DateTime?
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  password      String
+  role          String         @default("user")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  orders        Order[]
+  Account       Account[]
+  Session       Session[]
+  emailVerified DateTime?
+  vendorProfile VendorProfile?
+}
+
+model VendorProfile {
+  id           Int       @id @default(autoincrement())
+  userId       Int       @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName String
+  description  String?   @db.Text
+  phone        String?
+  address      String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  products     Product[]
+  marketDays   MarketDay[]
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  price       Float
-  user        User     @relation(fields: [userId], references: [id])
-  userId      Int
-  orders      Order[]
-  createdAt   DateTime @default(now())
+  id              Int           @id @default(autoincrement())
+  name            String
+  description     String?       @db.Text
+  price           Float
+  stock           Int           @default(0)
+  category        String?
+  imageUrl        String?
+  vendorProfile   VendorProfile @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
+  vendorProfileId Int
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  OrderItem       OrderItem[]
 }
 
 model Order {
-  id        Int       @id @default(autoincrement())
-  user      User      @relation(fields: [userId], references: [id])
-  userId    Int
-  product   Product[]
-  //TODO: add product info at time of purchase
+  id          Int         @id @default(autoincrement())
+  user        User        @relation(fields: [userId], references: [id])
+  userId      Int
+  orderItems  OrderItem[]
+  status      String      @default("pending") // pending, confirmed, completed, cancelled
+  total       Float
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  marketDay   MarketDay?  @relation(fields: [marketDayId], references: [id])
+  marketDayId Int?
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   Int
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
   quantity  Int
-  total     Float
-  createdAt DateTime  @default(now())
+  price     Float // Price at time of purchase
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MarketDay {
-  id        Int      @id @default(autoincrement())
-  date      DateTime
-  location  String
-  createdAt DateTime @default(now())
+  id          Int            @id @default(autoincrement())
+  date        DateTime
+  location    String
+  description String?        @db.Text
+  startTime   DateTime
+  endTime     DateTime
+  status      String         @default("DRAFT") // DRAFT, PUBLISHED, CANCELLED
+  vendors     VendorProfile[]
+  orders      Order[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 }
 
 model Account {

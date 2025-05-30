@@ -30,7 +30,7 @@ Testing approach:
 - Check that the folder structure matches the architectural plan
 - Ensure ESLint and Prettier are functioning as expected
 
-## 2. Configure MySQL Integration and NextAuth.js Authentication [pending]
+## 2. Configure MySQL Integration and NextAuth.js Authentication [done]
 ### Dependencies: 1.1
 ### Description: Set up MySQL database, configure NextAuth.js for authentication, and establish the connection between the frontend, backend, and MySQL.
 ### Details:
@@ -53,7 +53,7 @@ Testing approach:
 - Confirm protected routes redirect unauthenticated users
 - Test database connection and user creation in MySQL
 
-## 3. Design and Implement Database Schema [pending]
+## 3. Design and Implement Database Schema [done]
 ### Dependencies: 1.2
 ### Description: Create the core database schema in MySQL for users, products, orders, and market schedules according to the architectural plan.
 ### Details:
@@ -72,7 +72,7 @@ Testing approach:
 - Confirm indexes are working as expected for query performance
 - Validate that seed data is properly inserted
 
-## 4. Implement Data Layer with React Query [pending]
+## 4. Implement Data Layer with React Query [done]
 ### Dependencies: 1.2, 1.3
 ### Description: Set up React Query (TanStack Query) for data fetching, caching, and state management, and create API services for interacting with the MySQL database.
 ### Details:
