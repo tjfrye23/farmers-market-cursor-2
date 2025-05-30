@@ -55,3 +55,12 @@ next-env.d.ts
 # tasks.json
 # tasks/ 
 /src/generated/prisma
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+*storybook.log
+storybook-static
