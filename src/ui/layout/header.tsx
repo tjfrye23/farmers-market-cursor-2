@@ -1,62 +1,47 @@
 'use client'
 
 import Link from 'next/link'
-import { useAuth } from '@/lib/providers/auth-provider'
+import { useSession, signOut } from 'next-auth/react'
 
 export function Header() {
-  const { user, loading } = useAuth()
+  const { data: session, status } = useSession()
+  const isLoading = status === 'loading'
 
   return (
-    <header className="border-b">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="text-xl font-bold">
-          Farmers Market
-        </Link>
-        <nav className="flex items-center space-x-4">
-          <Link href="/products" className="hover:text-gray-600">
-            Products
-          </Link>
-          <Link href="/vendors" className="hover:text-gray-600">
-            Vendors
-          </Link>
-          <Link href="/market-days" className="hover:text-gray-600">
-            Market Days
-          </Link>
-          {loading ? (
-            <span className="h-8 w-20 animate-pulse rounded bg-gray-200" />
-          ) : user ? (
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/dashboard"
-                className="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
-              >
-                Dashboard
-              </Link>
-              <button
-                onClick={() => {}}
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                Sign Out
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-4">
+    <header className="bg-white shadow-sm">
+      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 justify-between">
+          <div className="flex">
+            <Link href="/" className="flex items-center">
+              <span className="text-xl font-bold">Farmers Market</span>
+            </Link>
+          </div>
+          <div className="flex items-center">
+            {isLoading ? (
+              <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-gray-900" />
+            ) : session ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-700">
+                  {session.user?.name || session.user?.email}
+                </span>
+                <button
+                  onClick={() => signOut()}
+                  className="text-sm text-gray-700 hover:text-gray-900"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
               <Link
                 href="/auth/login"
-                className="text-sm text-gray-600 hover:text-gray-900"
+                className="text-sm text-gray-700 hover:text-gray-900"
               >
-                Sign In
+                Sign in
               </Link>
-              <Link
-                href="/auth/signup"
-                className="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
-        </nav>
-      </div>
+            )}
+          </div>
+        </div>
+      </nav>
     </header>
   )
 }

@@ -15,14 +15,17 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
-  email     String   @unique
+  email     String    @unique
   password  String
-  role      String   @default("user")
-  createdAt DateTime @default(now())
+  role      String    @default("user")
+  createdAt DateTime  @default(now())
   products  Product[]
   orders    Order[]
+  Account   Account[]
+  Session   Session[]
+  emailVerified  DateTime?
 }
 
 model Product {
@@ -32,19 +35,19 @@ model Product {
   price       Float
   user        User     @relation(fields: [userId], references: [id])
   userId      Int
-  orders      Order[] 
+  orders      Order[]
   createdAt   DateTime @default(now())
 }
 
 model Order {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
+  id        Int       @id @default(autoincrement())
+  user      User      @relation(fields: [userId], references: [id])
   userId    Int
   product   Product[]
   //TODO: add product info at time of purchase
   quantity  Int
   total     Float
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 }
 
 model MarketDay {
@@ -55,19 +58,19 @@ model MarketDay {
 }
 
 model Account {
-  id                 Int       @id @default(autoincrement())
-  userId             Int
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?   @db.Text
-  access_token       String?   @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?   @db.Text
-  session_state      String?
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                Int     @id @default(autoincrement())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -83,7 +86,7 @@ model Session {
 model VerificationToken {
   identifier String
   token      String   @unique
-  expires   DateTime
+  expires    DateTime
 
   @@unique([identifier, token])
 }

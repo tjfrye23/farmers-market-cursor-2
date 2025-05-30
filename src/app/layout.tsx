@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import '@/ui/globals.css'
 import { RootLayout } from '@/ui/layout/root-layout'
-import { AuthProvider } from '@/lib/providers/auth-provider'
+import { Providers } from './providers'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -15,9 +15,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
+        <Providers>
           <RootLayout>{children}</RootLayout>
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   )
