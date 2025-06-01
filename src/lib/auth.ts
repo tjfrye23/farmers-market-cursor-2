@@ -6,6 +6,8 @@ import { db } from '@/lib/prisma'
 import { NextAuthOptions } from 'next-auth'
 import bcrypt from 'bcryptjs'
 
+export type UserRole = 'user' | 'vendor' | 'admin'
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
   providers: [
@@ -30,6 +32,9 @@ export const authOptions: NextAuthOptions = {
 
         const user = await db.user.findUnique({
           where: { email: credentials.email },
+          include: {
+            vendorProfile: true,
+          },
         })
 
         if (!user || !user.password) {
@@ -49,6 +54,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id.toString(),
           email: user.email,
           name: user.name,
+          role: user.role,
         }
       },
     }),
@@ -60,17 +66,19 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/login',
   },
   callbacks: {
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.sub!
-      }
-      return session
-    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
+        token.role = user.role
       }
       return token
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id
+        session.user.role = token.role
+      }
+      return session
     },
   },
 }
