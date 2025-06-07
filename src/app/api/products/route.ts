@@ -2,16 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withAuth, withValidation, withRateLimit } from '@/lib/api-handler'
 import { db } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 // Validation schemas
 export const createProductSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(1, 'Product name is required'),
   description: z.string().optional(),
-  price: z.number().positive(),
-  stock: z.number().int().min(0),
+  price: z.number().min(0, 'Price must be greater than or equal to 0'),
+  stock: z.number().int().min(0, 'Stock must be greater than or equal to 0'),
   category: z.string().optional(),
   imageUrl: z.string().url().optional(),
-  vendorProfileId: z.number().int().positive(),
 })
 
 export const updateProductSchema = createProductSchema.partial()
@@ -43,13 +44,26 @@ export type UpdateProductInput = z.infer<typeof updateProductSchema>
  */
 export const GET = withRateLimit(
   async (req: NextRequest) => {
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return new NextResponse('Unauthorized', { status: 401 })
+    }
+
     const searchParams = req.nextUrl.searchParams
     const category = searchParams.get('category')
-    const vendorId = searchParams.get('vendorId')
+
+    // Get the vendor profile for the current user
+    const vendorProfile = await db.vendorProfile.findUnique({
+      where: { userId: session.user.id },
+    })
+
+    if (!vendorProfile) {
+      return new NextResponse('Vendor profile not found', { status: 404 })
+    }
 
     const where = {
       ...(category && { category }),
-      ...(vendorId && { vendorProfileId: parseInt(vendorId, 10) }),
+      vendorProfileId: vendorProfile.id,
     }
 
     const products = await db.product.findMany({
@@ -103,8 +117,25 @@ export const GET = withRateLimit(
 export const POST = withRateLimit(
   withAuth(
     withValidation(createProductSchema, async (req, data) => {
+      const session = await getServerSession(authOptions)
+      if (!session?.user) {
+        return new NextResponse('Unauthorized', { status: 401 })
+      }
+
+      // Get the vendor profile for the current user
+      const vendorProfile = await db.vendorProfile.findUnique({
+        where: { userId: session.user.id },
+      })
+
+      if (!vendorProfile) {
+        return new NextResponse('Vendor profile not found', { status: 404 })
+      }
+
       const product = await db.product.create({
-        data,
+        data: {
+          ...data,
+          vendorProfileId: vendorProfile.id,
+        },
         include: {
           vendorProfile: {
             select: {
@@ -114,7 +145,7 @@ export const POST = withRateLimit(
         },
       })
 
-      return NextResponse.json(product, { status: 201 })
+      return NextResponse.json(product)
     })
   ),
   { limit: 20, windowMs: 60 * 1000 } // 20 requests per minute
