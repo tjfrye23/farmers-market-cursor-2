@@ -6,12 +6,12 @@ const prisma = new PrismaClient()
 
 async function main() {
   // Create admin user
-  const adminPassword = await hash('admin123', 12)
+  const adminPassword = await hash('test', 12)
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@farmersmarket.com' },
+    where: { email: 'admin@example.com' },
     update: {},
     create: {
-      email: 'admin@farmersmarket.com',
+      email: 'admin@example.com',
       name: 'Admin User',
       password: adminPassword,
       role: 'admin',
@@ -19,12 +19,12 @@ async function main() {
   })
 
   // Create vendor users and their profiles
-  const vendor1Password = await hash('vendor123', 12)
+  const vendor1Password = await hash('test', 12)
   const vendor1 = await prisma.user.upsert({
-    where: { email: 'organic@farmersmarket.com' },
+    where: { email: 'vendor@example.com' },
     update: {},
     create: {
-      email: 'organic@farmersmarket.com',
+      email: 'vendor@example.com',
       name: 'Organic Farm',
       password: vendor1Password,
       role: 'vendor',
@@ -60,7 +60,7 @@ async function main() {
   })
 
   // Create regular customer
-  const customerPassword = await hash('customer123', 12)
+  const customerPassword = await hash('test', 12)
   const customer = await prisma.user.upsert({
     where: { email: 'customer@example.com' },
     update: {},
@@ -147,6 +147,8 @@ async function main() {
       location: 'Downtown Square',
       description: 'Spring Market Opening Day',
       status: 'scheduled',
+      startTime: new Date('2024-04-01T09:00:00Z'),
+      endTime: new Date('2024-04-01T13:00:00Z'),
     },
   })
 
@@ -156,6 +158,8 @@ async function main() {
       location: 'Downtown Square',
       description: 'Weekly Market',
       status: 'scheduled',
+      startTime: new Date('2024-04-01T09:00:00Z'),
+      endTime: new Date('2024-04-01T13:00:00Z'),
     },
   })
 

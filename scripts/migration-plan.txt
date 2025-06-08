@@ -1,0 +1,83 @@
+# Farmers Market App Migration Plan
+
+## Phase 1: Migrate Pages from Other Project
+1. Vendor & Admin Pages (These will replace the current dashboard)
+   - VendorDashboard.tsx → src/app/vendor/dashboard/page.tsx
+   - VendorProfile.tsx → src/app/vendor/profile/page.tsx
+   - VendorOnboarding.tsx → src/app/vendor/onboarding/page.tsx
+   - OrderDetails.tsx → src/app/vendor/orders/:id
+   - MarketDayDetail.tsx → src/app/vendor/marketDay/[dayId]/page.tsx
+   - MarketDayProducts.tsx → src/app/vendor/marketDay/[dayId]/products/page.tsx
+   - MarketScheduleDetail.tsx → src/app/vendor/schedule/[scheduleId]/page.tsx
+   - AddProducts.tsx → src/app/vendor/products/add/page.tsx
+   - AdminDashboard.tsx → src/app/admin/dashboard/page.tsx
+   - AdminVendorDetails.tsx → src/app/admin/vendors/[id]/page.tsx
+   - OrderDetails.tsx → src/app/admin/orders/:id
+   - MarketScheduleDetail.tsx → src/app/admin/schedule/[scheduleId]/page.tsx
+   - CustomerDetails.tsx → src/app/admin/customer/[id]/page.tsx
+
+2. Order & Cart Pages
+   - Orders.tsx → src/app/orders/page.tsx
+   - OrderDetail.tsx → src/app/orders/[id]/page.tsx
+   - OrderConfirmation.tsx → src/app/orders/confirmation/page.tsx
+   - Cart.tsx → src/app/cart/page.tsx
+   - Checkout.tsx → src/app/checkout/page.tsx
+
+3. Other Pages
+   - UserProfile.tsx → src/app/profile/page.tsx
+   - Shop.tsx → src/app/shop/page.tsx
+   - Markets.tsx → src/app/markets/page.tsx
+   - ProductDetail.tsx → src/app/shop/products/[id]/page.tsx
+   - Vendors.tsx → src/app/vendors/page.tsx
+   - VendorDetail.tsx → src/app/vendors/[id]/page.tsx
+   - Favorites.tsx → src/app/favorites/page.tsx
+   - About.tsx → src/app/about/page.tsx
+   - Index.tsx → src/app/page.tsx (replacing current home page)
+   - NotFound.tsx → src/app/not-found.tsx
+
+## Phase 2: Preserve Current Auth Structure
+Keep and maintain:
+- src/app/auth/login
+- src/app/auth/signup
+- src/app/auth/verify
+- src/app/auth/vendor
+
+## Phase 3: Shared Resources Migration
+1. Components
+   - Review and migrate shared components from other-project/market-fresh-finds-online-main/src/components to src/components
+   - Ensure no naming conflicts with existing components
+
+2. Hooks
+   - Migrate custom hooks from other-project/market-fresh-finds-online-main/src/hooks to src/hooks
+   - Review for any duplicates with existing hooks
+
+3. Services
+   - Migrate services from other-project/market-fresh-finds-online-main/src/services to src/services
+   - Update API endpoints and configurations as needed
+
+4. Contexts
+   - Migrate contexts from other-project/market-fresh-finds-online-main/src/contexts to src/providers
+   - Ensure proper integration with existing providers
+
+## Phase 5: Styling & Dependencies
+1. Tailwind Configuration
+   - Merge any custom Tailwind configurations
+   - Ensure all required styles are available
+
+2. Dependencies
+   - Compare package.json files
+   - Add any missing dependencies
+   - Update versions if needed
+
+## Phase 6: Testing & Validation
+1. Test all migrated routes
+2. Verify auth functionality remains intact
+3. Test responsive design
+4. Validate all forms and interactions
+5. Check for any console errors
+
+## Notes
+- All page migrations should maintain Next.js 13+ App Router conventions
+- Ensure proper TypeScript typing throughout the migration
+- Maintain existing authentication flow while integrating new features
+- Test thoroughly after each phase of migration
