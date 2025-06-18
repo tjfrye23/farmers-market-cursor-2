@@ -30,17 +30,25 @@ model User {
 }
 
 model VendorProfile {
-  id           Int       @id @default(autoincrement())
-  userId       Int       @unique
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  businessName String
-  description  String?   @db.Text
-  phone        String?
-  address      String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  products     Product[]
-  marketDays   MarketDay[]
+  id              Int              @id @default(autoincrement())
+  userId          Int              @unique
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName    String
+  description     String           @db.Text
+  phone           String?
+  email           String
+  headerImageUrl  String
+  address         String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  facebookHandle  String?
+  instagramHandle String?
+  websiteUrl      String?
+  youtubeHandle   String?
+  twitterHandle   String?
+  products        Product[]
+  marketDays      MarketDay[]
+  marketSchedules MarketSchedule[]
 }
 
 model Product {
@@ -48,9 +56,8 @@ model Product {
   name            String
   description     String?       @db.Text
   price           Float
-  stock           Int           @default(0)
-  category        String?
-  imageUrl        String?
+  category        String
+  imageUrl        String
   vendorProfile   VendorProfile @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
   vendorProfileId Int
   createdAt       DateTime      @default(now())
@@ -78,23 +85,45 @@ model OrderItem {
   product   Product  @relation(fields: [productId], references: [id])
   productId Int
   quantity  Int
+  status    String   @default("processing") // e.g., processing, processed, cancelled
   price     Float // Price at time of purchase
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model MarketDay {
-  id          Int            @id @default(autoincrement())
-  date        DateTime
-  location    String
-  description String?        @db.Text
-  startTime   DateTime
-  endTime     DateTime
-  status      String         @default("DRAFT") // DRAFT, PUBLISHED, CANCELLED
-  vendors     VendorProfile[]
-  orders      Order[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id               Int             @id @default(autoincrement())
+  date             DateTime
+  location         String
+  description      String?         @db.Text
+  startTime        DateTime
+  endTime          DateTime
+  onlineStartTime  DateTime
+  onlineEndTime    DateTime
+  marketScheduleId Int
+  marketSchedule   MarketSchedule  @relation(fields: [marketScheduleId], references: [id], onDelete: Cascade)
+  status           String          @default("DRAFT") // DRAFT, PUBLISHED, CANCELLED
+  vendors          VendorProfile[]
+  orders           Order[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model MarketSchedule {
+  id              Int             @id @default(autoincrement())
+  reoccurring     Boolean
+  name            String
+  location        String
+  description     String?         @db.Text
+  startTime       DateTime
+  endTime         DateTime
+  onlineStartTime DateTime
+  onlineEndTime   DateTime
+  status          String          @default("DRAFT") // DRAFT, PUBLISHED, CANCELLED
+  subscriptions   VendorProfile[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  MarketDay       MarketDay[]
 }
 
 model Account {

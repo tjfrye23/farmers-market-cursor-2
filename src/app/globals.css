@@ -1,6 +1,24 @@
-@import 'tw-animate-css' layer(base);
+/* @import 'tw-animate-css' layer(base); */
 
 @import 'tailwindcss';
+
+@theme {
+  --market-green: #5A8F29;
+  --market-green-light: #8CC63F;
+  --market-green-dark: #3A5D1B;
+  --market-brown: #A67C52;
+  --market-brown-light: #D2B48C;
+  --market-brown-dark: #5D4037;
+  --market-yellow: #F9A825;
+  --market-yellow-light: #FFF176;
+  --market-yellow-dark: #F57F17;
+  --market-gray: #EEEEEE;
+  --market-gray-light: #F5F5F5;
+  --market-gray-dark: #9E9E9E;
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -113,6 +131,22 @@
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
   }
+
+  .bg-market-green { background-color: #5A8F29 ; }
+  .bg-market-green-light { background-color: #8CC63F ; }
+  .bg-market-green-dark { background-color: #3A5D1B ; }
+  .bg-market-brown { background-color: #A67C52 ; }
+  .bg-market-brown-light { background-color: #D2B48C ; }
+  .bg-market-brown-dark { background-color: #5D4037 ; }
+  .bg-market-yellow { background-color: #F9A825 ; }
+  .bg-market-yellow-light { background-color: #FFF176 ; }
+  .bg-market-yellow-dark { background-color: #F57F17 ; }
+  .bg-market-gray { background-color: #EEEEEE ; }
+  .bg-market-gray-light { background-color: #F5F5F5 ; }
+  .bg-market-gray-dark { background-color: #9E9E9E ; }
+  .rounded-radius-lg { border-radius: 1rem ; }
+  .rounded-radius-md { border-radius: 0.75rem ; }
+  .rounded-radius-sm { border-radius: 0.5rem ; }
 }
 
 @layer base {
@@ -123,5 +157,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-/* Add your custom CSS below this line */

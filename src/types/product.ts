@@ -1,7 +1,16 @@
 // Product type migrated from the other project
 export interface Product {
-  id: string
+  id: number
   name: string
+  description?: string
   price: number
-  // Add other fields as needed
+  stock: number
+  category?: string
+  imageUrl?: string
+  vendorProfileId: number
+  createdAt?: string
+  updatedAt?: string
+  unit?: string
+  organic?: boolean
+  local?: boolean
 }

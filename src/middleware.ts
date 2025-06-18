@@ -5,10 +5,8 @@ import { UserRole } from '@/lib/auth'
 
 // Define protected routes and their required roles
 const protectedRoutes: Record<string, UserRole[]> = {
-  '/vendor/dashboard': ['vendor'],
-  '/vendor/products': ['vendor'],
-  '/vendor/orders': ['vendor'],
-  '/admin': ['admin'],
+  '/vendor/': ['vendor'],
+  '/admin/': ['admin'],
 }
 
 export async function middleware(request: NextRequest) {

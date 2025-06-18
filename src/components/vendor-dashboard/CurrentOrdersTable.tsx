@@ -1,0 +1,105 @@
+import { Order } from '@/types/order'
+import { Badge } from '@/components/ui/badge'
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu'
+import { MoreHorizontal, Eye, Edit } from 'lucide-react'
+
+interface CurrentOrdersTableProps {
+  orders: Order[]
+  loading: boolean
+  onUpdateStatus: (order: Order) => void
+}
+
+export default function CurrentOrdersTable({
+  orders,
+  loading,
+  onUpdateStatus,
+}: CurrentOrdersTableProps) {
+  const getOrderStatus = (order: Order) => {
+    if (!order.orderItems.length) return 'N/A'
+    const firstStatus = order.orderItems[0].status
+    return order.orderItems.every((i) => i.status === firstStatus)
+      ? firstStatus
+      : 'mixed'
+  }
+  return loading ? (
+    <div>Loading orders...</div>
+  ) : orders.length > 0 ? (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Order #</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Customer</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Total</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {orders.map((order) => (
+          <TableRow key={order.id}>
+            <TableCell>{order.orderNumber ?? order.id}</TableCell>
+            <TableCell>
+              {order.date ? new Date(order.date).toLocaleDateString() : ''}
+            </TableCell>
+            <TableCell>{order.user ? order.user.name : ''}</TableCell>
+            <TableCell>
+              <Badge
+                variant={
+                  getOrderStatus(order) === 'processed'
+                    ? 'secondary'
+                    : getOrderStatus(order) === 'processing'
+                      ? 'default'
+                      : getOrderStatus(order) === 'mixed'
+                        ? 'outline'
+                        : 'outline'
+                }
+              >
+                {getOrderStatus(order).charAt(0).toUpperCase() +
+                  getOrderStatus(order).slice(1)}
+              </Badge>
+            </TableCell>
+            <TableCell>${order.total.toFixed(2)}</TableCell>
+            <TableCell>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="hover:bg-muted flex h-8 w-8 items-center justify-center rounded p-0"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-white">
+                  <DropdownMenuItem>
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Details
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onUpdateStatus(order)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Update Status
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  ) : (
+    <div>No current orders found.</div>
+  )
+}

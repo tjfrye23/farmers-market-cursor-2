@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession, Session } from 'next-auth'
 import { z } from 'zod'
+import { authOptions } from './auth'
 
 export type ApiHandler = (
   req: NextRequest,
@@ -11,7 +12,7 @@ export type AuthenticatedApiHandler = (
   req: NextRequest,
   context: {
     params: Record<string, string>
-    session: Awaited<ReturnType<typeof getServerSession>>
+    session: Session
   }
 ) => Promise<NextResponse>
 
@@ -27,7 +28,7 @@ export function withAuth(handler: AuthenticatedApiHandler): ApiHandler {
     context: { params: Record<string, string> }
   ) => {
     try {
-      const session = await getServerSession()
+      const session = await getServerSession(authOptions)
 
       if (!session) {
         return NextResponse.json(

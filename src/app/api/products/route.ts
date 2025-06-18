@@ -44,26 +44,13 @@ export type UpdateProductInput = z.infer<typeof updateProductSchema>
  */
 export const GET = withRateLimit(
   async (req: NextRequest) => {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return new NextResponse('Unauthorized', { status: 401 })
-    }
-
     const searchParams = req.nextUrl.searchParams
     const category = searchParams.get('category')
-
-    // Get the vendor profile for the current user
-    const vendorProfile = await db.vendorProfile.findUnique({
-      where: { userId: session.user.id },
-    })
-
-    if (!vendorProfile) {
-      return new NextResponse('Vendor profile not found', { status: 404 })
-    }
+    const vendorId = searchParams.get('vendorId')
 
     const where = {
       ...(category && { category }),
-      vendorProfileId: vendorProfile.id,
+      ...(vendorId && { vendorProfileId: parseInt(vendorId) }),
     }
 
     const products = await db.product.findMany({
@@ -122,9 +109,14 @@ export const POST = withRateLimit(
         return new NextResponse('Unauthorized', { status: 401 })
       }
 
+      const userId = parseInt(session.user.id)
+      if (isNaN(userId)) {
+        return new NextResponse('Invalid user ID', { status: 400 })
+      }
+      
       // Get the vendor profile for the current user
       const vendorProfile = await db.vendorProfile.findUnique({
-        where: { userId: session.user.id },
+        where: { userId },
       })
 
       if (!vendorProfile) {

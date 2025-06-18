@@ -23,8 +23,8 @@ export function Header() {
   const user = session?.user
 
   // TODO: Replace with real role logic
-  const isVendor = false
-  const isAdmin = false
+  const isVendor = user?.role === 'vendor'
+  const isAdmin = user?.role === 'admin'
 
   const getUserInitials = () => {
     if (!user) return 'U'
