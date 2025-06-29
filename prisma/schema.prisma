@@ -15,120 +15,136 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   name          String
-  email         String         @unique
+  email         String    @unique
   password      String
-  role          String         @default("user")
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  orders        Order[]
-  Account       Account[]
-  Session       Session[]
+  role          String    @default("user")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   emailVerified DateTime?
+
+  orders        Order[]
+  account       Account[]
+  session       Session[]
   vendorProfile VendorProfile?
+  carts         Cart[] //
 }
 
 model VendorProfile {
-  id              Int              @id @default(autoincrement())
-  userId          Int              @unique
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              Int      @id @default(autoincrement())
   businessName    String
-  description     String           @db.Text
+  description     String   @db.Text
   phone           String?
   email           String
   headerImageUrl  String
   address         String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   facebookHandle  String?
   instagramHandle String?
   websiteUrl      String?
   youtubeHandle   String?
   twitterHandle   String?
+
+  userId Int @unique
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   products        Product[]
   marketDays      MarketDay[]
   marketSchedules MarketSchedule[]
 }
 
 model Product {
-  id              Int           @id @default(autoincrement())
-  name            String
-  description     String?       @db.Text
-  price           Float
-  category        String
-  imageUrl        String
-  vendorProfile   VendorProfile @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String  @db.Text
+  category    String
+  imageUrl    String
+  organic     Boolean  @default(false)
+  local       Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   vendorProfileId Int
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  OrderItem       OrderItem[]
+
+  vendorProfile         VendorProfile           @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
+  marketDayProductGroup MarketDayProductGroup[]
 }
 
 model Order {
-  id          Int         @id @default(autoincrement())
-  user        User        @relation(fields: [userId], references: [id])
+  id        Int      @id @default(autoincrement())
+  status    String   @default("pending") // pending, confirmed, completed, cancelled
+  total     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   userId      Int
-  orderItems  OrderItem[]
-  status      String      @default("pending") // pending, confirmed, completed, cancelled
-  total       Float
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  marketDay   MarketDay?  @relation(fields: [marketDayId], references: [id])
-  marketDayId Int?
+  marketDayId Int
+
+  user       User        @relation(fields: [userId], references: [id])
+  marketDay  MarketDay   @relation(fields: [marketDayId], references: [id])
+  orderItems OrderItem[]
 }
 
 model OrderItem {
   id        Int      @id @default(autoincrement())
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId   Int
-  product   Product  @relation(fields: [productId], references: [id])
-  productId Int
   quantity  Int
-  status    String   @default("processing") // e.g., processing, processed, cancelled
   price     Float // Price at time of purchase
+  status    String   @default("processing")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  orderId            Int
+  productUnitId      Int
+  marketDayProductId Int
+
+  order            Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productUnit      ProductUnit      @relation(fields: [productUnitId], references: [id])
+  marketDayProduct MarketDayProduct @relation(fields: [marketDayProductId], references: [id])
 }
 
 model MarketDay {
-  id               Int             @id @default(autoincrement())
-  date             DateTime
-  location         String
-  description      String?         @db.Text
-  startTime        DateTime
-  endTime          DateTime
-  onlineStartTime  DateTime
-  onlineEndTime    DateTime
-  marketScheduleId Int
-  marketSchedule   MarketSchedule  @relation(fields: [marketScheduleId], references: [id], onDelete: Cascade)
-  status           String          @default("DRAFT") // DRAFT, PUBLISHED, CANCELLED
-  vendors          VendorProfile[]
-  orders           Order[]
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-}
-
-model MarketSchedule {
-  id              Int             @id @default(autoincrement())
-  reoccurring     Boolean
-  name            String
-  location        String
-  description     String?         @db.Text
+  id              Int      @id @default(autoincrement())
+  description     String?  @db.Text
   startTime       DateTime
   endTime         DateTime
   onlineStartTime DateTime
   onlineEndTime   DateTime
-  status          String          @default("DRAFT") // DRAFT, PUBLISHED, CANCELLED
-  subscriptions   VendorProfile[]
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  MarketDay       MarketDay[]
+  status          String   @default("DRAFT") // DRAFT, PUBLISHED, CANCELLED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  marketScheduleId Int
+
+  marketSchedule        MarketSchedule          @relation(fields: [marketScheduleId], references: [id], onDelete: Cascade)
+  vendors               VendorProfile[]
+  orders                Order[]
+  carts                 Cart[]
+  marketDayProductGroup MarketDayProductGroup[]
+}
+
+// TODO: Figure out how to think about interval scheduling
+model MarketSchedule {
+  id              Int      @id @default(autoincrement())
+  reoccurring     Boolean
+  name            String
+  location        String
+  description     String?  @db.Text
+  startTime       DateTime
+  endTime         DateTime
+  onlineStartTime DateTime
+  onlineEndTime   DateTime
+  status          String   @default("DRAFT") // DRAFT, PUBLISHED, CANCELLED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  subscriptions VendorProfile[]
+  marketDay     MarketDay[]
 }
 
 model Account {
   id                Int     @id @default(autoincrement())
-  userId            Int
   type              String
   provider          String
   providerAccountId String
@@ -139,7 +155,10 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  userId Int
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -147,9 +166,11 @@ model Account {
 model Session {
   id           Int      @id @default(autoincrement())
   sessionToken String   @unique
-  userId       Int
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  userId Int
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -158,4 +179,86 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model ProductUnit {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique // e.g., "lb", "ea", "bag", "dozen"
+  pluralName  String   // e.g., "lbs", "units", "s", "dozen"
+  displayName String // e.g., "Pound", "Each", "Bag", "Dozen"
+  symbol      String   @unique // e.g., "$/lb", "$/ea", "$/bag"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  marketDayProducts MarketDayProduct[]
+  orderItems        OrderItem[]
+}
+
+model MarketDayProductGroup {
+  id              Int      @id @default(autoincrement())
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  primaryOptionId Int? // Reference to the default MarketDayProduct to show on the shop page
+
+  marketDayId Int
+  productId   Int
+
+  variations MarketDayProduct[]
+  marketDay   MarketDay          @relation(fields: [marketDayId], references: [id], onDelete: Cascade)
+  product     Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([marketDayId, productId])
+}
+
+model MarketDayProduct {
+  id        Int      @id @default(autoincrement())
+  price     Float
+  size      Int
+  quantity  Int
+  packaged  Boolean
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productUnitId Int
+  marketDayId   Int
+  groupId       Int
+
+  productUnit ProductUnit           @relation(fields: [productUnitId], references: [id])
+  orderItems  OrderItem[]
+  group       MarketDayProductGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  cartItem    CartItem[]
+
+  @@unique([groupId, productUnitId])
+}
+
+model Cart {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId      Int
+  marketDayId Int
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  marketDay MarketDay  @relation(fields: [marketDayId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+
+  @@unique([userId, marketDayId])
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cartId             Int
+  marketDayProductId Int
+
+  cart             Cart             @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  marketDayProduct MarketDayProduct @relation(fields: [marketDayProductId], references: [id])
+
+  @@unique([cartId, marketDayProductId])
 }

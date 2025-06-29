@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { PrismaClient } from '../src/generated/prisma/client'
 import { hash } from 'bcryptjs'
 
@@ -7,7 +6,7 @@ const prisma = new PrismaClient()
 async function main() {
   // Create admin user
   const adminPassword = await hash('test', 12)
-  const admin = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: 'admin@example.com' },
     update: {},
     create: {
@@ -101,31 +100,31 @@ async function main() {
         {
           name: 'Organic Tomatoes',
           description: 'Fresh organic tomatoes, locally grown',
-          price: 3.99,
           category: 'Vegetables',
           imageUrl: '/images/products/tomatoes.webp',
           vendorProfileId: vendor1Profile.id,
+          organic: true,
+          local: true,
         },
         {
           name: 'Organic Lettuce',
           description: 'Crisp organic lettuce',
-          price: 2.99,
           category: 'Vegetables',
           imageUrl: '/images/products/lettuce.webp',
           vendorProfileId: vendor1Profile.id,
+          organic: true,
         },
         {
           name: 'Organic Carrots',
           description: 'Sweet organic carrots',
-          price: 1.99,
           category: 'Vegetables',
           imageUrl: '/images/products/carrots.webp',
           vendorProfileId: vendor1Profile.id,
+          local: true,
         },
         {
           name: 'Organic Zucchini',
           description: 'Fresh organic zucchini',
-          price: 2.49,
           category: 'Vegetables',
           imageUrl: '/images/products/zucchini.webp',
           vendorProfileId: vendor1Profile.id,
@@ -133,7 +132,6 @@ async function main() {
         {
           name: 'Organic Peppers',
           description: 'Colorful organic bell peppers',
-          price: 4.99,
           category: 'Vegetables',
           imageUrl: '/images/products/peppers.webp',
           vendorProfileId: vendor1Profile.id,
@@ -141,7 +139,6 @@ async function main() {
         {
           name: 'Organic Cucumbers',
           description: 'Crisp organic cucumbers',
-          price: 1.79,
           category: 'Vegetables',
           imageUrl: '/images/products/cucumbers.webp',
           vendorProfileId: vendor1Profile.id,
@@ -156,7 +153,6 @@ async function main() {
         {
           name: 'Sourdough Bread',
           description: 'Freshly baked sourdough bread',
-          price: 5.99,
           category: 'Bakery',
           imageUrl: '/images/products/sourdough.webp',
           vendorProfileId: vendor2Profile.id,
@@ -164,7 +160,6 @@ async function main() {
         {
           name: 'Croissants',
           description: 'Buttery, flaky croissants',
-          price: 2.99,
           category: 'Bakery',
           imageUrl: '/images/products/croissants.webp',
           vendorProfileId: vendor2Profile.id,
@@ -205,8 +200,6 @@ async function main() {
   // Create market days
   const marketDay1 = await prisma.marketDay.create({
     data: {
-      date: new Date('2024-04-01T09:00:00Z'),
-      location: 'Downtown Square',
       description: 'Spring Market Opening Day',
       status: 'scheduled',
       startTime: new Date('2024-04-01T09:00:00Z'),
@@ -219,8 +212,6 @@ async function main() {
 
   const marketDay2 = await prisma.marketDay.create({
     data: {
-      date: new Date('2024-04-08T09:00:00Z'),
-      location: 'Downtown Square',
       description: 'Weekly Market',
       status: 'scheduled',
       startTime: new Date('2024-04-08T09:00:00Z'),
@@ -231,10 +222,8 @@ async function main() {
     },
   })
 
-  const marketDay3 = await prisma.marketDay.create({
+  await prisma.marketDay.create({
     data: {
-      date: new Date('2024-04-08T09:00:00Z'),
-      location: 'Downtown Square non reoccurring',
       description: 'Spring Market Schedule non reoccurring',
       status: 'scheduled',
       startTime: new Date('2024-04-02T09:00:00Z'),
@@ -257,43 +246,6 @@ async function main() {
     vendor1ProductIds = products.map((p) => p.id)
   }
 
-  // Add 3 mock orders for vendor@example.com (one for each product)
-  if (
-    vendor1ProductIds.length === 3 &&
-    customer &&
-    typeof marketDay1 !== 'undefined'
-  ) {
-    for (let i = 0; i < 3; i++) {
-      const createdOrder = await prisma.order.create({
-        data: {
-          userId: customer!.id,
-          status: i === 0 ? 'processing' : i === 1 ? 'processing' : 'processed',
-          total:
-            1 *
-            (await prisma.product.findUnique({
-              where: { id: vendor1ProductIds[i] },
-            }))!.price,
-          marketDayId: marketDay1!.id,
-          orderItems: {
-            create: [
-              {
-                productId: vendor1ProductIds[i],
-                quantity: 1,
-                price: (await prisma.product.findUnique({
-                  where: { id: vendor1ProductIds[i] },
-                }))!.price,
-                status: 'processing',
-              },
-            ],
-          },
-        },
-        include: {
-          orderItems: { include: { product: true } },
-        },
-      })
-    }
-  }
-
   // Associate vendor1Profile with the first market schedule and its market days
   if (vendor1Profile && schedule && marketDay1 && marketDay2) {
     await prisma.vendorProfile.update({
@@ -307,6 +259,98 @@ async function main() {
         },
       },
     })
+  }
+
+  // --- Seed Product Units ---
+  const units = [
+    { name: 'lb', pluralName: 'lbs', displayName: 'Pound', symbol: '$/lb' },
+    { name: 'ea', pluralName: 'units', displayName: 'Each', symbol: '$/ea' },
+    { name: 'bag', pluralName: 'bags', displayName: 'Bag', symbol: '$/bag' },
+    {
+      name: 'dozen',
+      pluralName: 'dozen',
+      displayName: 'Dozen',
+      symbol: '$/dozen',
+    },
+  ]
+  for (const unit of units) {
+    await prisma.productUnit.upsert({
+      where: { name: unit.name },
+      update: {},
+      create: unit,
+    })
+  }
+  const allUnits = await prisma.productUnit.findMany()
+
+  // --- Seed MarketDayProductGroups and MarketDayProducts ---
+  // Get all products
+  const allProducts = await prisma.product.findMany()
+
+  // For each product, create a MarketDayProductGroup for each market day
+  for (const marketDay of [marketDay1, marketDay2]) {
+    for (const product of allProducts) {
+      // Create the group
+      const group = await prisma.marketDayProductGroup.create({
+        data: {
+          marketDayId: marketDay.id,
+          productId: product.id,
+        },
+      })
+
+      // For each unit, create a MarketDayProduct (with random price/quantity for demo)
+      for (const unit of allUnits) {
+        await prisma.marketDayProduct.create({
+          data: {
+            price: Math.floor(Math.random() * 10) + 2, // $2-$11
+            quantity: Math.floor(Math.random() * 50) + 10, // 10-59
+            size: Math.floor(Math.random() * 10) + 1, // 1-10
+            packaged: Math.random() < 0.5, // 50% chance of being packaged
+            productUnitId: unit.id,
+            marketDayId: marketDay.id,
+            groupId: group.id,
+          },
+        })
+      }
+    }
+  }
+
+  // Add 3 mock orders for vendor@example.com (one for each product)
+  if (
+    vendor1ProductIds.length === 3 &&
+    customer &&
+    typeof marketDay1 !== 'undefined'
+  ) {
+    for (let i = 0; i < 3; i++) {
+      // Find a MarketDayProduct for this product and marketDay1 (pick the first unit)
+      const mdp = await prisma.marketDayProduct.findFirst({
+        where: {
+          group: {
+            marketDayId: marketDay1.id,
+            productId: vendor1ProductIds[i],
+          },
+        },
+      })
+      if (!mdp) continue
+      await prisma.order.create({
+        data: {
+          userId: customer!.id,
+          status: i === 0 ? 'processing' : i === 1 ? 'processing' : 'processed',
+          total: mdp.price,
+          marketDayId: marketDay1!.id,
+          orderItems: {
+            create: [
+              {
+                marketDayProductId: mdp.id,
+                productUnitId: mdp.productUnitId,
+                quantity: 1,
+                price: mdp.price,
+                status: 'processing',
+              },
+            ],
+          },
+        },
+      })
+    }
   }
 }
 

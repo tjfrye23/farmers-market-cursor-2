@@ -6,10 +6,11 @@ import { db } from '@/lib/prisma'
 // Validation schemas
 export const createOrderSchema = z.object({
   userId: z.number().int().positive(),
-  marketDayId: z.number().int().positive().optional(),
+  marketDayId: z.number().int().positive(),
   orderItems: z.array(
     z.object({
-      productId: z.number().int().positive(),
+      marketDayProductId: z.number().int().positive(),
+      productUnitId: z.number().int().positive(),
       quantity: z.number().int().positive(),
       price: z.number().positive(),
     })
@@ -47,12 +48,13 @@ export type UpdateOrderInput = z.infer<typeof updateOrderSchema>
  * @apiSuccess {String} orders.user.email User's email
  * @apiSuccess {Object[]} orders.orderItems List of order items
  * @apiSuccess {Number} orders.orderItems.id Order item ID
- * @apiSuccess {Number} orders.orderItems.productId Product ID
+ * @apiSuccess {Number} orders.orderItems.marketDayProductId MarketDayProduct ID
+ * @apiSuccess {Number} orders.orderItems.productUnitId ProductUnit ID
  * @apiSuccess {Number} orders.orderItems.quantity Quantity
  * @apiSuccess {Number} orders.orderItems.price Price at time of purchase
- * @apiSuccess {Object} orders.orderItems.product Product information
- * @apiSuccess {String} orders.orderItems.product.name Product name
- * @apiSuccess {String} [orders.orderItems.product.imageUrl] Product image URL
+ * @apiSuccess {Object} orders.orderItems.marketDayProduct Product information
+ * @apiSuccess {String} orders.orderItems.marketDayProduct.product.name Product name
+ * @apiSuccess {String} [orders.orderItems.marketDayProduct.product.imageUrl] Product image URL
  *
  * @apiError (429) TooManyRequests Too many requests
  */
@@ -80,12 +82,17 @@ export const GET = withRateLimit(
         },
         orderItems: {
           include: {
-            product: {
-              select: {
-                name: true,
-                imageUrl: true,
+            marketDayProduct: {
+              include: {
+                group: {
+                  include: {
+                    product: { select: { name: true, imageUrl: true } },
+                  },
+                },
+                productUnit: true,
               },
             },
+            productUnit: true,
           },
         },
       },
@@ -111,7 +118,8 @@ export const GET = withRateLimit(
  * @apiBody {Number} userId User ID
  * @apiBody {Number} [marketDayId] Market day ID
  * @apiBody {Object[]} orderItems List of order items
- * @apiBody {Number} orderItems.productId Product ID
+ * @apiBody {Number} orderItems.marketDayProductId MarketDayProduct ID
+ * @apiBody {Number} orderItems.productUnitId ProductUnit ID
  * @apiBody {Number} orderItems.quantity Quantity
  * @apiBody {Number} orderItems.price Price at time of purchase
  * @apiBody {String} [status] Order status (default: PENDING)
@@ -129,12 +137,13 @@ export const GET = withRateLimit(
  * @apiSuccess {String} order.user.email User's email
  * @apiSuccess {Object[]} order.orderItems List of order items
  * @apiSuccess {Number} order.orderItems.id Order item ID
- * @apiSuccess {Number} order.orderItems.productId Product ID
+ * @apiSuccess {Number} order.orderItems.marketDayProductId MarketDayProduct ID
+ * @apiSuccess {Number} order.orderItems.productUnitId ProductUnit ID
  * @apiSuccess {Number} order.orderItems.quantity Quantity
  * @apiSuccess {Number} order.orderItems.price Price at time of purchase
- * @apiSuccess {Object} order.orderItems.product Product information
- * @apiSuccess {String} order.orderItems.product.name Product name
- * @apiSuccess {String} [order.orderItems.product.imageUrl] Product image URL
+ * @apiSuccess {Object} order.orderItems.marketDayProduct Product information
+ * @apiSuccess {String} order.orderItems.marketDayProduct.product.name Product name
+ * @apiSuccess {String} [order.orderItems.marketDayProduct.product.imageUrl] Product image URL
  *
  * @apiError (400) ValidationError Invalid input data
  * @apiError (401) Unauthorized Authentication required
@@ -159,12 +168,17 @@ export const POST = withRateLimit(
           },
           orderItems: {
             include: {
-              product: {
-                select: {
-                  name: true,
-                  imageUrl: true,
+              marketDayProduct: {
+                include: {
+                  group: {
+                    include: {
+                      product: { select: { name: true, imageUrl: true } },
+                    },
+                  },
+                  productUnit: true,
                 },
               },
+              productUnit: true,
             },
           },
         },

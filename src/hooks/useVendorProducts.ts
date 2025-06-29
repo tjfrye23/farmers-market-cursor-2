@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Product } from '../types/product'
+import { UIProduct } from '../types/product'
 
-export function useVendorProducts(vendorProfileId: string) {
-  const [data, setData] = useState<Product[]>([])
+export function useVendorProducts() {
+  const [data, setData] = useState<UIProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   const fetchProducts = useCallback(async () => {
     setIsLoading(true)
     try {
-      const res = await fetch(`/api/products?vendorProfileId=${vendorProfileId}`)
+      const res = await fetch(`/api/vendor/products`)
       const products = await res.json()
       setData(products)
     } catch {
@@ -16,13 +16,11 @@ export function useVendorProducts(vendorProfileId: string) {
     } finally {
       setIsLoading(false)
     }
-  }, [vendorProfileId])
+  }, [])
 
   useEffect(() => {
-    if (vendorProfileId) {
-      fetchProducts()
-    }
-  }, [vendorProfileId, fetchProducts])
+    fetchProducts()
+  }, [fetchProducts])
 
   return { data, isLoading, refetch: fetchProducts }
 }

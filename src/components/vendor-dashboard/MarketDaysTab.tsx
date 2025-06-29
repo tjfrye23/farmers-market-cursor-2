@@ -33,7 +33,7 @@ export default function MarketDaysTab({
         {marketDays.map((md) => (
           <TableRow key={md.id}>
             <TableCell>{md.location}</TableCell>
-            <TableCell>{new Date(md.date).toLocaleDateString()}</TableCell>
+            <TableCell>{new Date(md.startTime).toLocaleDateString()}</TableCell>
             <TableCell>
               {new Date(md.startTime).toLocaleTimeString([], {
                 hour: '2-digit',

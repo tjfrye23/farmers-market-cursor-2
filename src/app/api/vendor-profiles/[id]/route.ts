@@ -57,7 +57,6 @@ export const GET = withRateLimit(
           select: {
             id: true,
             name: true,
-            price: true,
             imageUrl: true,
           },
         },
@@ -142,7 +141,6 @@ export const PUT = withRateLimit(
               select: {
                 id: true,
                 name: true,
-                price: true,
                 imageUrl: true,
               },
             },

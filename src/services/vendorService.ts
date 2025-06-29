@@ -8,7 +8,7 @@ export async function getVendorOrders(): Promise<Order[]> {
   return res.json()
 }
 
-export async function getVendorMetrics(id: string) {
+export async function getVendorMetrics() {
   // TODO: Replace with real API call or logic
   return {
     totalRevenue: 0,
@@ -19,7 +19,7 @@ export async function getVendorMetrics(id: string) {
 }
 
 export async function updateVendorOrderStatus(
-  orderId: string,
+  orderId: number,
   status: 'processing' | 'processed'
 ): Promise<Order> {
   // The API expects a PUT to /api/orders/[id] with { status }

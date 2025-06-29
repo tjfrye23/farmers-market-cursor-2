@@ -1,23 +1,16 @@
+'use client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { type ReactNode } from 'react'
+import React, { PropsWithChildren, useRef } from 'react'
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
-    },
-  },
-})
-
-interface QueryProviderProps {
-  children: ReactNode
-}
-
-export function QueryProvider({ children }: QueryProviderProps) {
+export default function QueryProvider({ children }: PropsWithChildren) {
+  // Ensure a single QueryClient instance per browser session
+  const queryClientRef = useRef<QueryClient | null>(null)
+  if (!queryClientRef.current) {
+    queryClientRef.current = new QueryClient()
+  }
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClientRef.current}>
       {children}
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

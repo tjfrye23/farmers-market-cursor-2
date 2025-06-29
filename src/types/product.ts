@@ -1,16 +1,25 @@
 // Product type migrated from the other project
-export interface Product {
+export interface UIProduct {
   id: number
   name: string
-  description?: string
-  price: number
-  stock: number
-  category?: string
-  imageUrl?: string
-  vendorProfileId: number
-  createdAt?: string
-  updatedAt?: string
-  unit?: string
-  organic?: boolean
-  local?: boolean
+  description: string | null
+  imageUrl: string
+  category: string
+  vendorId: number
+  vendorName: string
+  unit: string
+  variations: {
+    id: number
+    name: string
+    size: number
+    packaged: boolean
+    symbol: string
+    price: number
+  }[]
+  organic: boolean
+  local: boolean
+}
+
+export interface getShopProductsResponse {
+  products: UIProduct[]
 }

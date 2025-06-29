@@ -13,6 +13,9 @@ export const createMarketDaySchema = z.object({
   maxVendors: z.number().int().positive(),
   status: z.enum(['DRAFT', 'PUBLISHED', 'CANCELLED']),
   organizerId: z.number().int().positive(),
+  onlineStartTime: z.string().datetime(),
+  onlineEndTime: z.string().datetime(),
+  marketScheduleId: z.number().int().positive(),
 })
 
 export const updateMarketDaySchema = createMarketDaySchema.partial()
@@ -64,22 +67,36 @@ export const GET = withRateLimit(
       ...(organizerId && { organizerId: parseInt(organizerId, 10) }),
     }
 
-    const marketDays = await db.marketDay.findMany({
-      where,
-      include: {
-        vendors: {
-          select: {
-            id: true,
-            businessName: true,
+    try {
+      const marketDays = await db.marketDay.findMany({
+        where,
+        include: {
+          vendors: {
+            select: {
+              id: true,
+              businessName: true,
+            },
+          },
+          marketSchedule: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
         },
-      },
-      orderBy: {
-        date: 'asc',
-      },
-    })
+        orderBy: {
+          startTime: 'asc',
+        },
+      })
 
-    return NextResponse.json(marketDays)
+      return NextResponse.json(marketDays)
+    } catch (error) {
+      console.error('Failed to fetch market days:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch market days' },
+        { status: 500 }
+      )
+    }
   },
   { limit: 100, windowMs: 60 * 1000 } // 100 requests per minute
 )

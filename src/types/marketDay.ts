@@ -1,10 +1,13 @@
 export interface MarketDay {
   id: number
-  date: string
   location: string
-  description?: string
+  description: string
+  status: string
   startTime: string
   endTime: string
-  status: string
-  vendors: { id: number; businessName: string }[]
-} 
+  marketScheduleId: number
+  marketSchedule: {
+    id: number
+    name: string
+  }
+}

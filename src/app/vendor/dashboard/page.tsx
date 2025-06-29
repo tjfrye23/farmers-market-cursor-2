@@ -20,34 +20,21 @@ import MarketDaysTab from '@/components/vendor-dashboard/MarketDaysTab'
 import OrderStatusDialog from '@/components/vendor-dashboard/OrderStatusDialog'
 import { useVendorOrders } from '@/hooks/useVendorOrders'
 import { useVendorMetrics } from '@/hooks/useVendorMetrics'
-import { useVendorProfileId } from '@/hooks/useVendorProfileId'
 import { useMarketDays } from '@/hooks/useMarketDays'
 import OrderHistoryTab from '@/components/vendor-dashboard/OrderHistoryTab'
-
-type Product = {
-  id: number
-  name: string
-  description?: string
-  price: number
-  stock: number
-  category?: string
-  imageUrl?: string
-  vendorProfileId: number
-  createdAt?: string
-  updatedAt?: string
-}
+import { UIProduct } from '@/types/product'
 
 export default function VendorDashboardPage() {
-  const { data: session } = useSession({ required: true })
+  const { data: session, status } = useSession<true>({ required: true })
+
   const user = session?.user
+
   const {
     data: products = [],
     isLoading: productsLoading,
     refetch: refetchProducts,
-  } = useVendorProducts(user?.id || '')
+  } = useVendorProducts()
 
-  // Vendor profile ID
-  const { vendorProfileId } = useVendorProfileId(user?.id)
   // Orders
   const {
     orders,
@@ -57,8 +44,8 @@ export default function VendorDashboardPage() {
   // Metrics
   const { metrics, loading: metricsLoading } = useVendorMetrics(user?.id)
   // Market Days
-  const { marketDays, loading: marketDaysLoading } =
-    useMarketDays(vendorProfileId)
+  const { data: marketDays = [], isLoading: marketDaysLoading } =
+    useMarketDays()
 
   // Order status dialog state
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
@@ -69,7 +56,7 @@ export default function VendorDashboardPage() {
   const [isUpdating, setIsUpdating] = useState(false)
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false)
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [editingProduct, setEditingProduct] = useState<UIProduct | null>(null)
 
   // Placeholder state for dialogs
   // TODO: Implement real state and handlers
@@ -110,7 +97,7 @@ export default function VendorDashboardPage() {
     }
   }
 
-  const handleEditProduct = (product: Product) => {
+  const handleEditProduct = (product: UIProduct) => {
     setEditingProduct(product)
     setIsProductDialogOpen(true)
   }
@@ -129,6 +116,22 @@ export default function VendorDashboardPage() {
     } catch {
       toast.error('Failed to delete product')
     }
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="flex h-screen items-center justify-center text-lg">
+        Loading dashboard...
+      </div>
+    )
+  }
+
+  if (!session.user?.vendorProfile || !session.user.vendorProfile.id) {
+    return (
+      <div className="flex h-screen items-center justify-center text-lg">
+        Please create a vendor profile to view the dashboard.
+      </div>
+    )
   }
 
   return (
@@ -187,7 +190,7 @@ export default function VendorDashboardPage() {
             />
           </TabsContent>
           <TabsContent value="schedules">
-            <MarketSchedulesTable vendorProfileId={vendorProfileId} />
+            <MarketSchedulesTable />
           </TabsContent>
         </Tabs>
       </section>

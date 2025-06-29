@@ -2,16 +2,17 @@ import ProductList from '@/components/product/ProductList'
 import ProductDialog from '@/components/product/ProductDialog'
 import { Button } from '@/components/ui/button'
 import { PlusCircle } from 'lucide-react'
+import { UIProduct } from '@/types/product'
 
 interface ProductsTabProps {
-  products: any[]
+  products: UIProduct[]
   loading: boolean
-  onEdit: (product: any) => void
+  onEdit: (product: UIProduct) => void
   onAdd: () => void
   onDelete: (productId: number) => void
   isDialogOpen: boolean
   setDialogOpen: (open: boolean) => void
-  editingProduct: any
+  editingProduct: UIProduct | null
   onResetForm: () => void
 }
 

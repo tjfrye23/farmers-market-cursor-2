@@ -84,8 +84,10 @@ export const GET = withRateLimit(
       where: {
         orderItems: {
           some: {
-            product: {
-              vendorProfileId: vendorProfile.id,
+            marketDayProduct: {
+              group: {
+                product: { vendorProfileId: vendorProfile.id },
+              },
             },
           },
         },
@@ -94,13 +96,21 @@ export const GET = withRateLimit(
         user: { select: { name: true, email: true } },
         orderItems: {
           where: {
-            product: {
-              vendorProfileId: vendorProfile.id,
+            marketDayProduct: {
+              group: {
+                product: { vendorProfileId: vendorProfile.id },
+              },
             },
           },
           include: {
-            product: {
-              select: { name: true, imageUrl: true, vendorProfileId: true },
+            marketDayProduct: {
+              include: {
+                group: {
+                  include: {
+                    product: { select: { vendorProfileId: true } },
+                  },
+                },
+              },
             },
           },
         },
@@ -182,7 +192,17 @@ export const POST = withRateLimit(
       where: { id: orderId },
       include: {
         orderItems: {
-          include: { product: { select: { vendorProfileId: true } } },
+          include: {
+            marketDayProduct: {
+              include: {
+                group: {
+                  include: {
+                    product: { select: { vendorProfileId: true } },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     })
@@ -190,7 +210,8 @@ export const POST = withRateLimit(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
     const vendorOrderItems = order.orderItems.filter(
-      (item) => item.product.vendorProfileId === vendorProfile.id
+      (item) =>
+        item.marketDayProduct.group.product.vendorProfileId === vendorProfile.id
     )
     if (vendorOrderItems.length === 0) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

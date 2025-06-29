@@ -4,15 +4,16 @@ import { withAuth, withValidation, withRateLimit } from '@/lib/api-handler'
 import { db } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { UIProduct } from '@/types/product'
 
 // Validation schemas
 export const createProductSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
-  description: z.string().optional(),
+  description: z.string(),
   price: z.number().min(0, 'Price must be greater than or equal to 0'),
   stock: z.number().int().min(0, 'Stock must be greater than or equal to 0'),
-  category: z.string().optional(),
-  imageUrl: z.string().url().optional(),
+  category: z.string(),
+  imageUrl: z.string().url(),
 })
 
 export const updateProductSchema = createProductSchema.partial()
@@ -20,55 +21,96 @@ export const updateProductSchema = createProductSchema.partial()
 export type CreateProductInput = z.infer<typeof createProductSchema>
 export type UpdateProductInput = z.infer<typeof updateProductSchema>
 
-/**
- * @api {get} /api/products List Products
- * @apiName GetProducts
- * @apiGroup Products
- * @apiVersion 1.0.0
- *
- * @apiQuery {String} [category] Filter products by category
- * @apiQuery {String} [vendorId] Filter products by vendor ID
- *
- * @apiSuccess {Object[]} products List of products
- * @apiSuccess {Number} products.id Product ID
- * @apiSuccess {String} products.name Product name
- * @apiSuccess {String} [products.description] Product description
- * @apiSuccess {Number} products.price Product price
- * @apiSuccess {Number} products.stock Available stock
- * @apiSuccess {String} [products.category] Product category
- * @apiSuccess {String} [products.imageUrl] Product image URL
- * @apiSuccess {Object} products.vendorProfile Vendor information
- * @apiSuccess {String} products.vendorProfile.businessName Vendor's business name
- *
- * @apiError (429) TooManyRequests Too many requests
- */
-export const GET = withRateLimit(
-  async (req: NextRequest) => {
-    const searchParams = req.nextUrl.searchParams
-    const category = searchParams.get('category')
-    const vendorId = searchParams.get('vendorId')
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams
+    const marketDayId = searchParams.get('marketDayId')
+    const categoryFilter = searchParams.getAll('category')
+    const vendorFilter = searchParams.getAll('vendorId')
 
-    const where = {
-      ...(category && { category }),
-      ...(vendorId && { vendorProfileId: parseInt(vendorId) }),
+    if (!marketDayId) {
+      return NextResponse.json(
+        { error: 'Market day ID is required' },
+        { status: 400 }
+      )
     }
 
-    const products = await db.product.findMany({
-      where,
-      include: {
-        vendorProfile: {
-          select: {
-            businessName: true,
+    // Fetch all product groups for the market day, including product and vendor info
+    const groups = await db.marketDayProductGroup.findMany({
+      where: {
+        marketDayId: parseInt(marketDayId),
+        isActive: true,
+        ...(categoryFilter.length > 0 && {
+          product: {
+            category: {
+              in: categoryFilter,
+            },
           },
+        }),
+        ...(vendorFilter.length > 0 && {
+          product: {
+            vendorProfile: {
+              id: {
+                in: vendorFilter.map(Number),
+              },
+            },
+          },
+        }),
+      },
+      include: {
+        product: {
+          include: {
+            vendorProfile: {
+              select: {
+                id: true,
+                businessName: true,
+              },
+            },
+          },
+        },
+        variations: {
+          include: { productUnit: true },
         },
       },
     })
 
-    return NextResponse.json(products)
-  },
-  { limit: 100, windowMs: 60 * 1000 } // 100 requests per minute
-)
+    const products = groups.map<UIProduct>((group) => {
+      const primary =
+        group.variations.find((u) => u.id === group.primaryOptionId) ||
+        group.variations[0]
 
+      return {
+        id: group.product.id,
+        name: group.product.name,
+        description: group.product.description,
+        price: primary.price,
+        imageUrl: group.product.imageUrl,
+        category: group.product.category,
+        vendorId: group.product.vendorProfile.id,
+        vendorName: group.product.vendorProfile.businessName,
+        unit: primary.productUnit.displayName,
+        organic: group.product.organic,
+        local: group.product.local,
+        variations: group.variations.map((u) => ({
+          id: u.id,
+          name: u.productUnit.name,
+          symbol: u.productUnit.symbol,
+          price: u.price,
+        })),
+      }
+    })
+
+    return NextResponse.json({
+      products,
+    })
+  } catch (error) {
+    console.error('Error fetching market day products:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch market day products' },
+      { status: 500 }
+    )
+  }
+}
 /**
  * @api {post} /api/products Create Product
  * @apiName CreateProduct
@@ -109,14 +151,9 @@ export const POST = withRateLimit(
         return new NextResponse('Unauthorized', { status: 401 })
       }
 
-      const userId = parseInt(session.user.id)
-      if (isNaN(userId)) {
-        return new NextResponse('Invalid user ID', { status: 400 })
-      }
-      
       // Get the vendor profile for the current user
       const vendorProfile = await db.vendorProfile.findUnique({
-        where: { userId },
+        where: { userId: session.user.id },
       })
 
       if (!vendorProfile) {

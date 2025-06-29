@@ -6,11 +6,12 @@ import { db } from '@/lib/prisma'
 // Validation schemas
 export const createVendorProfileSchema = z.object({
   businessName: z.string().min(1),
-  description: z.string().optional(),
-  contactEmail: z.string().email(),
+  description: z.string(),
+  email: z.string().email(),
   contactPhone: z.string().optional(),
   address: z.string().optional(),
   userId: z.number().int().positive(),
+  headerImageUrl: z.string(),
 })
 
 export const updateVendorProfileSchema = createVendorProfileSchema.partial()
@@ -66,7 +67,6 @@ export const GET = withRateLimit(
           select: {
             id: true,
             name: true,
-            price: true,
             imageUrl: true,
           },
         },
