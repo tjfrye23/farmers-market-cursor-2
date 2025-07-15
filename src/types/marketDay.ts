@@ -5,9 +5,8 @@ export interface MarketDay {
   status: string
   startTime: string
   endTime: string
-  marketScheduleId: number
+  name: string
   marketSchedule: {
     id: number
-    name: string
   }
 }

@@ -4,7 +4,7 @@ import { withAuth, withValidation, withRateLimit } from '@/lib/api-handler'
 import { db } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { UIProduct } from '@/types/product'
+import { ClientProduct } from '@/types/product'
 
 // Validation schemas
 export const createProductSchema = z.object({
@@ -35,8 +35,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Fetch all product groups for the market day, including product and vendor info
-    const groups = await db.marketDayProductGroup.findMany({
+    // Fetch all market day products for the market day, including product and vendor info
+    const products = await db.marketDayProduct.findMany({
       where: {
         marketDayId: parseInt(marketDayId),
         isActive: true,
@@ -69,39 +69,41 @@ export async function GET(request: NextRequest) {
           },
         },
         variations: {
-          include: { productUnit: true },
+          include: { productVariation: true },
         },
       },
     })
 
-    const products = groups.map<UIProduct>((group) => {
-      const primary =
-        group.variations.find((u) => u.id === group.primaryOptionId) ||
-        group.variations[0]
+    const result = products.map((product): ClientProduct => {
+      const primary = product.variations[0]
 
       return {
-        id: group.product.id,
-        name: group.product.name,
-        description: group.product.description,
+        id: product.product.id,
+        name: product.product.name,
+        description: product.product.description,
         price: primary.price,
-        imageUrl: group.product.imageUrl,
-        category: group.product.category,
-        vendorId: group.product.vendorProfile.id,
-        vendorName: group.product.vendorProfile.businessName,
-        unit: primary.productUnit.displayName,
-        organic: group.product.organic,
-        local: group.product.local,
-        variations: group.variations.map((u) => ({
-          id: u.id,
-          name: u.productUnit.name,
-          symbol: u.productUnit.symbol,
-          price: u.price,
-        })),
+        imageUrl: product.product.imageUrl,
+        category: product.product.category,
+        vendorId: product.product.vendorProfile.id,
+        vendorName: product.product.vendorProfile.businessName,
+        unit: primary.productVariation.unit,
+        organic: product.product.organic,
+        local: product.product.local,
+        variations: product.variations.map(
+          (v): ClientProduct['variations'][number] => ({
+            id: v.id,
+            name: v.productVariation.name,
+            size: v.productVariation.size,
+            packaged: v.productVariation.packaged,
+            unit: v.productVariation.unit,
+            price: v.price,
+          })
+        ),
       }
     })
 
     return NextResponse.json({
-      products,
+      products: result,
     })
   } catch (error) {
     console.error('Error fetching market day products:', error)

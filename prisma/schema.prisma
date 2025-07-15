@@ -29,12 +29,14 @@ model User {
   session       Session[]
   vendorProfile VendorProfile?
   carts         Cart[] //
+  favorites     Favorite[]
 }
 
 model VendorProfile {
   id              Int      @id @default(autoincrement())
   businessName    String
   description     String   @db.Text
+  specialty       String
   phone           String?
   email           String
   headerImageUrl  String
@@ -46,6 +48,7 @@ model VendorProfile {
   websiteUrl      String?
   youtubeHandle   String?
   twitterHandle   String?
+  status          String
 
   userId Int @unique
 
@@ -58,7 +61,7 @@ model VendorProfile {
 model Product {
   id          Int      @id @default(autoincrement())
   name        String
-  description String  @db.Text
+  description String   @db.Text
   category    String
   imageUrl    String
   organic     Boolean  @default(false)
@@ -68,8 +71,22 @@ model Product {
 
   vendorProfileId Int
 
-  vendorProfile         VendorProfile           @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
-  marketDayProductGroup MarketDayProductGroup[]
+  vendorProfile     VendorProfile      @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
+  favorites         Favorite[]
+  variations        ProductVariation[]
+  marketDayProducts MarketDayProduct[]
+}
+
+model ProductVariation {
+  id                  Int                         @id @default(autoincrement())
+  name                String
+  price               Float
+  size                Int
+  packaged            Boolean
+  unit                String
+  productId           Int
+  product             Product                     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  marketDayVariations MarketDayProductVariation[]
 }
 
 model Order {
@@ -117,11 +134,11 @@ model MarketDay {
 
   marketScheduleId Int
 
-  marketSchedule        MarketSchedule          @relation(fields: [marketScheduleId], references: [id], onDelete: Cascade)
-  vendors               VendorProfile[]
-  orders                Order[]
-  carts                 Cart[]
-  marketDayProductGroup MarketDayProductGroup[]
+  marketSchedule    MarketSchedule     @relation(fields: [marketScheduleId], references: [id], onDelete: Cascade)
+  vendors           VendorProfile[]
+  orders            Order[]
+  carts             Cart[]
+  marketDayProducts MarketDayProduct[]
 }
 
 // TODO: Figure out how to think about interval scheduling
@@ -130,7 +147,7 @@ model MarketSchedule {
   reoccurring     Boolean
   name            String
   location        String
-  description     String?  @db.Text
+  description     String  @db.Text
   startTime       DateTime
   endTime         DateTime
   onlineStartTime DateTime
@@ -184,7 +201,7 @@ model VerificationToken {
 model ProductUnit {
   id          Int      @id @default(autoincrement())
   name        String   @unique // e.g., "lb", "ea", "bag", "dozen"
-  pluralName  String   // e.g., "lbs", "units", "s", "dozen"
+  pluralName  String // e.g., "lbs", "units", "s", "dozen"
   displayName String // e.g., "Pound", "Each", "Bag", "Dozen"
   symbol      String   @unique // e.g., "$/lb", "$/ea", "$/bag"
   createdAt   DateTime @default(now())
@@ -194,43 +211,39 @@ model ProductUnit {
   orderItems        OrderItem[]
 }
 
-model MarketDayProductGroup {
-  id              Int      @id @default(autoincrement())
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  primaryOptionId Int? // Reference to the default MarketDayProduct to show on the shop page
-
-  marketDayId Int
-  productId   Int
-
-  variations MarketDayProduct[]
-  marketDay   MarketDay          @relation(fields: [marketDayId], references: [id], onDelete: Cascade)
-  product     Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([marketDayId, productId])
-}
-
 model MarketDayProduct {
   id        Int      @id @default(autoincrement())
-  price     Float
-  size      Int
-  quantity  Int
-  packaged  Boolean
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  productUnitId Int
-  marketDayId   Int
-  groupId       Int
+  marketDayId Int
+  productId   Int
 
-  productUnit ProductUnit           @relation(fields: [productUnitId], references: [id])
-  orderItems  OrderItem[]
-  group       MarketDayProductGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  cartItem    CartItem[]
+  marketDay     MarketDay                   @relation(fields: [marketDayId], references: [id], onDelete: Cascade)
+  product       Product                     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variations    MarketDayProductVariation[]
+  OrderItem     OrderItem[]
+  ProductUnit   ProductUnit?                @relation(fields: [productUnitId], references: [id])
+  productUnitId Int?
+  CartItem      CartItem[]
+}
 
-  @@unique([groupId, productUnitId])
+model MarketDayProductVariation {
+  id        Int      @id @default(autoincrement())
+  price     Float
+  quantity  Int
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  marketDayProductId Int
+  productVariationId Int
+
+  marketDayProduct MarketDayProduct @relation(fields: [marketDayProductId], references: [id], onDelete: Cascade)
+  productVariation ProductVariation @relation(fields: [productVariationId], references: [id], onDelete: Cascade)
+
+  @@unique([marketDayProductId, productVariationId])
 }
 
 model Cart {
@@ -261,4 +274,16 @@ model CartItem {
   marketDayProduct MarketDayProduct @relation(fields: [marketDayProductId], references: [id])
 
   @@unique([cartId, marketDayProductId])
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  productId Int
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
 }

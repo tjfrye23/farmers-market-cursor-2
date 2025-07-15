@@ -1,17 +1,23 @@
-'use client'
-
+import { getVendorsPaginated } from '@/data/vendors'
 import PageHeader from '@/components/PageHeader'
 import VendorCard from '@/components/VendorCard'
 import { Button } from '@/components/ui/button'
-import { useVendors } from '@/hooks/useVendors'
 import Image from 'next/image'
 
-export default function VendorsPage() {
-  const { vendors, isLoading, error } = useVendors()
+interface VendorsPageProps {
+  searchParams: Promise<{ page?: string; search?: string }>
+}
+
+export default async function VendorsPage({ searchParams }: VendorsPageProps) {
+  const page = Number((await searchParams).page) || 1
+  const pageSize = 12
+  const search = (await searchParams).search || ''
+
+  const { vendors, total } = await getVendorsPaginated(page, pageSize, search)
+  const totalPages = Math.ceil(total / pageSize)
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* TODO: Add Navbar if needed */}
       <main className="flex-grow">
         <PageHeader
           title="Meet Our Vendors"
@@ -31,23 +37,64 @@ export default function VendorsPage() {
                 market. Get to know the people who grow your food!
               </p>
             </div>
-            {isLoading ? (
-              <div className="flex h-48 items-center justify-center">
-                <span className="mr-2 animate-spin">🌀</span>
-                <span>Loading vendors...</span>
-              </div>
-            ) : error ? (
-              <div className="text-center text-red-500">{error}</div>
-            ) : vendors.length === 0 ? (
+            {vendors.length === 0 ? (
               <div className="flex h-48 items-center justify-center text-lg text-gray-500">
                 Sorry, we have no vendors to show at the moment.
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {vendors.map((vendor) => (
-                  <VendorCard key={vendor.id} {...vendor} />
-                ))}
-              </div>
+              <>
+                {/* Search Form */}
+                <form
+                  className="mb-6 flex justify-center"
+                  action=""
+                  method="get"
+                >
+                  <input
+                    type="text"
+                    name="search"
+                    defaultValue={search}
+                    placeholder="Search vendors..."
+                    className="w-64 rounded-l border px-3 py-2"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-market-green rounded-r px-4 py-2 text-white"
+                  >
+                    Search
+                  </button>
+                </form>
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                  {vendors.map((vendor) => (
+                    <VendorCard
+                      key={vendor.id}
+                      id={vendor.id}
+                      ownerName={vendor.businessName}
+                      vendorName={vendor.businessName}
+                      location={vendor.address ?? null}
+                      imageUrl={vendor.headerImageUrl}
+                      specialty={vendor.description}
+                    />
+                  ))}
+                </div>
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="mt-8 flex flex-wrap justify-center gap-2">
+                    {Array.from({ length: totalPages }).map((_, i) => (
+                      <a
+                        key={i}
+                        href={`?search=${encodeURIComponent(search)}&page=${i + 1}`}
+                        className={`rounded border px-3 py-1 text-sm transition-colors ${
+                          i + 1 === page
+                            ? 'bg-market-green border-market-green text-white'
+                            : 'text-market-green border-market-green hover:bg-market-green bg-white hover:text-white'
+                        }`}
+                      >
+                        {i + 1}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </section>
           <section className="bg-market-brown-light/20 mb-16 rounded-lg p-8">

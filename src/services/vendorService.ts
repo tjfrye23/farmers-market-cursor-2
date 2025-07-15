@@ -1,23 +1,5 @@
 import { Order } from '../types/order'
 
-export async function getVendorOrders(): Promise<Order[]> {
-  const res = await fetch(`/api/vendor/orders`)
-  if (!res.ok) {
-    throw new Error('Failed to fetch orders')
-  }
-  return res.json()
-}
-
-export async function getVendorMetrics() {
-  // TODO: Replace with real API call or logic
-  return {
-    totalRevenue: 0,
-    totalOrders: 0,
-    avgOrderValue: 0,
-    monthlyRevenue: [],
-  }
-}
-
 export async function updateVendorOrderStatus(
   orderId: number,
   status: 'processing' | 'processed'

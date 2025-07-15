@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from 'next/link'
 
 export default function Home() {
   return (
@@ -11,7 +11,7 @@ export default function Home() {
         </p>
         <div className="space-x-4">
           <Link
-            href="/products"
+            href="/shop"
             className="rounded-md bg-green-600 px-6 py-3 text-white hover:bg-green-700"
           >
             Browse Products
@@ -49,5 +49,5 @@ export default function Home() {
         </div>
       </section>
     </div>
-  );
+  )
 }

@@ -1,35 +1,13 @@
-import { useState, useEffect } from 'react'
 import { CheckCircle, Clock, AlertTriangle } from 'lucide-react'
+import { ClientVendor } from '@/types/vendors'
 
 interface ProfileStatusBannerProps {
-  userId: number
-}
-
-interface VendorProfile {
-  id: number
-  status: string
-  businessName: string
-  // Add other fields as needed
+  vendorProfile: ClientVendor
 }
 
 export default function ProfileStatusBanner({
-  userId,
+  vendorProfile,
 }: ProfileStatusBannerProps) {
-  const [profile, setProfile] = useState<VendorProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (!userId) return
-    setLoading(true)
-    fetch(`/api/vendor-profiles?userId=${userId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setProfile(data[0] || null)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
-  }, [userId])
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'active':
@@ -56,30 +34,26 @@ export default function ProfileStatusBanner({
     }
   }
 
-  if (loading || !profile) {
-    return null
-  }
-
   return (
     <div
-      className={`mb-6 flex items-center gap-3 rounded-lg border p-4 ${getStatusColor(profile.status || 'pending')}`}
+      className={`mb-6 flex items-center gap-3 rounded-lg border p-4 ${getStatusColor(vendorProfile.status || 'pending')}`}
     >
-      {getStatusIcon(profile.status || 'pending')}
+      {getStatusIcon(vendorProfile.status || 'pending')}
       <div>
         <p className="font-medium">
           Profile Status:{' '}
-          {profile.status === 'active'
+          {vendorProfile.status === 'active'
             ? 'Active'
-            : profile.status === 'pending'
+            : vendorProfile.status === 'pending'
               ? 'Pending Review'
               : 'Rejected'}
         </p>
         <p className="text-sm">
-          {profile.status === 'active' &&
+          {vendorProfile.status === 'active' &&
             'Your profile is approved and products are visible to customers.'}
-          {profile.status === 'pending' &&
+          {vendorProfile.status === 'pending' &&
             'Your profile is under admin review. Products will be visible once approved.'}
-          {profile.status === 'rejected' &&
+          {vendorProfile.status === 'rejected' &&
             'Your profile was rejected. Please contact support for more information.'}
         </p>
       </div>

@@ -7,11 +7,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { useMarketSchedules } from '@/hooks/useMarketSchedules'
+import { MarketSchedule } from '@/types/marketSchedule'
 
-export function MarketSchedulesTable() {
-  const { marketSchedules, loading } = useMarketSchedules()
+interface MarketSchedulesTableProps {
+  marketSchedules: MarketSchedule[]
+  loading?: boolean
+}
 
+export function MarketSchedulesTable({
+  marketSchedules,
+  loading,
+}: MarketSchedulesTableProps) {
   if (loading) {
     return <div>Loading market schedules...</div>
   }
@@ -35,14 +41,18 @@ export function MarketSchedulesTable() {
         {marketSchedules.map((ms) => (
           <TableRow key={ms.id}>
             <TableCell>{ms.name}</TableCell>
-            <TableCell>{ms.dayOfWeek}</TableCell>
             <TableCell>
-              {ms.startTime.toLocaleTimeString([], {
+              {new Date(ms.startDate).toLocaleDateString('en-US', {
+                weekday: 'long',
+              })}
+            </TableCell>
+            <TableCell>
+              {ms.startDate.toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit',
               })}
               {' - '}
-              {ms.endTime.toLocaleTimeString([], {
+              {ms.endDate.toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit',
               })}

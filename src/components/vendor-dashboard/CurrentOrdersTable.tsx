@@ -51,7 +51,7 @@ export default function CurrentOrdersTable({
       <TableBody>
         {orders.map((order) => (
           <TableRow key={order.id}>
-            <TableCell>{order.orderNumber ?? order.id}</TableCell>
+            <TableCell>{order.id}</TableCell>
             <TableCell>
               {order.date ? new Date(order.date).toLocaleDateString() : ''}
             </TableCell>

@@ -1,5 +1,4 @@
-// Product type migrated from the other project
-export interface UIProduct {
+export interface ClientProduct {
   id: number
   name: string
   description: string | null
@@ -8,18 +7,30 @@ export interface UIProduct {
   vendorId: number
   vendorName: string
   unit: string
+  price: number
   variations: {
     id: number
     name: string
     size: number
     packaged: boolean
-    symbol: string
+    unit: string
     price: number
   }[]
   organic: boolean
   local: boolean
 }
 
+export type ClientProductSimple = Omit<
+  ClientProduct,
+  'variations' | 'price' | 'unit'
+>
+
 export interface getShopProductsResponse {
-  products: UIProduct[]
+  products: ClientProduct[]
+}
+
+export function isClientProduct(
+  product: ClientProduct | ClientProductSimple
+): product is ClientProduct {
+  return 'variations' in product
 }

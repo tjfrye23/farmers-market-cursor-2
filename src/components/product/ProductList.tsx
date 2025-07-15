@@ -10,13 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { UIProduct } from '@/types/product'
+import { ClientProduct } from '@/types/product'
 import Image from 'next/image'
 // TODO: Migrate any missing dependencies
 
 interface ProductListProps {
-  products: UIProduct[]
-  onEdit: (product: UIProduct) => void
+  products: ClientProduct[]
+  onEdit: (product: ClientProduct) => void
   isLoading: boolean
   onDelete?: (productId: number) => void // Optional, can be a TODO
 }
@@ -70,6 +70,8 @@ export default function ProductList({
               <TableCell className="flex items-center">
                 {product.imageUrl ? (
                   <Image
+                    width={40}
+                    height={40}
                     src={product.imageUrl}
                     alt={product.name}
                     className="mr-3 h-10 w-10 rounded-full object-cover"

@@ -12,7 +12,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const groupId = parseInt(params.id)
   if (isNaN(groupId)) notFound()
 
-  const group = await db.marketDayProductGroup.findUnique({
+  const group = await db.marketDayProduct.findUnique({
     where: { id: groupId },
     include: {
       product: {
@@ -27,7 +27,7 @@ export default async function ProductDetailPage({ params }: Props) {
       },
       variations: {
         include: {
-          productUnit: true,
+          productVariation: true,
         },
         orderBy: { id: 'asc' },
       },
@@ -36,5 +36,25 @@ export default async function ProductDetailPage({ params }: Props) {
 
   if (!group) notFound()
 
-  return <ProductDetailClient group={group} />
+  // Map variations to expected shape for ProductDetailClient
+  const mappedGroup = {
+    ...group,
+    variations: group.variations.map((v) => ({
+      id: v.id,
+      price: v.price,
+      quantity: v.quantity,
+      isActive: v.isActive,
+      size: v.productVariation.size,
+      packaged: v.productVariation.packaged,
+      productUnit: {
+        id: v.productVariation.id, // No direct ProductUnit, so use variation id
+        name: v.productVariation.unit,
+        pluralName: v.productVariation.unit + 's', // Fallback
+        displayName: v.productVariation.unit,
+        symbol: v.productVariation.unit,
+      },
+    })),
+  }
+
+  return <ProductDetailClient group={mappedGroup} />
 }

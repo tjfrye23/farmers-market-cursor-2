@@ -31,97 +31,159 @@ const updateOrderStatusSchema = z.object({
   status: z.enum(['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED']),
 })
 
-/**
- * @api {get} /api/orders List Orders
- * @apiName GetOrders
- * @apiGroup Orders
- * @apiVersion 1.0.0
- *
- * @apiQuery {String} [userId] Filter orders by user ID
- * @apiQuery {String} [marketDayId] Filter orders by market day ID
- * @apiQuery {String} [status] Filter by status (PENDING, CONFIRMED, COMPLETED, CANCELLED)
- *
- * @apiSuccess {Object[]} orders List of orders
- * @apiSuccess {Number} orders.id Order ID
- * @apiSuccess {Number} orders.userId User ID
- * @apiSuccess {Number} [orders.marketDayId] Market day ID
- * @apiSuccess {String} orders.status Order status
- * @apiSuccess {Number} orders.total Order total
- * @apiSuccess {String} orders.createdAt Order creation date
- * @apiSuccess {Object} orders.user User information
- * @apiSuccess {String} orders.user.name User's name
- * @apiSuccess {String} orders.user.email User's email
- * @apiSuccess {Object[]} orders.orderItems List of order items
- * @apiSuccess {Number} orders.orderItems.id Order item ID
- * @apiSuccess {Number} orders.orderItems.productId Product ID
- * @apiSuccess {Number} orders.orderItems.quantity Quantity
- * @apiSuccess {Number} orders.orderItems.price Price at time of purchase
- * @apiSuccess {Object} orders.orderItems.product Product information
- * @apiSuccess {String} orders.orderItems.product.name Product name
- * @apiSuccess {String} [orders.orderItems.product.imageUrl] Product image URL
- *
- * @apiError (429) TooManyRequests Too many requests
- */
-export const GET = withRateLimit(
-  withAuth(async (req, context) => {
-    const user = context.session?.user
-    if (!user || user.role !== 'vendor' || !user.vendorProfile) {
-      console.log('Forbidden', user)
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-    // Find vendor profile
-    const vendorProfile = await db.vendorProfile.findUnique({
-      where: { id: user.vendorProfile?.id },
-      select: { id: true },
-    })
+// /**
+//  * @api {get} /api/orders List Orders
+//  * @apiName GetOrders
+//  * @apiGroup Orders
+//  * @apiVersion 1.0.0
+//  *
+//  * @apiQuery {String} [userId] Filter orders by user ID
+//  * @apiQuery {String} [marketDayId] Filter orders by market day ID
+//  * @apiQuery {String} [status] Filter by status (PENDING, CONFIRMED, COMPLETED, CANCELLED)
+//  *
+//  * @apiSuccess {Object[]} orders List of orders
+//  * @apiSuccess {Number} orders.id Order ID
+//  * @apiSuccess {Number} orders.userId User ID
+//  * @apiSuccess {Number} [orders.marketDayId] Market day ID
+//  * @apiSuccess {String} orders.status Order status
+//  * @apiSuccess {Number} orders.total Order total
+//  * @apiSuccess {String} orders.createdAt Order creation date
+//  * @apiSuccess {Object} orders.user User information
+//  * @apiSuccess {String} orders.user.name User's name
+//  * @apiSuccess {String} orders.user.email User's email
+//  * @apiSuccess {Object[]} orders.orderItems List of order items
+//  * @apiSuccess {Number} orders.orderItems.id Order item ID
+//  * @apiSuccess {Number} orders.orderItems.productId Product ID
+//  * @apiSuccess {Number} orders.orderItems.quantity Quantity
+//  * @apiSuccess {Number} orders.orderItems.price Price at time of purchase
+//  * @apiSuccess {Object} orders.orderItems.product Product information
+//  * @apiSuccess {String} orders.orderItems.product.name Product name
+//  * @apiSuccess {String} [orders.orderItems.product.imageUrl] Product image URL
+//  *
+//  * @apiError (429) TooManyRequests Too many requests
+//  */
+// export const GET = withRateLimit(
+//   withAuth(async (req, context) => {
+//     try {
+//       const user = context.session?.user
+//       if (!user || user.role !== 'vendor' || !user.vendorProfile) {
+//         console.log('Forbidden', user)
+//         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+//       }
+//       // Find vendor profile
+//       const vendorProfile = await db.vendorProfile.findUnique({
+//         where: { id: user.vendorProfile?.id },
+//         select: { id: true },
+//       })
 
-    if (!vendorProfile) {
-      return NextResponse.json([], { status: 200 })
-    }
+//       if (!vendorProfile) {
+//         return NextResponse.json([], { status: 200 })
+//       }
 
-    // Find all orders where any orderItem.product.vendorProfileId matches this vendor
-    const orders = await db.order.findMany({
-      where: {
-        orderItems: {
-          some: {
-            marketDayProduct: {
-              group: {
-                product: { vendorProfileId: vendorProfile.id },
-              },
-            },
-          },
-        },
-      },
-      include: {
-        user: { select: { name: true, email: true } },
-        orderItems: {
-          where: {
-            marketDayProduct: {
-              group: {
-                product: { vendorProfileId: vendorProfile.id },
-              },
-            },
-          },
-          include: {
-            marketDayProduct: {
-              include: {
-                group: {
-                  include: {
-                    product: { select: { vendorProfileId: true } },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+//       // Find all orders where any orderItem.product.vendorProfileId matches this vendor
+//       const orders = await db.order.findMany({
+//         where: {
+//           orderItems: {
+//             some: {
+//               marketDayProduct: {
+//                 product: { vendorProfileId: vendorProfile.id },
+//               },
+//             },
+//           },
+//         },
+//         include: {
+//           user: { select: { name: true, email: true } },
+//           marketDay: {
+//             select: {
+//               id: true,
+//               startTime: true,
+//               marketSchedule: {
+//                 select: {
+//                   id: true,
+//                   name: true,
+//                 },
+//               },
+//             },
+//           },
+//           orderItems: {
+//             where: {
+//               marketDayProduct: {
+//                 product: { vendorProfileId: vendorProfile.id },
+//               },
+//             },
+//             include: {
+//               productUnit: true,
+//               marketDayProduct: {
+//                 include: {
+//                   product: {
+//                     select: {
+//                       name: true,
+//                       imageUrl: true,
+//                       vendorProfileId: true,
+//                     },
+//                   },
+//                 },
+//               },
+//             },
+//           },
+//         },
+//         orderBy: { createdAt: 'desc' },
+//       })
 
-    return NextResponse.json(orders)
-  }),
-  { limit: 100, windowMs: 60 * 1000 }
-)
+//       const mappedOrders = orders.map((order) => {
+//         const computedStatus: 'processing' | 'processed' =
+//           order.orderItems.some((item) => item.status === 'processing')
+//             ? 'processing'
+//             : 'processed'
+
+//         const marketDay: Order['marketDay'] = {
+//           id: order.marketDay.id,
+//           name: order.marketDay.marketSchedule.name,
+//           date: order.marketDay.startTime
+//             ? order.marketDay.startTime.toISOString().split('T')[0]
+//             : '',
+//         }
+
+//         let vendorTotal = 0
+//         const orderItems: Order['orderItems'] = order.orderItems.map(
+//           (item): Order['orderItems'][number] => {
+//             vendorTotal += item.price * item.quantity
+//             return {
+//               id: item.id,
+//               quantity: item.quantity,
+//               price: item.price,
+//               unit: item.productUnit.name,
+//               status: item.status,
+//               name: item.marketDayProduct.product.name,
+//               imageUrl: item.marketDayProduct.product.imageUrl,
+//             }
+//           }
+//         )
+
+//         const vendorOrder: Order = {
+//           id: order.id,
+//           date: order.createdAt.toISOString().split('T')[0],
+//           user: order.user,
+//           status: computedStatus,
+//           orderItems,
+//           marketDay,
+//           total: vendorTotal,
+//         }
+
+//         return vendorOrder
+//       })
+
+//       return NextResponse.json(mappedOrders)
+//     } catch (e) {
+//       console.error('Failed to fetch market days:', e)
+//       return NextResponse.json(
+//         { error: 'Failed to fetch market days' },
+//         { status: 500 }
+//       )
+//     }
+//   }),
+//   { limit: 100, windowMs: 60 * 1000 }
+// )
 
 /**
  * @api {post} /api/orders Create Order
@@ -195,11 +257,7 @@ export const POST = withRateLimit(
           include: {
             marketDayProduct: {
               include: {
-                group: {
-                  include: {
-                    product: { select: { vendorProfileId: true } },
-                  },
-                },
+                product: { select: { vendorProfileId: true } },
               },
             },
           },
@@ -211,7 +269,7 @@ export const POST = withRateLimit(
     }
     const vendorOrderItems = order.orderItems.filter(
       (item) =>
-        item.marketDayProduct.group.product.vendorProfileId === vendorProfile.id
+        item.marketDayProduct.product.vendorProfileId === vendorProfile.id
     )
     if (vendorOrderItems.length === 0) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

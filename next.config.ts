@@ -1,5 +1,9 @@
 import type { NextConfig } from 'next'
 
-const nextConfig: NextConfig = {}
+const nextConfig: NextConfig = {
+  experimental: {
+    serverSourceMaps: true,
+  },
+}
 
 export default nextConfig

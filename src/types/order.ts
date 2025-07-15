@@ -1,40 +1,26 @@
-// Order type migrated from the other project
 export interface OrderItem {
   id: number
-  productId: number
   quantity: number
   price: number
-  status:
-    | 'processing'
-    | 'processed'
-    | 'pending'
-    | 'confirmed'
-    | 'completed'
-    | 'cancelled'
-  product: {
-    name: string
-    imageUrl?: string
-    vendorProfileId: number
-  }
+  unit: string
+  status: string
+  name: string
+  imageUrl: string
 }
 
 export interface Order {
   id: number
-  orderNumber?: string
-  date?: string
-  user?: {
+  date: string
+  user: {
     name: string
     email: string
   }
-  status: 'processing' | 'processed'
+  status: string
   orderItems: OrderItem[]
   total: number
-  vendorOrderStatus:
-    | 'processing'
-    | 'processed'
-    | 'pending'
-    | 'confirmed'
-    | 'completed'
-    | 'cancelled'
-  // Add other fields as needed
+  marketDay: {
+    id: number
+    name: string
+    date: string
+  }
 }

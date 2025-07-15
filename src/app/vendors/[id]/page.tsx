@@ -1,60 +1,64 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import { headers } from 'next/headers'
+import { ArrowLeft, Pencil } from 'lucide-react'
 import { VendorHeroImage } from '@/components/vendor-detail/VendorHeroImage'
 import { VendorInfoCard } from '@/components/vendor-detail/VendorInfoCard'
-import { VendorProductsSection } from '@/components/vendor-detail/VendorProductsSection'
+import { VendorProductsSectionClient } from '@/components/vendor-detail/VendorProductsSectionClient'
+import { getVendorById } from '@/data/vendors'
+import { getUserFavoriteProductIds } from '@/data/favorites'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
-async function getBaseUrl() {
-  const h = await headers()
-  const proto = h.get('x-forwarded-proto') || 'http'
-  const host = h.get('host')
-  return `${proto}://${host}`
+interface VendorDetailPageProps {
+  params: { id: string }
+  isProfileView?: boolean
 }
 
-async function getVendor(id: string) {
-  const baseUrl = await getBaseUrl()
-  const res = await fetch(`${baseUrl}/api/vendor-profiles/${id}`, {
-    cache: 'no-store',
-  })
-  if (!res.ok) return null
-  return res.json()
-}
+export default async function VendorDetailPage({
+  params,
+  isProfileView = false,
+}: VendorDetailPageProps) {
+  const vendorId = Number(params.id)
+  const session = await getServerSession(authOptions)
 
-async function getVendorProducts(id: string) {
-  const baseUrl = await getBaseUrl()
-  const res = await fetch(`${baseUrl}/api/products?vendorId=${id}`, {
-    cache: 'no-store',
-  })
-  if (!res.ok) return []
-  return res.json()
-}
+  if (isNaN(vendorId) || !session?.user) return notFound()
 
-export default async function VendorDetailPage(props: {
-  params: Promise<{ id: string }>
-}) {
-  const params = await props.params
-  const vendor = await getVendor(params.id)
-  if (!vendor) return notFound()
-  const products = await getVendorProducts(params.id)
+  const [vendorResult, favorites] = await Promise.all([
+    getVendorById(vendorId),
+    getUserFavoriteProductIds(session?.user?.id),
+  ])
+
+  if (!vendorResult) return notFound()
+
+  const { vendor, products } = vendorResult
+
   const defaultImage = '/images/products/farmer-field.jpeg'
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* TODO: Add Navbar */}
       <main className="flex-grow">
-        <div className="px-4 py-4">
-          <Link href="/vendors">
+        <div className="flex items-center gap-4 px-4 py-4">
+          <Link href={isProfileView ? '/vendor/dashboard' : '/vendors'}>
             <Button variant="outline" className="mb-4">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Vendors
+              {isProfileView ? 'Back to Dashboard' : 'Back to Vendors'}
             </Button>
           </Link>
+          {isProfileView && (
+            <Link href="/vendor/profile/edit">
+              <Button
+                variant="secondary"
+                className="mb-4 flex items-center gap-2"
+              >
+                <Pencil className="h-4 w-4" />
+                Edit Profile
+              </Button>
+            </Link>
+          )}
         </div>
         <VendorHeroImage
-          imageUrl={vendor.imageUrl}
+          imageUrl={vendor.headerImageUrl}
           alt={vendor.businessName}
           defaultImage={defaultImage}
         />
@@ -62,7 +66,7 @@ export default async function VendorDetailPage(props: {
           <div className="relative z-10 mx-auto -mt-16 max-w-4xl">
             <VendorInfoCard
               businessName={vendor.businessName}
-              ownerName={vendor.user?.name}
+              ownerName={vendor.ownerName}
               address={vendor.address}
               specialty={vendor.specialty}
               description={vendor.description}
@@ -72,10 +76,11 @@ export default async function VendorDetailPage(props: {
               twitterHandle={vendor.twitterHandle}
               youtubeHandle={vendor.youtubeHandle}
             />
-            <VendorProductsSection
+            <VendorProductsSectionClient
               products={products}
               businessName={vendor.businessName}
               defaultImage={defaultImage}
+              favorites={favorites}
             />
           </div>
         </div>

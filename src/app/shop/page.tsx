@@ -12,6 +12,7 @@ import { useMarketDays } from '@/hooks/useMarketDays'
 import { useVendors } from '@/hooks/useVendors'
 import { useCategories } from '@/hooks/useCategories'
 import { useMarketDayProducts } from '@/hooks/useMarketDayProducts'
+import { useFavorites } from '@/hooks/useFavorites'
 
 export default function ShopPage() {
   const searchParams = useSearchParams()
@@ -19,6 +20,7 @@ export default function ShopPage() {
   const [selectedMarketDay, setSelectedMarketDay] = useState<number | null>(
     null
   )
+  const { favorites, handleFavoriteChange } = useFavorites()
 
   const {
     categoryFilter,
@@ -70,7 +72,6 @@ export default function ShopPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* TODO: Navbar */}
       <main className="flex-grow">
         <PageHeader title="Market" />
         <div className="container mx-auto px-4 py-8">
@@ -103,12 +104,13 @@ export default function ShopPage() {
                 products={products}
                 isLoading={isProductsLoading}
                 error={error?.message}
+                favorites={favorites}
+                onFavoriteChange={handleFavoriteChange}
               />
             </section>
           </div>
         </div>
       </main>
-      {/* TODO: Footer */}
     </div>
   )
 }
