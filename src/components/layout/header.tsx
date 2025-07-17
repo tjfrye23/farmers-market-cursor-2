@@ -8,19 +8,23 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-
-// TODO: Replace with real cart context/hook
-function useCart() {
-  return { getTotalItems: () => 0 }
-}
+import { useCartActions } from '@/hooks/useCartActions'
+import MarketDaySelector from '@/components/shop/MarketDaySelector'
+import { useMarketDayStore } from '@/stores/useMarketDay'
+import { useMarketDays } from '@/hooks/useMarketDays'
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const { data: session, status } = useSession()
-  const { getTotalItems } = useCart()
-  const cartItemCount = getTotalItems()
+  const { carts } = useCartActions()
+  const cartItemCount = carts.reduce((acc, cart) => acc + cart.items.length, 0)
   const isLoading = status === 'loading'
   const user = session?.user
+
+  // Market day selection logic
+  const { data: marketDays = [], isLoading: isMarketDaysLoading } =
+    useMarketDays(true)
+  const { selectedMarketDay, setSelectedMarketDay } = useMarketDayStore()
 
   // TODO: Replace with real role logic
   const isVendor = user?.role === 'vendor'
@@ -45,6 +49,15 @@ export function Header() {
           </div>
 
           <div className="flex items-center space-x-2">
+            <div className="mr-2 hidden min-w-[180px] md:block">
+              <MarketDaySelector
+                marketDays={marketDays}
+                selectedMarketDay={selectedMarketDay}
+                onSelectMarketDay={setSelectedMarketDay}
+                isLoading={isMarketDaysLoading}
+                variant="compressed"
+              />
+            </div>
             <Link
               href="/cart"
               className="hover:text-market-green relative p-2 text-gray-700 transition-colors"
@@ -53,7 +66,7 @@ export function Header() {
               {cartItemCount > 0 && (
                 <Badge
                   variant="destructive"
-                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center p-0 text-xs"
+                  className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center p-0 text-xs"
                 >
                   {cartItemCount}
                 </Badge>

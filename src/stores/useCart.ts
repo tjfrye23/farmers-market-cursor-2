@@ -1,98 +1,145 @@
+import { ClientCartItem, ClientCart } from '@/types/cart'
+import { ClientMarketDay } from '@/types/marketDay'
 import { create } from 'zustand'
-
-export interface CartItem {
-  productId: number
-  name: string
-  imageUrl: string
-  price: number
-  quantity: number
-  unit: string
-  variationId: number
-}
+import { persist } from 'zustand/middleware'
+import { devtools } from 'zustand/middleware'
 
 interface CartState {
-  items: CartItem[]
-  addToCart: (item: CartItem) => void
-  removeFromCart: (productId: number, variationId: number) => void
-  clearCart: () => void
-  syncCart: () => Promise<void>
+  carts: ClientCart[]
+  addToCart: (item: ClientCartItem, marketDay: ClientMarketDay) => void
+  removeFromCart: (
+    marketDayProductVariationId: number,
+    marketDayId: number
+  ) => void
+  clearCart: (marketDayId: number) => void
+  clearAllCarts: () => void
+  setCarts: (carts: ClientCart[]) => void
 }
 
-function saveCartToLocalStorage(items: CartItem[]) {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('cart', JSON.stringify(items))
-  }
-}
-
-function loadCartFromLocalStorage(): CartItem[] {
-  if (typeof window !== 'undefined') {
-    const data = localStorage.getItem('cart')
-    if (data) return JSON.parse(data)
-  }
-  return []
-}
-
-export const useCart = create<CartState>((set, get) => ({
-  items: [],
-  addToCart: (item) => {
-    set((state) => {
-      const existing = state.items.find(
-        (i) =>
-          i.productId === item.productId && i.variationId === item.variationId
-      )
-      let newItems
-      if (existing) {
-        newItems = state.items.map((i) =>
-          i.productId === item.productId && i.variationId === item.variationId
-            ? { ...i, quantity: i.quantity + item.quantity }
-            : i
-        )
-      } else {
-        newItems = [...state.items, item]
+export const useCart = create<CartState>()(
+  devtools(
+    persist(
+      (set) => ({
+        carts: [],
+        addToCart: (item, marketDay) => {
+          set(
+            (state) => {
+              const existingCart = state.carts.find(
+                (c) => c.marketDay.id === marketDay.id
+              )
+              if (!existingCart) {
+                return addCart(state, marketDay, item)
+              }
+              return updateCart(state, existingCart, marketDay, item)
+            },
+            false,
+            'addToCart'
+          )
+        },
+        removeFromCart: (marketDayProductVariationId, marketDayId) => {
+          set(
+            (state) => {
+              return removeCartItem(
+                state,
+                marketDayId,
+                marketDayProductVariationId
+              )
+            },
+            false,
+            'removeFromCart'
+          )
+        },
+        clearCart: (marketDayId) => {
+          set(
+            (state) => {
+              return removeCart(state, marketDayId)
+            },
+            false,
+            'clearCart'
+          )
+        },
+        clearAllCarts: () => {
+          set(() => ({ carts: [] }), false, 'clearAllCarts')
+        },
+        setCarts: (carts) => set({ carts }, false, 'setCarts'),
+      }),
+      {
+        name: 'cart',
       }
-      saveCartToLocalStorage(newItems)
-      // Optimistically update UI, then sync with backend
-      fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item),
-      })
-      return { items: newItems }
-    })
-  },
-  removeFromCart: (productId, variationId) => {
-    set((state) => {
-      const newItems = state.items.filter(
-        (i) => i.productId !== productId || i.variationId !== variationId
-      )
-      saveCartToLocalStorage(newItems)
-      // Optimistically update UI, then sync with backend
-      fetch(`/api/cart?productId=${productId}&variationId=${variationId}`, {
-        method: 'DELETE',
-      })
-      return { items: newItems }
-    })
-  },
-  clearCart: () => {
-    set(() => {
-      saveCartToLocalStorage([])
-      fetch('/api/cart', { method: 'DELETE' })
-      return { items: [] }
-    })
-  },
-  syncCart: async () => {
-    // Try to fetch cart from backend, fallback to localStorage
-    try {
-      const res = await fetch('/api/cart')
-      if (res.ok) {
-        const data = await res.json()
-        set({ items: data })
-        saveCartToLocalStorage(data)
-      } else {
-        set({ items: loadCartFromLocalStorage() })
-      }
-    } catch {
-      set({ items: loadCartFromLocalStorage() })
+    ),
+    {
+      name: 'CartStore',
+      enabled: process.env.NODE_ENV === 'development',
     }
-  },
-}))
+  )
+)
+
+function updateCartItem(
+  items: ClientCartItem[],
+  newItem: ClientCartItem
+): ClientCartItem[] {
+  return items.map((i) => (i.variationId === newItem.variationId ? newItem : i))
+}
+
+function addCartItem(
+  items: ClientCartItem[],
+  newItem: ClientCartItem
+): ClientCartItem[] {
+  return [...items, newItem]
+}
+
+function removeCartItem(
+  state: CartState,
+  marketDayId: number,
+  variationId: number
+): CartState {
+  const updatedCarts = state.carts
+    .map((c) =>
+      c.marketDay.id === marketDayId
+        ? {
+            ...c,
+            items: c.items.filter((i) => i.variationId !== variationId),
+          }
+        : c
+    )
+    .filter((c) => c.items.length > 0)
+  return { ...state, carts: updatedCarts }
+}
+
+function addCart(
+  state: CartState,
+  marketDay: ClientMarketDay,
+  item: ClientCartItem
+): CartState {
+  return {
+    ...state,
+    carts: [...state.carts, { marketDay, items: [item] }],
+  }
+}
+
+function updateCart(
+  state: CartState,
+  existingCart: ClientCart,
+  marketDay: ClientMarketDay,
+  item: ClientCartItem
+): CartState {
+  const itemExists = existingCart.items.some(
+    (i) => i.variationId === item.variationId
+  )
+  const updatedCarts = state.carts.map((c) =>
+    c.marketDay.id === marketDay.id
+      ? {
+          ...c,
+          items: itemExists
+            ? updateCartItem(c.items, item)
+            : addCartItem(c.items, item),
+        }
+      : c
+  )
+  return { ...state, carts: updatedCarts }
+}
+
+function removeCart(state: CartState, marketDayId: number): CartState {
+  const updatedCarts = state.carts.filter((c) => c.marketDay.id !== marketDayId)
+  return { ...state, carts: updatedCarts }
+}

@@ -15,3 +15,5 @@ export interface ClientVendor {
   ownerName: string
   status: string
 }
+
+export type ClientVendorSimple = Pick<ClientVendor, 'id' | 'businessName'>

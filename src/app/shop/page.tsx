@@ -5,21 +5,18 @@ import { useSearchParams } from 'next/navigation'
 import PageHeader from '@/components/PageHeader'
 import ProductGrid from '@/components/shop/ProductGrid'
 import ShopFilters from '@/components/shop/ShopFilters'
-import MarketDaySelector from '@/components/shop/MarketDaySelector'
 import ShopAvailabilityBanner from '@/components/shop/ShopAvailabilityBanner'
 import { useShopFilters } from '@/hooks/useShopFilters'
-import { useMarketDays } from '@/hooks/useMarketDays'
 import { useVendors } from '@/hooks/useVendors'
 import { useCategories } from '@/hooks/useCategories'
 import { useMarketDayProducts } from '@/hooks/useMarketDayProducts'
 import { useFavorites } from '@/hooks/useFavorites'
+import { useMarketDayStore } from '@/stores/useMarketDay'
 
 export default function ShopPage() {
   const searchParams = useSearchParams()
   const [filterVisible, setFilterVisible] = useState(false)
-  const [selectedMarketDay, setSelectedMarketDay] = useState<number | null>(
-    null
-  )
+  const { selectedMarketDay } = useMarketDayStore()
   const { favorites, handleFavoriteChange } = useFavorites()
 
   const {
@@ -31,15 +28,11 @@ export default function ShopPage() {
     setVendorFilter,
   } = useShopFilters()
 
-  // Fetch market days
-  const { data: marketDays = [], isLoading: isMarketDaysLoading } =
-    useMarketDays()
-
   // Fetch vendors
   const { data: vendors = [] } = useVendors()
 
   // Fetch categories
-  const { data: categories = [] } = useCategories(selectedMarketDay)
+  const { data: categories = [] } = useCategories(selectedMarketDay?.id ?? null)
 
   // Fetch market day product groups
   const {
@@ -50,7 +43,7 @@ export default function ShopPage() {
     categoryFilter,
     vendorFilter,
     priceRange,
-    selectedMarketDay,
+    selectedMarketDay: selectedMarketDay?.id ?? null,
   })
 
   useEffect(() => {
@@ -76,14 +69,6 @@ export default function ShopPage() {
         <PageHeader title="Market" />
         <div className="container mx-auto px-4 py-8">
           <ShopAvailabilityBanner />
-          <div className="mb-6">
-            <MarketDaySelector
-              marketDays={marketDays}
-              selectedMarketDay={selectedMarketDay}
-              onSelectMarketDay={setSelectedMarketDay}
-              isLoading={isMarketDaysLoading}
-            />
-          </div>
           <div className="relative flex flex-col gap-8 lg:flex-row">
             <aside className="lg:w-64 lg:flex-shrink-0">
               <ShopFilters

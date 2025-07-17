@@ -1,5 +1,11 @@
 import { db } from '@/lib/prisma'
-import { ClientProduct, ClientProductSimple } from '@/types/product'
+import {
+  ClientMarketDayProduct,
+  ClientMarketDayProductVariation,
+  ClientProduct,
+  ClientProductSimple,
+  ClientProductVariation,
+} from '@/types/product'
 
 export async function getUserFavoriteProducts(
   userId: number
@@ -24,8 +30,10 @@ export async function getUserFavoriteProducts(
       description: product.description,
       imageUrl: product.imageUrl,
       category: product.category,
-      vendorId: product.vendorProfile.id,
-      vendorName: product.vendorProfile.businessName,
+      vendor: {
+        id: product.vendorProfile.id,
+        businessName: product.vendorProfile.businessName,
+      },
       organic: product.organic,
       local: product.local,
     }
@@ -41,7 +49,11 @@ export async function getVendorProducts(
   const products = await db.product.findMany({
     where: { vendorProfileId },
     include: {
-      variations: true,
+      variations: {
+        include: {
+          unit: true,
+        },
+      },
       vendorProfile: {
         select: {
           id: true,
@@ -58,20 +70,101 @@ export async function getVendorProducts(
       description: product.description,
       imageUrl: product.imageUrl,
       category: product.category,
-      vendorId: product.vendorProfile.id,
-      vendorName: product.vendorProfile.businessName,
+      vendor: {
+        id: product.vendorProfile.id,
+        businessName: product.vendorProfile.businessName,
+      },
       organic: product.organic,
       local: product.local,
       unit: product.variations[0].unit,
       price: product.variations[0].price,
-      variations: product.variations.map((variation) => ({
-        id: variation.id,
-        name: variation.name,
-        size: variation.size,
-        packaged: variation.packaged,
-        unit: variation.unit,
-        price: variation.price,
-      })),
+      variations: product.variations.map<ClientProductVariation>(
+        (variation) => ({
+          id: variation.id,
+          name: variation.name,
+          size: variation.size,
+          packaged: variation.packaged,
+          unit: variation.unit,
+          price: variation.price,
+        })
+      ),
     }
   })
+}
+
+export async function getMarketDayProductById(
+  productId: number
+): Promise<ClientMarketDayProduct | null> {
+  const product = await db.marketDayProduct.findUnique({
+    where: { id: productId },
+    include: {
+      product: {
+        include: {
+          vendorProfile: true,
+        },
+      },
+      marketDay: {
+        include: {
+          marketSchedule: true,
+        },
+      },
+      variations: {
+        include: {
+          productVariation: {
+            include: {
+              unit: true,
+            },
+          },
+        },
+        orderBy: { id: 'asc' },
+      },
+    },
+  })
+
+  if (!product) return null
+
+  product.variations = product?.variations.filter((v) => v.isActive)
+
+  if (product.variations.length === 0) return null
+
+  return {
+    id: product.id,
+    name: product.product.name,
+    description: product.product.description,
+    imageUrl: product.product.imageUrl,
+    category: product.product.category,
+    vendor: {
+      id: product.product.vendorProfile.id,
+      businessName: product.product.vendorProfile.businessName,
+    },
+    organic: product.product.organic,
+    local: product.product.local,
+    unit: product.variations[0].productVariation.unit,
+    price: product.variations[0].price,
+    variations: product.variations.map<ClientMarketDayProductVariation>(
+      (variation) => ({
+        id: variation.id,
+        name: variation.productVariation.name,
+        size: variation.productVariation.size,
+        packaged: variation.productVariation.packaged,
+        unit: variation.productVariation.unit,
+        price: variation.price,
+        quantity: variation.quantity,
+      })
+    ),
+    marketDay: {
+      id: product.marketDay.id,
+      marketSchedule: product.marketDay.marketSchedule,
+      location: product.marketDay.marketSchedule.location,
+      description: product.marketDay.marketSchedule.description,
+      status: product.marketDay.marketSchedule.status,
+      startTime: product.marketDay.marketSchedule.startTime.toISOString(),
+      endTime: product.marketDay.marketSchedule.endTime.toISOString(),
+      onlineStartTime:
+        product.marketDay.marketSchedule.onlineStartTime.toISOString(),
+      onlineEndTime:
+        product.marketDay.marketSchedule.onlineEndTime.toISOString(),
+      name: product.marketDay.marketSchedule.name,
+    },
+  }
 }

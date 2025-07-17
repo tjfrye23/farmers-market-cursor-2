@@ -1,11 +1,16 @@
-import { MarketDay } from '@/types/marketDay'
+import { ClientMarketDay } from '@/types/marketDay'
 import { useQuery } from '@tanstack/react-query'
 
-export const useMarketDays = () => {
-  return useQuery<MarketDay[]>({
-    queryKey: ['marketDays'],
+export const useMarketDays = (active?: boolean) => {
+  return useQuery<ClientMarketDay[]>({
+    queryKey: ['marketDays', { active }],
     queryFn: async () => {
-      const res = await fetch('/api/market-days')
+      const params = new URLSearchParams()
+      if (active) {
+        params.append('active', 'true')
+      }
+      const url = `/api/market-days?${params.toString()}`
+      const res = await fetch(url)
       if (!res.ok) throw new Error('Failed to fetch market days')
       return res.json()
     },

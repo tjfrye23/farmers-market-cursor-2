@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { UIProduct } from '@/types/product'
+import { ClientProduct } from '@/types/product'
 
 interface UseMarketDayProductsParams {
   categoryFilter: string[]
@@ -8,24 +8,20 @@ interface UseMarketDayProductsParams {
   selectedMarketDay: number | null
 }
 
-/**
- * Fetches market day product groups using React Query based on filters and selected market day.
- * @param params categoryFilter, vendorFilter, priceRange, selectedMarketDay
- * @returns React Query result for market day products
- */
 export function useMarketDayProducts({
   categoryFilter,
   vendorFilter,
   priceRange,
   selectedMarketDay,
 }: UseMarketDayProductsParams) {
-  return useQuery<UIProduct[], Error>({
+  return useQuery<ClientProduct[], Error>({
     queryKey: [
       'marketDayProducts',
       { categoryFilter, vendorFilter, priceRange, selectedMarketDay },
     ],
     queryFn: async () => {
       if (!selectedMarketDay) return []
+
       const params = new URLSearchParams()
       params.append('marketDayId', selectedMarketDay.toString())
       if (categoryFilter.length > 0) {

@@ -78,14 +78,17 @@ model Product {
 }
 
 model ProductVariation {
-  id                  Int                         @id @default(autoincrement())
-  name                String
-  price               Float
-  size                Int
-  packaged            Boolean
-  unit                String
-  productId           Int
+  id       Int         @id @default(autoincrement())
+  name     String
+  price    Float
+  size     Int
+  packaged Boolean
+
+  productId     Int
+  productUnitId Int
+
   product             Product                     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  unit     ProductUnit @relation(fields: [productUnitId], references: [id])
   marketDayVariations MarketDayProductVariation[]
 }
 
@@ -107,18 +110,20 @@ model Order {
 model OrderItem {
   id        Int      @id @default(autoincrement())
   quantity  Int
-  price     Float // Price at time of purchase
+  price     Float    // Price at time of purchase
+  packaged  Boolean  // Packaged at time of purchase
+  size      Int      // Size at time of purchase
   status    String   @default("processing")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orderId            Int
-  productUnitId      Int
-  marketDayProductId Int
+  orderId                     Int
+  productUnitId               Int // Unit at time of purchase
+  marketDayProductVariationId Int
 
-  order            Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productUnit      ProductUnit      @relation(fields: [productUnitId], references: [id])
-  marketDayProduct MarketDayProduct @relation(fields: [marketDayProductId], references: [id])
+  order                     Order                     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  unit                      ProductUnit               @relation(fields: [productUnitId], references: [id])
+  marketDayProductVariation MarketDayProductVariation @relation(fields: [marketDayProductVariationId], references: [id])
 }
 
 model MarketDay {
@@ -147,7 +152,7 @@ model MarketSchedule {
   reoccurring     Boolean
   name            String
   location        String
-  description     String  @db.Text
+  description     String   @db.Text
   startTime       DateTime
   endTime         DateTime
   onlineStartTime DateTime
@@ -207,8 +212,8 @@ model ProductUnit {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  marketDayProducts MarketDayProduct[]
-  orderItems        OrderItem[]
+  orderItems       OrderItem[]
+  ProductVariation ProductVariation[]
 }
 
 model MarketDayProduct {
@@ -220,13 +225,9 @@ model MarketDayProduct {
   marketDayId Int
   productId   Int
 
-  marketDay     MarketDay                   @relation(fields: [marketDayId], references: [id], onDelete: Cascade)
-  product       Product                     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variations    MarketDayProductVariation[]
-  OrderItem     OrderItem[]
-  ProductUnit   ProductUnit?                @relation(fields: [productUnitId], references: [id])
-  productUnitId Int?
-  CartItem      CartItem[]
+  marketDay  MarketDay                   @relation(fields: [marketDayId], references: [id], onDelete: Cascade)
+  product    Product                     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variations MarketDayProductVariation[]
 }
 
 model MarketDayProductVariation {
@@ -242,6 +243,8 @@ model MarketDayProductVariation {
 
   marketDayProduct MarketDayProduct @relation(fields: [marketDayProductId], references: [id], onDelete: Cascade)
   productVariation ProductVariation @relation(fields: [productVariationId], references: [id], onDelete: Cascade)
+  CartItem         CartItem[]
+  OrderItem        OrderItem[]
 
   @@unique([marketDayProductId, productVariationId])
 }
@@ -267,13 +270,13 @@ model CartItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  cartId             Int
-  marketDayProductId Int
+  cartId                      Int
+  marketDayProductVariationId Int
 
-  cart             Cart             @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  marketDayProduct MarketDayProduct @relation(fields: [marketDayProductId], references: [id])
+  cart                      Cart                      @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  marketDayProductVariation MarketDayProductVariation @relation(fields: [marketDayProductVariationId], references: [id])
 
-  @@unique([cartId, marketDayProductId])
+  @@unique([cartId, marketDayProductVariationId])
 }
 
 model Favorite {

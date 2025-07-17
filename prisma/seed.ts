@@ -163,10 +163,10 @@ async function main() {
   const marketDay = await prisma.marketDay.create({
     data: {
       description: 'Saturday Market',
-      startTime: new Date('2024-06-15T08:00:00Z'),
-      endTime: new Date('2024-06-15T14:00:00Z'),
-      onlineStartTime: new Date('2024-06-14T08:00:00Z'),
-      onlineEndTime: new Date('2024-06-15T07:59:59Z'),
+      startTime: new Date(new Date().setDate(new Date().getDate() + 2)),
+      endTime: new Date(new Date().setDate(new Date().getDate() + 3)),
+      onlineStartTime: new Date(new Date().setDate(new Date().getDate() - 1)),
+      onlineEndTime: new Date(new Date().setDate(new Date().getDate() + 1)),
       status: 'PUBLISHED',
       marketScheduleId: schedule.id,
     },
@@ -207,7 +207,14 @@ async function main() {
     const productVariations = []
     for (const v of variations) {
       const pv = await prisma.productVariation.create({
-        data: { ...v, productId: product.id, price: Math.random() * 9 + 1 },
+        data: {
+          name: v.name,
+          size: v.size,
+          packaged: v.packaged,
+          productId: product.id,
+          price: Math.random() * 9 + 1,
+          productUnitId: productUnitMap[v.unit],
+        },
       })
       productVariations.push(pv)
     }
@@ -427,12 +434,14 @@ async function main() {
           (p) => p.id === item.marketDayProductId
         )
         const variation = mdp?.variations.find((v) => v.id === item.variationId)
-        const unitName = variation?.productVariation?.unit || 'ea'
-        const productUnitId = productUnitMap[unitName] || productUnitMap['ea']
+        const productUnitId =
+          variation?.productVariation?.productUnitId || productUnitMap['ea']
         await prisma.orderItem.create({
           data: {
             orderId: order.id,
-            marketDayProductId: item.marketDayProductId,
+            marketDayProductVariationId: item.variationId,
+            packaged: variation?.productVariation?.packaged || false,
+            size: variation?.productVariation?.size || 0,
             productUnitId,
             quantity: item.quantity,
             price: item.price,

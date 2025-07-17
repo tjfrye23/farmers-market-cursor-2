@@ -1,97 +1,119 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { db } from '@/lib/prisma'
+import { z } from 'zod'
+import { ClientCart } from '@/types/cart'
+import {
+  getCart,
+  getCarts,
+  upsertCartWithItems,
+  deleteCartItem,
+  deleteAllCarts,
+  deleteAllCartItems,
+} from '@/data/carts'
 
-// Assumes you have Cart and CartItem models in your Prisma schema
+const UpdateCartSchema = z.object({
+  marketDayId: z.number(),
+  marketDayProductVariationIds: z.array(z.number()),
+  quantities: z.array(z.number().int().min(1)),
+})
 
-export async function GET() {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
-    return NextResponse.json([], { status: 200 })
-  }
-  const cart = await db.cart.findUnique({
-    where: { userId: session.user.id },
-    include: { items: true },
-  })
-  return NextResponse.json(cart?.items || [])
-}
+export type UpdateCartRequest = z.infer<typeof UpdateCartSchema>
 
-export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  const data = await req.json()
-  // Upsert cart and item
-  let cart = await db.cart.upsert({
-    where: { userId: session.user.id },
-    update: {},
-    create: { userId: session.user.id },
-  })
-  // Upsert item (by productId + variationId)
-  await db.cartItem.upsert({
-    where: {
-      cartId_productId_variationId: {
-        cartId: cart.id,
-        productId: data.productId,
-        variationId: data.variationId,
-      },
-    },
-    update: {
-      quantity: { increment: data.quantity },
-    },
-    create: {
-      cartId: cart.id,
-      productId: data.productId,
-      variationId: data.variationId,
-      name: data.name,
-      imageUrl: data.imageUrl,
-      price: data.price,
-      quantity: data.quantity,
-      unit: data.unit,
-    },
-  })
-  // Return updated cart
-  cart = await db.cart.findUnique({
-    where: { userId: session.user.id },
-    include: { items: true },
-  })
-  return NextResponse.json(cart?.items || [])
-}
+export async function GET(): Promise<NextResponse<ClientCart[]>> {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json([], { status: 200 })
+    }
 
-export async function DELETE(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  const url = new URL(req.url)
-  const productId = url.searchParams.get('productId')
-  const variationId = url.searchParams.get('variationId')
-  let cart = await db.cart.findUnique({
-    where: { userId: session.user.id },
-    include: { items: true },
-  })
-  if (!cart) {
-    return NextResponse.json([], { status: 200 })
-  }
-  if (productId && variationId) {
-    // Remove a single item
-    await db.cartItem.deleteMany({
-      where: {
-        cartId: cart.id,
-        productId: Number(productId),
-        variationId: Number(variationId),
-      },
+    const carts = await getCarts(session.user.id)
+    return NextResponse.json(carts)
+  } catch (error) {
+    console.error('GET /api/cart error:', error)
+    return NextResponse.json([], {
+      status: 500,
+      statusText: 'Internal Server Error',
     })
-  } else {
-    // Clear all items
-    await db.cartItem.deleteMany({ where: { cartId: cart.id } })
   }
-  // Return updated cart
-  cart = await db.cart.findUnique({
-    where: { userId: session.user.id },
-    include: { items: true },
-  })
-  return NextResponse.json(cart?.items || [])
+}
+
+export async function POST(
+  req: NextRequest
+): Promise<NextResponse<ClientCart | { error: string }>> {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const data = await req.json()
+    const parse = UpdateCartSchema.safeParse(data)
+    if (!parse.success) {
+      return NextResponse.json(
+        { error: 'Invalid payload', details: parse.error.flatten() },
+        { status: 400 }
+      )
+    }
+    const { marketDayId, marketDayProductVariationIds, quantities } = parse.data
+
+    await upsertCartWithItems(
+      session.user.id,
+      marketDayId,
+      marketDayProductVariationIds,
+      quantities
+    )
+    const updatedCart = await getCart(session.user.id, marketDayId)
+    if (!updatedCart) {
+      return NextResponse.json({ error: 'Cart not found' }, { status: 404 })
+    }
+
+    return NextResponse.json(updatedCart)
+  } catch (error) {
+    console.error('POST /api/cart error:', error)
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(
+  req: NextRequest
+): Promise<NextResponse<ClientCart | null | { error: string }>> {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const url = new URL(req.url)
+    const marketDayId = url.searchParams.get('marketDayId')
+    const marketDayProductVariationId = url.searchParams.get(
+      'marketDayProductVariationId'
+    )
+
+    if (!marketDayId) {
+      await deleteAllCarts(session.user.id)
+      return NextResponse.json(null)
+    }
+
+    if (!marketDayProductVariationId) {
+      await deleteAllCartItems(session.user.id, Number(marketDayId))
+    } else {
+      await deleteCartItem(
+        session.user.id,
+        Number(marketDayId),
+        Number(marketDayProductVariationId)
+      )
+    }
+
+    const clientCart = await getCart(session.user.id, Number(marketDayId))
+
+    return NextResponse.json(clientCart)
+  } catch (error) {
+    console.error('DELETE /api/cart error:', error)
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    )
+  }
 }

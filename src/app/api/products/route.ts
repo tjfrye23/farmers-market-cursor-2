@@ -21,7 +21,9 @@ export const updateProductSchema = createProductSchema.partial()
 export type CreateProductInput = z.infer<typeof createProductSchema>
 export type UpdateProductInput = z.infer<typeof updateProductSchema>
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest
+): Promise<NextResponse<{ products: ClientProduct[] } | { error: string }>> {
   try {
     const searchParams = request.nextUrl.searchParams
     const marketDayId = searchParams.get('marketDayId')
@@ -69,7 +71,13 @@ export async function GET(request: NextRequest) {
           },
         },
         variations: {
-          include: { productVariation: true },
+          include: {
+            productVariation: {
+              include: {
+                unit: true,
+              },
+            },
+          },
         },
       },
     })
@@ -84,8 +92,10 @@ export async function GET(request: NextRequest) {
         price: primary.price,
         imageUrl: product.product.imageUrl,
         category: product.product.category,
-        vendorId: product.product.vendorProfile.id,
-        vendorName: product.product.vendorProfile.businessName,
+        vendor: {
+          id: product.product.vendorProfile.id,
+          businessName: product.product.vendorProfile.businessName,
+        },
         unit: primary.productVariation.unit,
         organic: product.product.organic,
         local: product.product.local,
@@ -113,71 +123,64 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-/**
- * @api {post} /api/products Create Product
- * @apiName CreateProduct
- * @apiGroup Products
- * @apiVersion 1.0.0
- * @apiDescription Create a new product. Requires authentication.
- *
- * @apiHeader {String} Authorization Bearer token for authentication
- *
- * @apiBody {String} name Product name
- * @apiBody {String} [description] Product description
- * @apiBody {Number} price Product price (must be positive)
- * @apiBody {Number} stock Available stock (must be non-negative)
- * @apiBody {String} [category] Product category
- * @apiBody {String} [imageUrl] Product image URL
- * @apiBody {Number} vendorProfileId ID of the vendor profile
- *
- * @apiSuccess (201) {Object} product Created product
- * @apiSuccess {Number} product.id Product ID
- * @apiSuccess {String} product.name Product name
- * @apiSuccess {String} [product.description] Product description
- * @apiSuccess {Number} product.price Product price
- * @apiSuccess {Number} product.stock Available stock
- * @apiSuccess {String} [product.category] Product category
- * @apiSuccess {String} [product.imageUrl] Product image URL
- * @apiSuccess {Object} product.vendorProfile Vendor information
- * @apiSuccess {String} product.vendorProfile.businessName Vendor's business name
- *
- * @apiError (400) ValidationError Invalid input data
- * @apiError (401) Unauthorized Authentication required
- * @apiError (429) TooManyRequests Too many requests
- */
+
 export const POST = withRateLimit(
   withAuth(
-    withValidation(createProductSchema, async (req, data) => {
-      const session = await getServerSession(authOptions)
-      if (!session?.user) {
-        return new NextResponse('Unauthorized', { status: 401 })
-      }
+    withValidation(
+      createProductSchema,
+      async (
+        req,
+        data
+      ): Promise<NextResponse<ClientProduct | { error: string }>> => {
+        const session = await getServerSession(authOptions)
+        if (!session?.user) {
+          return new NextResponse('Unauthorized', { status: 401 })
+        }
 
-      // Get the vendor profile for the current user
-      const vendorProfile = await db.vendorProfile.findUnique({
-        where: { userId: session.user.id },
-      })
+        // Get the vendor profile for the current user
+        const vendorProfile = await db.vendorProfile.findUnique({
+          where: { userId: session.user.id },
+        })
 
-      if (!vendorProfile) {
-        return new NextResponse('Vendor profile not found', { status: 404 })
-      }
+        if (!vendorProfile) {
+          return new NextResponse('Vendor profile not found', { status: 404 })
+        }
 
-      const product = await db.product.create({
-        data: {
-          ...data,
-          vendorProfileId: vendorProfile.id,
-        },
-        include: {
-          vendorProfile: {
-            select: {
-              businessName: true,
-            },
+        const product = await db.product.create({
+          data: {
+            ...data,
+            vendorProfileId: vendorProfile.id,
           },
-        },
-      })
+          include: {
+            vendorProfile: true,
+          },
+        })
 
-      return NextResponse.json(product)
-    })
+        const clientProduct: ClientProduct = {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          imageUrl: product.imageUrl,
+          category: product.category,
+          unit: {
+            id: 0,
+            name: '',
+            pluralName: '',
+            displayName: '',
+            symbol: '',
+          },
+          price: 0,
+          organic: product.organic,
+          local: product.local,
+          vendor: {
+            id: product.vendorProfile.id,
+            businessName: product.vendorProfile.businessName,
+          },
+          variations: [],
+        }
+        return NextResponse.json(clientProduct)
+      }
+    )
   ),
   { limit: 20, windowMs: 60 * 1000 } // 20 requests per minute
 )

@@ -65,7 +65,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <div className="mb-3 flex items-baseline">
             <span className="text-2xl font-bold text-gray-800">${dollars}</span>
             <span className="ml-1 text-lg text-gray-800">{cents}</span>
-            <span className="ml-2 text-gray-500">/{product.unit}</span>
+            <span className="ml-2 text-gray-500">/{product.unit.name}</span>
           </div>
         )}
 
@@ -78,10 +78,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             className="text-market-green hover:text-market-green-dark cursor-pointer underline underline-offset-2 transition-colors"
             onClick={(e) => {
               e.stopPropagation()
-              router.push(`/vendors/${product.vendorId}`)
+              router.push(`/vendors/${product.vendor.id}`)
             }}
           >
-            {product.vendorName}
+            {product.vendor.businessName}
           </div>
         </div>
       </div>

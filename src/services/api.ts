@@ -1,21 +1,29 @@
 class ApiError extends Error {
+  data: unknown
+
   constructor(
     public status: number,
-    message: string
+    message: string,
+    data?: unknown
   ) {
     super(message)
     this.name = 'ApiError'
+    this.data = data
   }
 }
 
 export const handleApiError = (error: unknown): never => {
+  let apiError: ApiError
   if (error instanceof ApiError) {
-    throw error
+    apiError = error
   }
   if (error instanceof Error) {
-    throw new ApiError(500, error.message)
+    apiError = new ApiError(500, error.message)
   }
-  throw new ApiError(500, 'An unexpected error occurred')
+  apiError = new ApiError(500, 'An unexpected error occurred', error)
+  console.error(apiError)
+
+  throw apiError
 }
 
 export const api = {
