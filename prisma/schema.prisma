@@ -14,6 +14,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ProductCategory {
+  VEGETABLES
+  FRUITS
+  HERBS
+  DAIRY
+  MEAT
+  GRAINS
+  BAKERY
+  OTHER
+}
+
 model User {
   id            Int       @id @default(autoincrement())
   name          String
@@ -59,15 +70,15 @@ model VendorProfile {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int             @id @default(autoincrement())
   name        String
-  description String   @db.Text
-  category    String
+  description String          @db.Text
+  category    ProductCategory
   imageUrl    String
-  organic     Boolean  @default(false)
-  local       Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  organic     Boolean         @default(false)
+  local       Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   vendorProfileId Int
 

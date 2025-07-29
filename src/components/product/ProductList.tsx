@@ -55,9 +55,8 @@ export default function ProductList({
         <TableHeader>
           <TableRow>
             <TableHead>Product</TableHead>
-            <TableHead>Price</TableHead>
             <TableHead>Category</TableHead>
-            <TableHead>Features</TableHead>
+            <TableHead>Tags</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -84,7 +83,9 @@ export default function ProductList({
                     <Link href={`/products/${product.id}`}>{product.name}</Link>
                   </div>
                   {product.unit && (
-                    <div className="text-sm text-gray-500">{product.unit}</div>
+                    <div className="text-sm text-gray-500">
+                      {product.unit.name}
+                    </div>
                   )}
                 </div>
               </TableCell>

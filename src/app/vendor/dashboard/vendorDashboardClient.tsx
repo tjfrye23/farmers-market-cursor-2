@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import Header from '@/components/vendor-dashboard/Header'
 import ProfileStatusBanner from '@/components/ProfileStatusBanner'
 import Metrics from '@/components/vendor-dashboard/Metrics'
@@ -12,7 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { MarketSchedulesTable } from '@/components/MarketSchedulesTable'
 import { ClientProduct } from '@/types/product'
 import { Order } from '@/types/order'
-import { MarketDay } from '@/types/marketDay'
+import { ClientMarketDay } from '@/types/marketDay'
 import { MarketSchedule } from '@/types/marketSchedule'
 import { Session } from 'next-auth'
 import { ClientVendor } from '@/types/vendors'
@@ -30,7 +31,7 @@ interface VendorDashboardClientProps {
   products: ClientProduct[]
   orders: Order[]
   metrics: Metrics
-  marketDays: MarketDay[]
+  marketDays: ClientMarketDay[]
   marketSchedules: MarketSchedule[]
 }
 
@@ -43,6 +44,8 @@ export default function VendorDashboardClient({
   marketDays,
   marketSchedules,
 }: VendorDashboardClientProps) {
+  const router = useRouter()
+
   // Placeholder state and handlers for demonstration
   const metricsLoading = false
   const ordersLoading = false
@@ -55,7 +58,9 @@ export default function VendorDashboardClient({
   const editingProduct = null
   const resetProductForm = () => {}
   const handleEditProduct = () => {}
-  const handleAddNewProduct = () => {}
+  const handleAddNewProduct = () => {
+    router.push('/vendor/products/add')
+  }
   const handleDeleteProduct = () => {}
   const handleUpdateStatus = () => {}
   const isStatusDialogOpen = false

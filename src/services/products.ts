@@ -1,8 +1,9 @@
 import { api } from './api'
 import type { Product } from '../generated/prisma/client'
-
-export type CreateProductInput = Omit<Product, 'id' | 'createdAt' | 'updatedAt'>
-export type UpdateProductInput = Partial<CreateProductInput>
+import {
+  CreateProductInput,
+  UpdateProductInput,
+} from '@/app/api/products/route'
 
 export const productsService = {
   async getAll(): Promise<Product[]> {

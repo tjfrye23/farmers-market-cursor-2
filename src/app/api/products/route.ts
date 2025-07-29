@@ -4,16 +4,26 @@ import { withAuth, withValidation, withRateLimit } from '@/lib/api-handler'
 import { db } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { ClientProduct } from '@/types/product'
+import { ClientProduct, isCategory } from '@/types/product'
+import { ProductCategory } from '@/generated/prisma/client'
 
 // Validation schemas
 export const createProductSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
-  description: z.string(),
-  price: z.number().min(0, 'Price must be greater than or equal to 0'),
-  stock: z.number().int().min(0, 'Stock must be greater than or equal to 0'),
-  category: z.string(),
-  imageUrl: z.string().url(),
+  description: z.string().min(1, 'Description is required'),
+  category: z.nativeEnum(ProductCategory),
+  imageUrl: z.string().url('Please provide a valid image URL'),
+  organic: z.boolean().default(false),
+  local: z.boolean().default(false),
+  variations: z.array(
+    z.object({
+      name: z.string().min(1, 'Variation name is required'),
+      price: z.number().min(0, 'Price must be non-negative'),
+      size: z.number().min(1, 'Size must be at least 1'),
+      packaged: z.boolean().default(false),
+      unitId: z.number().min(1, 'Unit is required'),
+    })
+  ),
 })
 
 export const updateProductSchema = createProductSchema.partial()
@@ -37,15 +47,27 @@ export async function GET(
       )
     }
 
+    // Convert category filter strings to ProductCategory enum values
+    const categoryFilterEnums = categoryFilter
+      .map((cat) => cat.toUpperCase())
+      .filter(isCategory)
+
+    if (categoryFilterEnums.length !== categoryFilter.length) {
+      return NextResponse.json(
+        { error: 'Invalid category filter' },
+        { status: 400 }
+      )
+    }
+
     // Fetch all market day products for the market day, including product and vendor info
     const products = await db.marketDayProduct.findMany({
       where: {
         marketDayId: parseInt(marketDayId),
         isActive: true,
-        ...(categoryFilter.length > 0 && {
+        ...(categoryFilterEnums.length > 0 && {
           product: {
             category: {
-              in: categoryFilter,
+              in: categoryFilterEnums,
             },
           },
         }),
@@ -130,7 +152,7 @@ export const POST = withRateLimit(
       createProductSchema,
       async (
         req,
-        data
+        data: CreateProductInput
       ): Promise<NextResponse<ClientProduct | { error: string }>> => {
         const session = await getServerSession(authOptions)
         if (!session?.user) {
@@ -148,7 +170,12 @@ export const POST = withRateLimit(
 
         const product = await db.product.create({
           data: {
-            ...data,
+            name: data.name,
+            description: data.description,
+            category: data.category,
+            imageUrl: data.imageUrl,
+            organic: data.organic,
+            local: data.local,
             vendorProfileId: vendorProfile.id,
           },
           include: {

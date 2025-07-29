@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Eye, Edit } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface CurrentOrdersTableProps {
   orders: Order[]
@@ -27,6 +28,8 @@ export default function CurrentOrdersTable({
   loading,
   onUpdateStatus,
 }: CurrentOrdersTableProps) {
+  const router = useRouter()
+
   const getOrderStatus = (order: Order) => {
     if (!order.orderItems.length) return 'N/A'
     const firstStatus = order.orderItems[0].status
@@ -50,7 +53,11 @@ export default function CurrentOrdersTable({
       </TableHeader>
       <TableBody>
         {orders.map((order) => (
-          <TableRow key={order.id}>
+          <TableRow
+            key={order.id}
+            className="hover:bg-muted/50 cursor-pointer"
+            onClick={() => router.push(`/vendor/orders/${order.id}`)}
+          >
             <TableCell>{order.id}</TableCell>
             <TableCell>
               {order.date ? new Date(order.date).toLocaleDateString() : ''}
@@ -79,12 +86,15 @@ export default function CurrentOrdersTable({
                   <button
                     type="button"
                     className="hover:bg-muted flex h-8 w-8 items-center justify-center rounded p-0"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-white">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => router.push(`/vendor/orders/${order.id}`)}
+                  >
                     <Eye className="mr-2 h-4 w-4" />
                     View Details
                   </DropdownMenuItem>

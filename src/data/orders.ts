@@ -11,8 +11,10 @@ export async function getVendorOrders(
     where: {
       orderItems: {
         some: {
-          marketDayProduct: {
-            product: { vendorProfileId },
+          marketDayProductVariation: {
+            marketDayProduct: {
+              product: { vendorProfileId },
+            },
           },
         },
       },
@@ -33,19 +35,19 @@ export async function getVendorOrders(
       },
       orderItems: {
         where: {
-          marketDayProduct: {
-            product: { vendorProfileId },
+          marketDayProductVariation: {
+            marketDayProduct: {
+              product: { vendorProfileId },
+            },
           },
         },
         include: {
-          productUnit: true,
-          marketDayProduct: {
+          marketDayProductVariation: {
             include: {
-              product: {
-                select: {
-                  name: true,
-                  imageUrl: true,
-                  vendorProfileId: true,
+              productVariation: {
+                include: {
+                  unit: true,
+                  product: true,
                 },
               },
             },
@@ -79,10 +81,11 @@ export async function getVendorOrders(
           id: item.id,
           quantity: item.quantity,
           price: item.price,
-          unit: item.productUnit.name,
+          unit: item.marketDayProductVariation.productVariation.unit.name,
           status: item.status,
-          name: item.marketDayProduct.product.name,
-          imageUrl: item.marketDayProduct.product.imageUrl,
+          name: item.marketDayProductVariation.productVariation.product.name,
+          imageUrl:
+            item.marketDayProductVariation.productVariation.product.imageUrl,
         }
       }
     )
@@ -101,4 +104,126 @@ export async function getVendorOrders(
   })
 
   return mappedOrders
+}
+
+/**
+ * Fetch a specific vendor order with full details
+ */
+export async function getVendorOrderById(
+  orderId: number,
+  vendorProfileId: number
+): Promise<Order | null> {
+  const order = await db.order.findUnique({
+    where: { id: orderId },
+    include: {
+      user: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+      marketDay: {
+        select: {
+          id: true,
+          startTime: true,
+          marketSchedule: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+      orderItems: {
+        where: {
+          marketDayProductVariation: {
+            marketDayProduct: {
+              product: { vendorProfileId },
+            },
+          },
+        },
+        include: {
+          unit: true,
+          marketDayProductVariation: {
+            include: {
+              marketDayProduct: {
+                include: {
+                  product: {
+                    select: {
+                      name: true,
+                      imageUrl: true,
+                      vendorProfileId: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!order || order.orderItems.length === 0) {
+    return null
+  }
+
+  // Transform data to match the expected format
+  return {
+    id: order.id,
+    date: order.createdAt.toISOString().split('T')[0],
+    user: order.user,
+    status: order.orderItems.some((item) => item.status === 'processing')
+      ? 'processing'
+      : 'processed',
+    orderItems: order.orderItems.map((item) => ({
+      id: item.id,
+      quantity: item.quantity,
+      price: item.price,
+      unit: item.unit.name,
+      status: item.status,
+      name: item.marketDayProductVariation.marketDayProduct.product.name,
+      imageUrl:
+        item.marketDayProductVariation.marketDayProduct.product.imageUrl,
+    })),
+    marketDay: {
+      id: order.marketDay?.id || 0,
+      name: order.marketDay?.marketSchedule?.name || '',
+      date: order.marketDay?.startTime
+        ? order.marketDay.startTime.toISOString().split('T')[0]
+        : '',
+    },
+    total: order.orderItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    ),
+  }
+}
+
+/**
+ * Check if there's a next order with unprocessed items for navigation
+ */
+export async function getNextVendorOrder(
+  currentOrderId: number,
+  vendorProfileId: number
+): Promise<{ id: number } | null> {
+  return await db.order.findFirst({
+    where: {
+      id: { gt: currentOrderId },
+      orderItems: {
+        some: {
+          marketDayProductVariation: {
+            marketDayProduct: {
+              product: { vendorProfileId },
+            },
+          },
+          status: 'processing',
+        },
+      },
+    },
+    select: {
+      id: true,
+    },
+    orderBy: { id: 'asc' },
+  })
 }

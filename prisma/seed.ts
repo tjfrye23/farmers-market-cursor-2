@@ -1,24 +1,43 @@
 import { PrismaClient } from '../src/generated/prisma/client'
+import { ProductCategory } from '../src/generated/prisma/client'
 import { hash } from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  // 1. Seed all needed ProductUnits and keep a map of their IDs
-  const productUnitNames = [
-    { name: 'lb', pluralName: 'lbs', displayName: 'Pound', symbol: '$/lb' },
-    { name: 'ea', pluralName: 'units', displayName: 'Each', symbol: '$/ea' },
-    { name: 'box', pluralName: 'boxes', displayName: 'Box', symbol: '$/box' },
-    { name: 'bag', pluralName: 'bags', displayName: 'Bag', symbol: '$/bag' },
+  console.log('🌱 Starting database seed...')
+
+  // Create product units
+  const productUnits = [
+    { name: 'pound', pluralName: 'pounds', displayName: 'Pound', symbol: 'lb' },
+    { name: 'each', pluralName: 'each', displayName: 'Each', symbol: 'ea' },
+    { name: 'box', pluralName: 'boxes', displayName: 'Box', symbol: 'box' },
+    { name: 'bag', pluralName: 'bags', displayName: 'Bag', symbol: 'bag' },
+    {
+      name: 'bunch',
+      pluralName: 'bunches',
+      displayName: 'Bunch',
+      symbol: 'bunch',
+    },
+    { name: 'dozen', pluralName: 'dozen', displayName: 'Dozen', symbol: 'dz' },
+    { name: 'quart', pluralName: 'quarts', displayName: 'Quart', symbol: 'qt' },
+    {
+      name: 'gallon',
+      pluralName: 'gallons',
+      displayName: 'Gallon',
+      symbol: 'gal',
+    },
   ]
+
   const productUnitMap: Record<string, number> = {}
-  for (const unit of productUnitNames) {
-    const created = await prisma.productUnit.upsert({
+
+  for (const unit of productUnits) {
+    const createdUnit = await prisma.productUnit.upsert({
       where: { name: unit.name },
       update: {},
       create: unit,
     })
-    productUnitMap[unit.name] = created.id
+    productUnitMap[unit.name] = createdUnit.id
   }
 
   // Create admin user
@@ -183,7 +202,7 @@ async function main() {
     productData: {
       name: string
       description: string
-      category: string
+      category: ProductCategory
       imageUrl: string
       organic?: boolean
       local?: boolean
@@ -244,14 +263,14 @@ async function main() {
       productData: {
         name: 'Organic Tomatoes',
         description: 'Fresh organic tomatoes, locally grown',
-        category: 'Vegetables',
+        category: ProductCategory.VEGETABLES,
         imageUrl: '/images/products/tomatoes.webp',
         organic: true,
         local: true,
       },
       variations: [
-        { name: '1 lb', size: 1, packaged: false, unit: 'lb' },
-        { name: '2 lb', size: 2, packaged: false, unit: 'lb' },
+        { name: '1 lb', size: 1, packaged: false, unit: 'pound' },
+        { name: '2 lb', size: 2, packaged: false, unit: 'pound' },
         { name: 'Box', size: 5, packaged: true, unit: 'box' },
       ],
       vendorProfileId: vendor1Profile.id,
@@ -266,12 +285,12 @@ async function main() {
       productData: {
         name: 'Organic Lettuce',
         description: 'Crisp organic lettuce',
-        category: 'Vegetables',
+        category: ProductCategory.VEGETABLES,
         imageUrl: '/images/products/lettuce.webp',
         organic: true,
       },
       variations: [
-        { name: 'Head', size: 1, packaged: false, unit: 'ea' },
+        { name: 'Head', size: 1, packaged: false, unit: 'each' },
         { name: 'Bag', size: 3, packaged: true, unit: 'bag' },
       ],
       vendorProfileId: vendor1Profile.id,
@@ -285,13 +304,13 @@ async function main() {
       productData: {
         name: 'Organic Carrots',
         description: 'Sweet organic carrots',
-        category: 'Vegetables',
+        category: ProductCategory.VEGETABLES,
         imageUrl: '/images/products/carrots.webp',
         local: true,
       },
       variations: [
-        { name: '1 lb', size: 1, packaged: false, unit: 'lb' },
-        { name: '2 lb', size: 2, packaged: false, unit: 'lb' },
+        { name: '1 lb', size: 1, packaged: false, unit: 'pound' },
+        { name: '2 lb', size: 2, packaged: false, unit: 'pound' },
       ],
       vendorProfileId: vendor1Profile.id,
       marketDayId: marketDay.id,
@@ -308,12 +327,12 @@ async function main() {
       productData: {
         name: 'Sourdough Bread',
         description: 'Freshly baked sourdough bread',
-        category: 'Bakery',
+        category: ProductCategory.BAKERY,
         imageUrl: '/images/products/sourdough.webp',
       },
       variations: [
-        { name: 'Loaf', size: 1, packaged: true, unit: 'ea' },
-        { name: 'Half Loaf', size: 0.5, packaged: true, unit: 'ea' },
+        { name: 'Loaf', size: 1, packaged: true, unit: 'each' },
+        { name: 'Half Loaf', size: 0.5, packaged: true, unit: 'each' },
       ],
       vendorProfileId: vendor2Profile.id,
       marketDayId: marketDay.id,
@@ -326,11 +345,11 @@ async function main() {
       productData: {
         name: 'Croissants',
         description: 'Buttery, flaky croissants',
-        category: 'Bakery',
+        category: ProductCategory.BAKERY,
         imageUrl: '/images/products/croissants.webp',
       },
       variations: [
-        { name: 'Single', size: 1, packaged: false, unit: 'ea' },
+        { name: 'Single', size: 1, packaged: false, unit: 'each' },
         { name: 'Box of 6', size: 6, packaged: true, unit: 'box' },
       ],
       vendorProfileId: vendor2Profile.id,

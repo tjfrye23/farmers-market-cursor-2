@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react'
-import { Upload, X } from 'lucide-react'
+import { Upload, X, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import Image from 'next/image'
 
 interface ImageUploaderProps {
   existingImageUrl: string | null
@@ -43,25 +44,35 @@ const ImageUploader = ({
     setIsUploading(true)
 
     try {
-      // Convert to base64 for mock implementation
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const imageUrl = e.target?.result as string
+      // Create FormData for file upload
+      const formData = new FormData()
+      formData.append('file', file)
 
-        // Update preview and notify parent
-        setImagePreview(imageUrl)
-        onImageUploaded(imageUrl)
-        toast.success('Image uploaded successfully')
-        setIsUploading(false)
+      // Upload to our API
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Upload failed')
       }
-      reader.onerror = () => {
-        toast.error('Failed to upload image. Please try again.')
-        setIsUploading(false)
-      }
-      reader.readAsDataURL(file)
+
+      const data = await response.json()
+
+      // Update preview and notify parent
+      setImagePreview(data.imageUrl)
+      onImageUploaded(data.imageUrl)
+      toast.success('Image uploaded successfully')
     } catch (error) {
       console.error('Error uploading image:', error)
-      toast.error('Failed to upload image. Please try again.')
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to upload image. Please try again.'
+      )
+    } finally {
       setIsUploading(false)
     }
   }
@@ -116,7 +127,9 @@ const ImageUploader = ({
     <div className="space-y-4">
       {imagePreview ? (
         <div className="relative">
-          <img
+          <Image
+            width={160}
+            height={160}
             src={imagePreview}
             alt="Product preview"
             className="h-40 w-full rounded-md object-cover"
@@ -127,6 +140,7 @@ const ImageUploader = ({
             size="icon"
             className="absolute top-2 right-2 h-7 w-7"
             onClick={handleRemoveImage}
+            disabled={isUploading}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -140,21 +154,38 @@ const ImageUploader = ({
           onDrop={handleDrop}
         >
           <div className="mb-3">
-            <Upload
-              className={`h-10 w-10 ${isDragging ? 'text-primary' : 'text-gray-400'}`}
-            />
+            {isUploading ? (
+              <Loader2 className="text-primary h-10 w-10 animate-spin" />
+            ) : (
+              <Upload
+                className={`h-10 w-10 ${isDragging ? 'text-primary' : 'text-gray-400'}`}
+              />
+            )}
           </div>
           <p className="mb-2 text-sm text-gray-500">
-            Drag and drop an image or click to browse
+            {isUploading
+              ? 'Uploading image...'
+              : 'Drag and drop an image or click to browse'}
           </p>
-          <p className="mb-4 text-xs text-gray-400">PNG, JPG, GIF up to 5MB</p>
+          <p className="mb-4 text-xs text-gray-400">
+            {isUploading
+              ? 'Please wait while we upload your image'
+              : 'PNG, JPG, GIF up to 5MB'}
+          </p>
           <Button
             type="button"
             variant="outline"
             disabled={isUploading}
             onClick={handleBrowseClick}
           >
-            {isUploading ? 'Uploading...' : 'Choose File'}
+            {isUploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              'Choose File'
+            )}
             <input
               ref={fileInputRef}
               type="file"

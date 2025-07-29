@@ -1,5 +1,7 @@
+import z from 'zod'
 import { ClientMarketDay } from './marketDay'
 import { ClientVendor } from './vendors'
+import { ProductCategory } from '@/generated/prisma'
 
 export interface ClientMarketDayProduct {
   id: number
@@ -56,3 +58,31 @@ export function isClientProduct(
 ): product is ClientProduct {
   return 'variations' in product
 }
+
+const allCategories = new Set(Object.values(ProductCategory))
+
+export function isCategory(category: string): category is ProductCategory {
+  return allCategories.has(category as ProductCategory)
+}
+
+export const createProductSchema = z.object({
+  name: z.string().min(1, 'Product name is required'),
+  description: z.string().min(1, 'Description is required'),
+  category: z.nativeEnum(ProductCategory),
+  imageUrl: z.string().url('Please provide a valid image URL'),
+  organic: z.boolean(),
+  local: z.boolean(),
+  variations: z
+    .array(
+      z.object({
+        name: z.string().min(1, 'Variation name is required'),
+        price: z.number().min(0, 'Price must be non-negative'),
+        size: z.number().min(1, 'Size must be at least 1'),
+        packaged: z.boolean(),
+        unitId: z.number().min(1, 'Unit is required'),
+      })
+    )
+    .min(1, 'At least one variation is required'),
+})
+
+export type CreateProductSchema = z.infer<typeof createProductSchema>

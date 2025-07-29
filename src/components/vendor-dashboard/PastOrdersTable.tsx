@@ -8,6 +8,7 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table'
+import { useRouter } from 'next/navigation'
 
 interface PastOrdersTableProps {
   orders: Order[]
@@ -18,6 +19,8 @@ export default function PastOrdersTable({
   orders,
   loading,
 }: PastOrdersTableProps) {
+  const router = useRouter()
+
   const getOrderStatus = (order: Order) => {
     if (!order.orderItems.length) return 'N/A'
     const firstStatus = order.orderItems[0].status
@@ -41,8 +44,12 @@ export default function PastOrdersTable({
       </TableHeader>
       <TableBody>
         {orders.map((order) => (
-          <TableRow key={order.id}>
-            <TableCell>{order.orderNumber ?? order.id}</TableCell>
+          <TableRow
+            key={order.id}
+            className="hover:bg-muted/50 cursor-pointer"
+            onClick={() => router.push(`/vendor/orders/${order.id}`)}
+          >
+            <TableCell>{order.id}</TableCell>
             <TableCell>
               {order.date ? new Date(order.date).toLocaleDateString() : ''}
             </TableCell>
@@ -65,7 +72,16 @@ export default function PastOrdersTable({
             </TableCell>
             <TableCell>${order.total.toFixed(2)}</TableCell>
             <TableCell>
-              {/* TODO: Add actions (view, update status) */}
+              <button
+                type="button"
+                className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  router.push(`/vendor/orders/${order.id}`)
+                }}
+              >
+                View Details
+              </button>
             </TableCell>
           </TableRow>
         ))}
