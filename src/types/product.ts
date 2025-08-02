@@ -59,6 +59,12 @@ export function isClientProduct(
   return 'variations' in product
 }
 
+export function isClientMarketDayProduct(
+  product: ClientProduct | ClientMarketDayProduct
+): product is ClientMarketDayProduct {
+  return 'marketDay' in product
+}
+
 const allCategories = new Set(Object.values(ProductCategory))
 
 export function isCategory(category: string): category is ProductCategory {

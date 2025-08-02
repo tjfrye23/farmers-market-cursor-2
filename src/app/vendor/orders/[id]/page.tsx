@@ -5,9 +5,9 @@ import { getVendorOrderById, getNextVendorOrder } from '@/data/orders'
 import VendorOrderDetailClient from './VendorOrderDetailClient'
 
 interface VendorOrderDetailPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function VendorOrderDetailPage({
@@ -23,7 +23,8 @@ export default async function VendorOrderDetailPage({
     notFound()
   }
 
-  const orderId = parseInt(params.id, 10)
+  const { id } = await params
+  const orderId = parseInt(id, 10)
 
   if (isNaN(orderId)) {
     notFound()

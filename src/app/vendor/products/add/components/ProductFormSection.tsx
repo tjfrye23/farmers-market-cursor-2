@@ -17,10 +17,12 @@ export default function ProductFormSection({
   onCancel,
   formData,
 }: ProductFormSectionProps) {
+  const isEditing = !!currentProduct
+
   return (
     <div className="mb-8 overflow-hidden rounded-lg bg-white p-6 shadow-md">
       <h2 className="mb-4 text-xl font-semibold">
-        {currentProduct ? 'Edit Product' : 'Add New Product'}
+        {isEditing ? 'Edit Product' : 'Add New Product'}
       </h2>
       <div className="overflow-visible">
         <ProductForm
@@ -28,7 +30,7 @@ export default function ProductFormSection({
           initialValues={currentProduct || undefined}
           onSuccess={onSuccess}
           onCancel={onCancel}
-          submitButtonText="Add to Queue"
+          submitButtonText={isEditing ? 'Save Changes' : 'Add to Queue'}
           formData={formData}
         />
       </div>

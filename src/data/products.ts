@@ -92,6 +92,51 @@ export async function getVendorProducts(
   })
 }
 
+export async function getProductById(
+  productId: number
+): Promise<ClientProduct | null> {
+  const product = await db.product.findUnique({
+    where: { id: productId },
+    include: {
+      vendorProfile: true,
+      variations: {
+        include: {
+          unit: true,
+        },
+      },
+    },
+  })
+
+  if (!product) return null
+
+  if (product.variations.length === 0) return null
+
+  return {
+    id: product.id,
+    name: product.name,
+    description: product.description,
+    imageUrl: product.imageUrl,
+    category: product.category,
+    vendor: {
+      id: product.vendorProfile.id,
+      businessName: product.vendorProfile.businessName,
+    },
+    organic: product.organic,
+    local: product.local,
+    unit: product.variations[0].unit,
+    price: product.variations[0].price,
+    variations: product.variations.map<ClientProductVariation>((variation) => ({
+      id: variation.id,
+      name: variation.name,
+      size: variation.size,
+      packaged: variation.packaged,
+      unit: variation.unit,
+      price: variation.price,
+      quantity: 0,
+    })),
+  }
+}
+
 export async function getMarketDayProductById(
   productId: number
 ): Promise<ClientMarketDayProduct | null> {

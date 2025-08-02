@@ -1,18 +1,8 @@
 import { db } from '@/lib/prisma'
 import { MarketSchedule } from '@/types/marketSchedule'
 
-export async function getVendorMarketSchedules(
-  vendorId: number
-): Promise<MarketSchedule[]> {
-  const schedules = await db.marketSchedule.findMany({
-    where: {
-      subscriptions: {
-        some: {
-          id: vendorId,
-        },
-      },
-    },
-  })
+export async function getMarketSchedules(): Promise<MarketSchedule[]> {
+  const schedules = await db.marketSchedule.findMany()
 
   return schedules.map<MarketSchedule>((schedule) => ({
     ...schedule,

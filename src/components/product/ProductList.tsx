@@ -1,5 +1,5 @@
 import React from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Edit, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -27,6 +27,8 @@ export default function ProductList({
   isLoading,
   onDelete,
 }: ProductListProps) {
+  const router = useRouter()
+
   // Loading state
   if (isLoading) {
     return (
@@ -49,6 +51,15 @@ export default function ProductList({
     )
   }
 
+  const handleRowClick = (productId: number) => {
+    router.push(`/vendor/products/${productId}`)
+  }
+
+  const handleActionClick = (e: React.MouseEvent, action: () => void) => {
+    e.stopPropagation()
+    action()
+  }
+
   return (
     <div className="overflow-hidden rounded-lg bg-white shadow">
       <Table>
@@ -65,6 +76,7 @@ export default function ProductList({
             <TableRow
               key={product.id}
               className="hover:bg-muted/50 cursor-pointer"
+              onClick={() => handleRowClick(product.id)}
             >
               <TableCell className="flex items-center">
                 {product.imageUrl ? (
@@ -80,7 +92,7 @@ export default function ProductList({
                 )}
                 <div>
                   <div className="text-sm font-medium text-gray-900">
-                    <Link href={`/products/${product.id}`}>{product.name}</Link>
+                    {product.name}
                   </div>
                   {product.unit && (
                     <div className="text-sm text-gray-500">
@@ -112,7 +124,7 @@ export default function ProductList({
                   variant="ghost"
                   size="sm"
                   className="text-indigo-600 hover:text-indigo-900"
-                  onClick={() => onEdit(product)}
+                  onClick={(e) => handleActionClick(e, () => onEdit(product))}
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
@@ -120,10 +132,12 @@ export default function ProductList({
                   variant="ghost"
                   size="sm"
                   className="text-red-600 hover:text-red-900"
-                  onClick={() =>
-                    onDelete
-                      ? onDelete(product.id)
-                      : alert('Delete not implemented')
+                  onClick={(e) =>
+                    handleActionClick(e, () =>
+                      onDelete
+                        ? onDelete(product.id)
+                        : alert('Delete not implemented')
+                    )
                   }
                 >
                   <Trash2 className="h-4 w-4" />
