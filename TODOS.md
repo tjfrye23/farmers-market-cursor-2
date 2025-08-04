@@ -50,6 +50,22 @@ This document tracks pending tasks, improvements, and features for the Farmers M
 - [ ] Create responsive design for mobile devices
 - [ ] Add keyboard navigation support
 
+### Map Integration
+
+- [ ] **Replace mock map with real map integration**
+  - [ ] Research and select mapping service (Google Maps, Mapbox, Leaflet)
+  - [ ] Set up API keys and environment configuration
+  - [ ] Implement geocoding for location addresses
+  - [ ] Add interactive map markers for market locations
+  - [ ] Implement map controls (zoom, pan, street view)
+  - [ ] Add directions and navigation features
+  - [ ] Handle map loading states and error fallbacks
+  - [ ] Optimize map performance and bundle size
+  - [ ] Add accessibility features for map interactions
+  - [ ] Implement responsive map sizing for mobile devices
+  - [ ] Add map caching and offline support
+  - [ ] Consider implementing custom map styling to match brand
+
 ### Performance
 
 - [ ] Implement image optimization and lazy loading

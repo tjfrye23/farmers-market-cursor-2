@@ -1,6 +1,11 @@
 import { db } from '@/lib/prisma'
 import { ClientProductSimple } from '@/types/product'
 import { ClientVendor } from '@/types/vendors'
+import z from 'zod'
+
+export const vendorProfileIdSchema = z
+  .number()
+  .positive('Vendor profile ID must be a positive number')
 
 export async function getVendorsPaginated(
   page: number,
@@ -51,7 +56,7 @@ export async function getVendorById(id: number): Promise<{
       ...vendor,
       ownerName: vendor.user.name,
     },
-    products: vendor.products.map((product) => ({
+    products: vendor.products.map<ClientProductSimple>((product) => ({
       id: product.id,
       name: product.name,
       description: product.description,
@@ -59,7 +64,7 @@ export async function getVendorById(id: number): Promise<{
       category: product.category,
       organic: product.organic,
       local: product.local,
-      vendorId: product.vendorProfileId,
+      vendor: vendor,
       vendorName: vendor.businessName,
     })),
   }

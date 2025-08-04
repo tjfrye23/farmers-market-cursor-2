@@ -1,3 +1,5 @@
+'use client'
+
 import { Badge } from '@/components/ui/badge'
 import {
   Table,
@@ -8,6 +10,11 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { MarketSchedule } from '@/types/marketSchedule'
+import { useRouter } from 'next/navigation'
+import {
+  getStatusBadgeVariant,
+  getStatusDisplayName,
+} from '@/lib/marketScheduleUtils'
 
 interface MarketSchedulesTableProps {
   marketSchedules: MarketSchedule[]
@@ -18,6 +25,8 @@ export function MarketSchedulesTable({
   marketSchedules,
   loading,
 }: MarketSchedulesTableProps) {
+  const router = useRouter()
+
   if (loading) {
     return <div>Loading market schedules...</div>
   }
@@ -39,7 +48,11 @@ export function MarketSchedulesTable({
       </TableHeader>
       <TableBody>
         {marketSchedules.map((ms) => (
-          <TableRow key={ms.id}>
+          <TableRow
+            key={ms.id}
+            className="hover:bg-muted/50 cursor-pointer"
+            onClick={() => router.push(`/vendor/schedule/${ms.id}`)}
+          >
             <TableCell>{ms.name}</TableCell>
             <TableCell>
               {new Date(ms.startDate).toLocaleDateString('en-US', {
@@ -59,8 +72,8 @@ export function MarketSchedulesTable({
             </TableCell>
             <TableCell>{ms.location}</TableCell>
             <TableCell>
-              <Badge variant={ms.status === 'active' ? 'default' : 'secondary'}>
-                {ms.status}
+              <Badge variant={getStatusBadgeVariant(ms.status)}>
+                {getStatusDisplayName(ms.status)}
               </Badge>
             </TableCell>
           </TableRow>

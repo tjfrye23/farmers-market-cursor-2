@@ -1,3 +1,12 @@
+export enum MarketScheduleStatus {
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+  CANCELLED = 'CANCELLED',
+  PENDING_REVIEW = 'PENDING_REVIEW',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+}
+
 export interface MarketSchedule {
   id: number
   name: string
@@ -7,5 +16,5 @@ export interface MarketSchedule {
   onlineStartDate: Date
   onlineEndDate: Date
   location: string
-  status: string
+  status: MarketScheduleStatus
 }

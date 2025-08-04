@@ -175,7 +175,7 @@ async function main() {
       endTime: new Date('2024-06-01T14:00:00Z'),
       onlineStartTime: new Date('2024-05-31T08:00:00Z'),
       onlineEndTime: new Date('2024-06-01T07:59:59Z'),
-      status: 'PUBLISHED',
+      status: 'ACTIVE',
       description: 'Main market schedule',
     },
   })
