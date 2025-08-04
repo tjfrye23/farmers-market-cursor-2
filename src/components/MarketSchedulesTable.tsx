@@ -17,7 +17,7 @@ import {
 } from '@/lib/marketScheduleUtils'
 
 interface MarketSchedulesTableProps {
-  marketSchedules: MarketSchedule[]
+  marketSchedules: (MarketSchedule & { isSubscribed?: boolean })[]
   loading?: boolean
 }
 
@@ -44,6 +44,7 @@ export function MarketSchedulesTable({
           <TableHead>Time</TableHead>
           <TableHead>Location</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead>Subscription</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -74,6 +75,18 @@ export function MarketSchedulesTable({
             <TableCell>
               <Badge variant={getStatusBadgeVariant(ms.status)}>
                 {getStatusDisplayName(ms.status)}
+              </Badge>
+            </TableCell>
+            <TableCell>
+              <Badge
+                variant={ms.isSubscribed ? 'default' : 'secondary'}
+                className={
+                  ms.isSubscribed
+                    ? 'bg-green-100 text-green-800 hover:bg-green-100'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-100'
+                }
+              >
+                {ms.isSubscribed ? 'Subscribed' : 'Not Subscribed'}
               </Badge>
             </TableCell>
           </TableRow>

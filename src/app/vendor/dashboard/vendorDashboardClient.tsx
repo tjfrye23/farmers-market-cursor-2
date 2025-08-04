@@ -32,7 +32,7 @@ interface VendorDashboardClientProps {
   orders: Order[]
   metrics: Metrics
   marketDays: ClientMarketDay[]
-  marketSchedules: MarketSchedule[]
+  marketSchedules: (MarketSchedule & { isSubscribed: boolean })[]
 }
 
 export default function VendorDashboardClient({

@@ -44,6 +44,32 @@ export async function getMarketSchedules(): Promise<MarketSchedule[]> {
   }))
 }
 
+export async function getMarketSchedulesWithSubscriptionStatus(
+  vendorProfileId: number
+): Promise<Array<MarketSchedule & { isSubscribed: boolean }>> {
+  const schedules = await db.marketSchedule.findMany({
+    include: {
+      subscriptions: {
+        where: {
+          id: vendorProfileId,
+        },
+      },
+    },
+  })
+
+  return schedules.map<MarketSchedule & { isSubscribed: boolean }>(
+    (schedule) => ({
+      ...schedule,
+      startDate: new Date(schedule.startTime),
+      endDate: new Date(schedule.endTime),
+      onlineStartDate: new Date(schedule.onlineStartTime),
+      onlineEndDate: new Date(schedule.onlineEndTime),
+      status: schedule.status as MarketScheduleStatus,
+      isSubscribed: schedule.subscriptions.length > 0,
+    })
+  )
+}
+
 export async function getMarketScheduleById(
   id: number
 ): Promise<MarketSchedule | null> {

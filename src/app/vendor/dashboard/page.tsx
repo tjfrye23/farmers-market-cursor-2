@@ -5,7 +5,7 @@ import { getMarketDays } from '@/data/marketDays'
 import { getVendorProducts } from '@/data/products'
 import { getVendorOrders } from '@/data/orders'
 import { getVendorMetrics } from '@/data/metrics'
-import { getMarketSchedules } from '@/data/marketSchedules'
+import { getMarketSchedulesWithSubscriptionStatus } from '@/data/marketSchedules'
 import { getVendor } from '@/data/vendors'
 
 export default async function VendorDashboardPage() {
@@ -22,7 +22,7 @@ export default async function VendorDashboardPage() {
       getVendorProducts(user.vendorProfile.id),
       getVendorOrders(user.vendorProfile.id),
       getMarketDays(),
-      getMarketSchedules(),
+      getMarketSchedulesWithSubscriptionStatus(user.vendorProfile.id),
     ])
 
   const metrics = getVendorMetrics(orders)
