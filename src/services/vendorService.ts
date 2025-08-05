@@ -1,30 +1,24 @@
-import { Order } from '../types/order'
+import { ClientVendor } from '@/types/vendors'
+import { api } from './api'
+import { UpdateVendorProfileInput } from '@/app/api/vendors/route'
 
-export async function updateVendorOrderStatus(
-  orderId: number,
-  status: 'processing' | 'processed'
-): Promise<Order> {
-  // The API expects a PUT to /api/orders/[id] with { status }
-  const res = await fetch(`/api/orders/${orderId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ status }),
-  })
-  if (!res.ok) {
-    throw new Error('Failed to update order status')
-  }
-  return res.json()
+export interface VendorService {
+  getVendorProfile: (vendorId: number) => Promise<ClientVendor>
+  updateVendorProfile: (
+    vendorId: number,
+    data: UpdateVendorProfileInput
+  ) => Promise<ClientVendor>
 }
 
-export async function deleteVendorProduct(
-  productId: number | string
-): Promise<void> {
-  const res = await fetch(`/api/products/${productId}`, {
-    method: 'DELETE',
-  })
-  if (!res.ok) {
-    throw new Error('Failed to delete product')
-  }
+export const vendorService: VendorService = {
+  async getVendorProfile(vendorId: number): Promise<ClientVendor> {
+    return api.get<ClientVendor>(`/api/vendors/${vendorId}`)
+  },
+
+  async updateVendorProfile(
+    vendorId: number,
+    data: UpdateVendorProfileInput
+  ): Promise<ClientVendor> {
+    return api.put<ClientVendor>(`/api/vendors/${vendorId}`, data)
+  },
 }

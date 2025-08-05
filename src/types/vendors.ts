@@ -1,3 +1,56 @@
+import { VendorStatus as PrismaVendorStatus } from '@/generated/prisma'
+
+export enum VendorStatus {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  INACTIVE = 'INACTIVE',
+  BANNED = 'BANNED',
+}
+
+// Helper function to convert Prisma enum to our enum
+export function toVendorStatus(status: PrismaVendorStatus): VendorStatus {
+  return status as VendorStatus
+}
+
+// Helper function to get display name for vendor status
+export function getVendorStatusDisplayName(status: VendorStatus): string {
+  switch (status) {
+    case VendorStatus.PENDING:
+      return 'Pending'
+    case VendorStatus.ACTIVE:
+      return 'Active'
+    case VendorStatus.SUSPENDED:
+      return 'Suspended'
+    case VendorStatus.INACTIVE:
+      return 'Inactive'
+    case VendorStatus.BANNED:
+      return 'Banned'
+    default:
+      return status
+  }
+}
+
+// Helper function to get badge variant for vendor status
+export function getVendorStatusVariant(
+  status: VendorStatus
+): 'default' | 'secondary' | 'destructive' | 'outline' {
+  switch (status) {
+    case VendorStatus.ACTIVE:
+      return 'default'
+    case VendorStatus.PENDING:
+      return 'outline'
+    case VendorStatus.SUSPENDED:
+      return 'secondary'
+    case VendorStatus.INACTIVE:
+      return 'secondary'
+    case VendorStatus.BANNED:
+      return 'destructive'
+    default:
+      return 'outline'
+  }
+}
+
 export interface ClientVendor {
   id: number
   businessName: string
@@ -13,7 +66,7 @@ export interface ClientVendor {
   youtubeHandle?: string | null
   twitterHandle?: string | null
   ownerName: string
-  status: string
+  status: VendorStatus
 }
 
 export type ClientVendorSimple = Pick<ClientVendor, 'id' | 'businessName'>

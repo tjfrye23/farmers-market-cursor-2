@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { withAuth, withValidation, withRateLimit } from '@/lib/api-handler'
+import { withRateLimit } from '@/lib/api-handler'
 import { db } from '@/lib/prisma'
 
 // Validation schemas
@@ -13,6 +13,10 @@ export const createVendorProfileSchema = z.object({
   userId: z.number().int().positive(),
   headerImageUrl: z.string(),
   specialty: z.string(),
+  website: z.string().optional(),
+  facebook: z.string().optional(),
+  instagram: z.string().optional(),
+  twitter: z.string().optional(),
 })
 
 export const updateVendorProfileSchema = createVendorProfileSchema.partial()
@@ -51,25 +55,4 @@ export const GET = withRateLimit(
     return NextResponse.json(vendorProfiles)
   },
   { limit: 100, windowMs: 60 * 1000 } // 100 requests per minute
-)
-
-export const POST = withRateLimit(
-  withAuth(
-    withValidation(createVendorProfileSchema, async (req, data) => {
-      const vendorProfile = await db.vendorProfile.create({
-        data: { ...data, status: 'INACTIVE' },
-        include: {
-          user: {
-            select: {
-              name: true,
-              email: true,
-            },
-          },
-        },
-      })
-
-      return NextResponse.json(vendorProfile, { status: 201 })
-    })
-  ),
-  { limit: 20, windowMs: 60 * 1000 } // 20 requests per minute
 )

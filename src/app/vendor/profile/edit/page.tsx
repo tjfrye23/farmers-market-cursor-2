@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { vendorService } from '@/services/vendorService'
 
 const profileSchema = z.object({
   businessName: z.string().min(1, 'Business name is required'),
@@ -66,11 +67,8 @@ export default function VendorProfilePage() {
       setError('No vendor profile found for this user.')
       return
     }
-    fetch(`/api/vendor-profiles/${vendorProfileId}`)
-      .then(async (res) => {
-        if (!res.ok) throw new Error('Failed to fetch profile')
-        return res.json()
-      })
+    vendorService
+      .getVendorProfile(vendorProfileId)
       .then((data) => {
         setProfile({
           businessName: data.businessName || '',
@@ -128,22 +126,17 @@ export default function VendorProfilePage() {
       return
     }
     try {
-      const res = await fetch(`/api/vendor-profiles/${vendorProfileId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          businessName: profile.businessName,
-          description: profile.description,
-          address: profile.location,
-          specialty: profile.specialty,
-          imageUrl: profile.imageUrl,
-          website: profile.website,
-          facebook: profile.facebook,
-          instagram: profile.instagram,
-          twitter: profile.twitter,
-        }),
+      await vendorService.updateVendorProfile(vendorProfileId, {
+        businessName: profile.businessName,
+        description: profile.description,
+        address: profile.location,
+        specialty: profile.specialty,
+        imageUrl: profile.imageUrl,
+        website: profile.website,
+        facebook: profile.facebook,
+        instagram: profile.instagram,
+        twitter: profile.twitter,
       })
-      if (!res.ok) throw new Error('Failed to save profile')
       toast.success('Profile updated successfully!')
       setIsEditing(false)
     } catch (err: unknown) {

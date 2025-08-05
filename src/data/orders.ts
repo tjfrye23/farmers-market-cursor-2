@@ -1,5 +1,10 @@
 import { db } from '@/lib/prisma'
-import { Order } from '@/types/order'
+import {
+  Order,
+  OrderStatus,
+  OrderItemStatus,
+  toOrderItemStatus,
+} from '@/types/order'
 
 /**
  * Fetch all orders relevant to a vendor, including nested product and user info.
@@ -59,11 +64,11 @@ export async function getVendorOrders(
   })
 
   const mappedOrders = orders.map((order) => {
-    const computedStatus: 'processing' | 'processed' = order.orderItems.some(
-      (item) => item.status === 'processing'
+    const computedStatus: OrderStatus = order.orderItems.some(
+      (item) => toOrderItemStatus(item.status) === OrderItemStatus.PROCESSING
     )
-      ? 'processing'
-      : 'processed'
+      ? OrderStatus.PENDING
+      : OrderStatus.COMPLETED
 
     const marketDay: Order['marketDay'] = {
       id: order.marketDay.id,
@@ -82,7 +87,7 @@ export async function getVendorOrders(
           quantity: item.quantity,
           price: item.price,
           unit: item.marketDayProductVariation.productVariation.unit.name,
-          status: item.status,
+          status: toOrderItemStatus(item.status),
           name: item.marketDayProductVariation.productVariation.product.name,
           imageUrl:
             item.marketDayProductVariation.productVariation.product.imageUrl,
@@ -173,15 +178,17 @@ export async function getVendorOrderById(
     id: order.id,
     date: order.createdAt.toISOString().split('T')[0],
     user: order.user,
-    status: order.orderItems.some((item) => item.status === 'processing')
-      ? 'processing'
-      : 'processed',
+    status: order.orderItems.some(
+      (item) => toOrderItemStatus(item.status) === OrderItemStatus.PROCESSING
+    )
+      ? OrderStatus.PENDING
+      : OrderStatus.COMPLETED,
     orderItems: order.orderItems.map((item) => ({
       id: item.id,
       quantity: item.quantity,
       price: item.price,
       unit: item.unit.name,
-      status: item.status,
+      status: toOrderItemStatus(item.status),
       name: item.marketDayProductVariation.marketDayProduct.product.name,
       imageUrl:
         item.marketDayProductVariation.marketDayProduct.product.imageUrl,
@@ -217,7 +224,7 @@ export async function getNextVendorOrder(
               product: { vendorProfileId },
             },
           },
-          status: 'processing',
+          status: 'PROCESSING',
         },
       },
     },

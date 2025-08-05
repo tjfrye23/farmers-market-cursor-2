@@ -1,12 +1,12 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import VendorDashboardClient from './vendorDashboardClient'
-import { getMarketDays } from '@/data/marketDays'
 import { getVendorProducts } from '@/data/products'
 import { getVendorOrders } from '@/data/orders'
 import { getVendorMetrics } from '@/data/metrics'
 import { getMarketSchedulesWithSubscriptionStatus } from '@/data/marketSchedules'
 import { getVendor } from '@/data/vendors'
+import { getVendorMarketDays } from '@/data/marketDays'
 
 export default async function VendorDashboardPage() {
   const session = await getServerSession(authOptions)
@@ -21,7 +21,7 @@ export default async function VendorDashboardPage() {
       getVendor(user.vendorProfile.id),
       getVendorProducts(user.vendorProfile.id),
       getVendorOrders(user.vendorProfile.id),
-      getMarketDays(),
+      getVendorMarketDays(user.vendorProfile.id),
       getMarketSchedulesWithSubscriptionStatus(user.vendorProfile.id),
     ])
 

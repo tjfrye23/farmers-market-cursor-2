@@ -13,10 +13,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { MarketSchedulesTable } from '@/components/MarketSchedulesTable'
 import { ClientProduct } from '@/types/product'
 import { Order } from '@/types/order'
-import { ClientMarketDay } from '@/types/marketDay'
 import { MarketSchedule } from '@/types/marketSchedule'
 import { Session } from 'next-auth'
 import { ClientVendor } from '@/types/vendors'
+import { ClientMarketDay } from '@/types/marketDay'
 
 interface Metrics {
   totalRevenue: number
@@ -51,8 +51,8 @@ export default function VendorDashboardClient({
   const ordersLoading = false
   const productsLoading = false
   const marketDaysLoading = false
-  const currentOrders = orders.filter((o) => o.status === 'processing')
-  const pastOrders = orders.filter((o) => o.status !== 'processing')
+  const currentOrders = orders.filter((o) => o.status === 'PENDING')
+  const pastOrders = orders.filter((o) => o.status !== 'PENDING')
   const isProductDialogOpen = false
   const setIsProductDialogOpen = () => {}
   const editingProduct = null

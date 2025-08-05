@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { mockVendors } from '@/data/mockData'
 
 /**
  * Fetches the list of vendors using React Query, with fallback to mockVendors on error.
@@ -14,7 +13,7 @@ export function useVendors() {
         if (!res.ok) throw new Error('API error')
         return await res.json()
       } catch {
-        return mockVendors
+        return []
       }
     },
     initialData: [],

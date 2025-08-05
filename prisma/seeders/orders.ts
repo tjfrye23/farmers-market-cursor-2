@@ -70,7 +70,7 @@ export async function seedOrders(
       createdAt,
     }: {
       customerId: number
-      status: string
+      status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'
       orderItems: Array<{
         marketDayProductId: number
         variationId: number
@@ -111,7 +111,7 @@ export async function seedOrders(
             productUnitId,
             quantity: item.quantity,
             price: item.price,
-            status: 'processing',
+            status: 'PROCESSING',
           },
         })
       }
@@ -124,7 +124,7 @@ export async function seedOrders(
       // Order 1: Pending order with tomatoes and lettuce
       await createOrderWithItems({
         customerId: customer1.id,
-        status: 'pending',
+        status: 'PENDING',
         orderItems: [
           {
             marketDayProductId: vendor1MarketDayProducts[0].id, // Tomatoes
@@ -145,7 +145,7 @@ export async function seedOrders(
       // Order 2: Confirmed order with carrots
       await createOrderWithItems({
         customerId: customer2.id,
-        status: 'confirmed',
+        status: 'CONFIRMED',
         orderItems: [
           {
             marketDayProductId: vendor1MarketDayProducts[2].id, // Carrots
@@ -160,7 +160,7 @@ export async function seedOrders(
       // Order 3: Completed order with multiple items
       await createOrderWithItems({
         customerId: customer3.id,
-        status: 'completed',
+        status: 'COMPLETED',
         orderItems: [
           {
             marketDayProductId: vendor1MarketDayProducts[0].id, // Tomatoes
@@ -181,7 +181,7 @@ export async function seedOrders(
       // Order 4: Another pending order
       await createOrderWithItems({
         customerId: customer1.id,
-        status: 'pending',
+        status: 'PENDING',
         orderItems: [
           {
             marketDayProductId: vendor1MarketDayProducts[1].id, // Lettuce
@@ -196,7 +196,7 @@ export async function seedOrders(
       // Order 5: Cancelled order
       await createOrderWithItems({
         customerId: customer2.id,
-        status: 'cancelled',
+        status: 'CANCELLED',
         orderItems: [
           {
             marketDayProductId: vendor1MarketDayProducts[0].id, // Tomatoes

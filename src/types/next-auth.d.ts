@@ -1,4 +1,6 @@
 import 'next-auth'
+import { UserRole } from '@/lib/auth'
+import { ClientVendor } from '@/types/vendors'
 
 // Extend next-auth types
 declare module 'next-auth' {
@@ -7,7 +9,7 @@ declare module 'next-auth' {
     name: string
     email: string
     role: UserRole
-    vendorProfile: Pick<VendorProfile, 'id' | 'name'> | null
+    vendorProfile: Pick<ClientVendor, 'id' | 'businessName'> | null
   }
 
   interface Session {
@@ -16,7 +18,7 @@ declare module 'next-auth' {
       name: string
       email: string
       role: UserRole
-      vendorProfile?: Pick<VendorProfile, 'id' | 'name'> | null
+      vendorProfile?: Pick<ClientVendor, 'id' | 'businessName'> | null
     }
   }
 }
@@ -27,6 +29,6 @@ declare module 'next-auth/jwt' {
     name: string
     email: string
     role: UserRole
-    vendorProfile?: Pick<VendorProfile, 'id' | 'name'> | null
+    vendorProfile?: Pick<ClientVendor, 'id' | 'businessName'> | null
   }
 }

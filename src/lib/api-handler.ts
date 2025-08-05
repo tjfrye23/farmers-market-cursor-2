@@ -37,7 +37,8 @@ export function withAuth(handler: AuthenticatedApiHandler): ApiHandler {
         )
       }
 
-      return handler(req, { ...context, session })
+      const params = await context.params
+      return handler(req, { params, session })
     } catch (error) {
       console.error('API Error:', error)
       return NextResponse.json(

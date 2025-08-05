@@ -1,6 +1,6 @@
 import { db } from '@/lib/prisma'
 import { ClientProductSimple } from '@/types/product'
-import { ClientVendor } from '@/types/vendors'
+import { ClientVendor, toVendorStatus } from '@/types/vendors'
 import z from 'zod'
 
 export const vendorProfileIdSchema = z
@@ -35,7 +35,7 @@ export async function getVendorsPaginated(
   const clientVendors = vendors.map<ClientVendor>((vendor) => ({
     ...vendor,
     ownerName: vendor.user.name,
-    status: vendor.status,
+    status: toVendorStatus(vendor.status),
   }))
   return { vendors: clientVendors, total }
 }
@@ -55,6 +55,7 @@ export async function getVendorById(id: number): Promise<{
     vendor: {
       ...vendor,
       ownerName: vendor.user.name,
+      status: toVendorStatus(vendor.status),
     },
     products: vendor.products.map<ClientProductSimple>((product) => ({
       id: product.id,
@@ -81,5 +82,6 @@ export async function getVendor(id: number): Promise<ClientVendor | null> {
   return {
     ...vendor,
     ownerName: vendor.user.name,
+    status: toVendorStatus(vendor.status),
   }
 }

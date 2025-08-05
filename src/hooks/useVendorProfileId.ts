@@ -9,7 +9,7 @@ export function useVendorProfileId(userId?: string | number) {
     if (!userId) return
     setLoading(true)
     setError(null)
-    fetch(`/api/vendor-profiles?userId=${userId}`)
+    fetch(`/api/vendors?userId=${userId}`)
       .then((res) => res.json())
       .then((data) => {
         setVendorProfileId(data[0]?.id || null)

@@ -6,6 +6,7 @@ import {
   ClientProductSimple,
   ClientProductVariation,
 } from '@/types/product'
+import { toMarketDayStatus } from '@/types/marketDay'
 
 export async function getUserFavoriteProducts(
   userId: number
@@ -137,6 +138,69 @@ export async function getProductById(
   }
 }
 
+export async function getMarketDayProducts(
+  marketDayId: number
+): Promise<ClientProduct[]> {
+  const marketDayProducts = await db.marketDayProduct.findMany({
+    where: {
+      marketDayId,
+      isActive: true,
+    },
+    include: {
+      product: {
+        include: {
+          vendorProfile: {
+            select: {
+              id: true,
+              businessName: true,
+            },
+          },
+        },
+      },
+      variations: {
+        where: { isActive: true },
+        include: {
+          productVariation: {
+            include: {
+              unit: true,
+            },
+          },
+        },
+        orderBy: { id: 'asc' },
+      },
+    },
+  })
+
+  return marketDayProducts
+    .filter((mdp) => mdp.variations.length > 0)
+    .map<ClientProduct>((mdp) => {
+      const firstVariation = mdp.variations[0]
+      return {
+        id: mdp.product.id,
+        name: mdp.product.name,
+        description: mdp.product.description,
+        imageUrl: mdp.product.imageUrl,
+        category: mdp.product.category,
+        vendor: {
+          id: mdp.product.vendorProfile.id,
+          businessName: mdp.product.vendorProfile.businessName,
+        },
+        organic: mdp.product.organic,
+        local: mdp.product.local,
+        unit: firstVariation.productVariation.unit,
+        price: firstVariation.price,
+        variations: mdp.variations.map<ClientProductVariation>((variation) => ({
+          id: variation.id,
+          name: variation.productVariation.name,
+          size: variation.productVariation.size,
+          packaged: variation.productVariation.packaged,
+          unit: variation.productVariation.unit,
+          price: variation.price,
+        })),
+      }
+    })
+}
+
 export async function getMarketDayProductById(
   productId: number
 ): Promise<ClientMarketDayProduct | null> {
@@ -202,13 +266,11 @@ export async function getMarketDayProductById(
       marketSchedule: product.marketDay.marketSchedule,
       location: product.marketDay.marketSchedule.location,
       description: product.marketDay.marketSchedule.description,
-      status: product.marketDay.marketSchedule.status,
-      startTime: product.marketDay.marketSchedule.startTime.toISOString(),
-      endTime: product.marketDay.marketSchedule.endTime.toISOString(),
-      onlineStartTime:
-        product.marketDay.marketSchedule.onlineStartTime.toISOString(),
-      onlineEndTime:
-        product.marketDay.marketSchedule.onlineEndTime.toISOString(),
+      status: toMarketDayStatus(product.marketDay.status),
+      startTime: product.marketDay.startTime.toISOString(),
+      endTime: product.marketDay.endTime.toISOString(),
+      onlineStartTime: product.marketDay.onlineStartTime.toISOString(),
+      onlineEndTime: product.marketDay.onlineEndTime.toISOString(),
       name: product.marketDay.marketSchedule.name,
     },
   }

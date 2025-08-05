@@ -7,6 +7,7 @@ import {
   TableCell,
 } from '@/components/ui/table'
 import { MarketDay } from '@/types/marketDay'
+import { useRouter } from 'next/navigation'
 
 interface MarketDaysTabProps {
   marketDays: MarketDay[]
@@ -17,8 +18,16 @@ export default function MarketDaysTab({
   marketDays,
   loading,
 }: MarketDaysTabProps) {
+  const router = useRouter()
+
   if (loading) return <div>Loading market days...</div>
-  if (marketDays.length === 0) return <div>No upcoming market days found.</div>
+  if (marketDays.length === 0)
+    return <div>No subscribed market days found.</div>
+
+  const handleRowClick = (marketDayId: number) => {
+    router.push(`/vendor/marketDay/${marketDayId}`)
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -31,7 +40,11 @@ export default function MarketDaysTab({
       </TableHeader>
       <TableBody>
         {marketDays.map((md) => (
-          <TableRow key={md.id}>
+          <TableRow
+            key={md.id}
+            className="cursor-pointer hover:bg-gray-50"
+            onClick={() => handleRowClick(md.id)}
+          >
             <TableCell>{md.location}</TableCell>
             <TableCell>{new Date(md.startTime).toLocaleDateString()}</TableCell>
             <TableCell>

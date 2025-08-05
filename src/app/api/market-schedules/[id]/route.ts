@@ -6,7 +6,7 @@ import {
   deleteMarketSchedule,
 } from '@/data/marketSchedules'
 import z from 'zod'
-import { MarketSchedule } from '@/types/marketSchedule'
+import { MarketSchedule, MarketScheduleStatus } from '@/types/marketSchedule'
 
 export const updateMarketScheduleSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -18,9 +18,9 @@ export const updateMarketScheduleSchema = z.object({
     .string()
     .datetime('Online start time must be a valid date'),
   onlineEndTime: z.string().datetime('Online end time must be a valid date'),
-  status: z.enum(['DRAFT', 'PUBLISHED', 'CANCELLED'], {
+  status: z.nativeEnum(MarketScheduleStatus, {
     errorMap: () => ({
-      message: 'Status must be DRAFT, PUBLISHED, or CANCELLED',
+      message: `Status must be one of: ${Object.values(MarketScheduleStatus).join(', ')}`,
     }),
   }),
   reoccurring: z.boolean(),

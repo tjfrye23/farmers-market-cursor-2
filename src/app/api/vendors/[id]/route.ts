@@ -86,24 +86,3 @@ export const PUT = withRateLimit(
   ),
   { limit: 20, windowMs: 60 * 1000 }
 )
-
-export const DELETE = withRateLimit(
-  withAuth(
-    async (req: NextRequest, context: { params: Record<string, string> }) => {
-      const id = parseInt(context.params.id, 10)
-      if (isNaN(id)) {
-        return NextResponse.json(
-          { error: 'Invalid vendor profile ID' },
-          { status: 400 }
-        )
-      }
-
-      await db.vendorProfile.delete({
-        where: { id },
-      })
-
-      return new NextResponse(null, { status: 204 })
-    }
-  ),
-  { limit: 20, windowMs: 60 * 1000 }
-)
