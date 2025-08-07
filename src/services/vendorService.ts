@@ -1,6 +1,6 @@
 import { ClientVendor } from '@/types/vendors'
 import { api } from './api'
-import { UpdateVendorProfileInput } from '@/app/api/vendors/route'
+import { UpdateVendorProfileInput } from '@/lib/schemas/vendor'
 
 export interface VendorService {
   getVendorProfile: (vendorId: number) => Promise<ClientVendor>

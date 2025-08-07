@@ -4,11 +4,15 @@ import { db } from '@/lib/prisma'
 import {
   updateVendorProfileSchema,
   type UpdateVendorProfileInput,
-} from '../route'
+} from '@/lib/schemas/vendor'
 
 export const GET = withRateLimit(
-  async (req: NextRequest, context: { params: Record<string, string> }) => {
-    const id = parseInt(context.params.id, 10)
+  async (
+    req: NextRequest,
+    context: { params: Promise<Record<string, string>> }
+  ) => {
+    const params = await context.params
+    const id = parseInt(params.id, 10)
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid vendor profile ID' },
@@ -52,7 +56,8 @@ export const PUT = withRateLimit(
     withValidation(
       updateVendorProfileSchema,
       async (req, data: UpdateVendorProfileInput, context) => {
-        const id = parseInt(context.params.id, 10)
+        const params = await context.params
+        const id = parseInt(params.id, 10)
         if (isNaN(id)) {
           return NextResponse.json(
             { error: 'Invalid vendor profile ID' },

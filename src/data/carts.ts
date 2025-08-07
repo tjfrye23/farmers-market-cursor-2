@@ -3,9 +3,7 @@ import { ClientCart, ClientCartItem } from '@/types/cart'
 
 export const getCarts = async (userId: number): Promise<ClientCart[]> => {
   const carts = await db.cart.findMany({
-    where: {
-      userId,
-    },
+    where: { userId },
     include: {
       marketDay: {
         include: {
@@ -34,13 +32,15 @@ export const getCarts = async (userId: number): Promise<ClientCart[]> => {
     },
   })
 
-  const clientCart = carts.map<ClientCart>((cart) => ({
+  const clientCarts: ClientCart[] = carts.map((cart) => ({
     marketDay: {
       id: cart.marketDayId,
       name: cart.marketDay.marketSchedule.name,
       location: cart.marketDay.marketSchedule.location,
       startTime: cart.marketDay.startTime.toISOString(),
       endTime: cart.marketDay.endTime.toISOString(),
+      onlineStartTime: cart.marketDay.onlineStartTime.toISOString(),
+      onlineEndTime: cart.marketDay.onlineEndTime.toISOString(),
       description: cart.marketDay.marketSchedule.description,
       status: cart.marketDay.status,
       marketSchedule: {
@@ -62,7 +62,7 @@ export const getCarts = async (userId: number): Promise<ClientCart[]> => {
     })),
   }))
 
-  return clientCart
+  return clientCarts
 }
 
 export const getCart = async (
@@ -115,6 +115,8 @@ export const getCart = async (
       location: cart.marketDay.marketSchedule.location,
       startTime: cart.marketDay.startTime.toISOString(),
       endTime: cart.marketDay.endTime.toISOString(),
+      onlineStartTime: cart.marketDay.onlineStartTime.toISOString(),
+      onlineEndTime: cart.marketDay.onlineEndTime.toISOString(),
       description: cart.marketDay.marketSchedule.description,
       status: cart.marketDay.status,
       marketSchedule: {
@@ -189,6 +191,8 @@ export const getCartSimple = async (
       location: cart.marketDay.marketSchedule.location,
       startTime: cart.marketDay.startTime.toISOString(),
       endTime: cart.marketDay.endTime.toISOString(),
+      onlineStartTime: cart.marketDay.onlineStartTime.toISOString(),
+      onlineEndTime: cart.marketDay.onlineEndTime.toISOString(),
       description: cart.marketDay.marketSchedule.description,
       status: cart.marketDay.status,
       marketSchedule: {

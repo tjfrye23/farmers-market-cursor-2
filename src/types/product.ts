@@ -65,10 +65,11 @@ export function isClientMarketDayProduct(
   return 'marketDay' in product
 }
 
-const allCategories = new Set(Object.values(ProductCategory))
+// Use Zod for category validation instead of manual type casting
+const categorySchema = z.nativeEnum(ProductCategory)
 
 export function isCategory(category: string): category is ProductCategory {
-  return allCategories.has(category as ProductCategory)
+  return categorySchema.safeParse(category).success
 }
 
 export const createProductSchema = z.object({

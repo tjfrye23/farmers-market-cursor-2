@@ -8,14 +8,15 @@ import {
   DialogClose,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Order } from '@/types/order'
+import { ClientOrder } from '@/types/order'
+import { OrderStatus } from '@/generated/prisma/client'
 
 interface OrderStatusDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  selectedOrder: Order | null
-  selectedStatus: 'processing' | 'processed'
-  onStatusChange: (status: 'processing' | 'processed') => void
+  selectedOrder: ClientOrder | null
+  selectedStatus: OrderStatus
+  onStatusChange: (status: OrderStatus) => void
   onUpdate: () => void
   isUpdating: boolean
 }
@@ -35,7 +36,7 @@ export default function OrderStatusDialog({
         <DialogHeader>
           <DialogTitle>Update Order Status</DialogTitle>
           <DialogDescription>
-            Change the status for order #{selectedOrder?.orderNumber}
+            Change the status for order #{selectedOrder?.id}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -43,13 +44,13 @@ export default function OrderStatusDialog({
           <select
             className="w-full rounded border px-3 py-2"
             value={selectedStatus}
-            onChange={(e) =>
-              onStatusChange(e.target.value as 'processing' | 'processed')
-            }
+            onChange={(e) => onStatusChange(e.target.value as OrderStatus)}
             disabled={isUpdating}
           >
-            <option value="processing">Processing</option>
-            <option value="processed">Processed</option>
+            <option value={OrderStatus.PENDING}>Pending</option>
+            <option value={OrderStatus.CONFIRMED}>Confirmed</option>
+            <option value={OrderStatus.COMPLETED}>Completed</option>
+            <option value={OrderStatus.CANCELLED}>Cancelled</option>
           </select>
         </div>
         <DialogFooter>

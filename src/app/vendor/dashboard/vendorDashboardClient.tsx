@@ -12,7 +12,8 @@ import OrderStatusDialog from '@/components/vendor-dashboard/OrderStatusDialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { MarketSchedulesTable } from '@/components/MarketSchedulesTable'
 import { ClientProduct } from '@/types/product'
-import { Order } from '@/types/order'
+import { ClientOrder } from '@/types/order'
+import { OrderStatus } from '@/generated/prisma/client'
 import { MarketSchedule } from '@/types/marketSchedule'
 import { Session } from 'next-auth'
 import { ClientVendor } from '@/types/vendors'
@@ -29,7 +30,7 @@ interface VendorDashboardClientProps {
   user: Session['user']
   vendorProfile: ClientVendor
   products: ClientProduct[]
-  orders: Order[]
+  orders: ClientOrder[]
   metrics: Metrics
   marketDays: ClientMarketDay[]
   marketSchedules: (MarketSchedule & { isSubscribed: boolean })[]
@@ -51,8 +52,8 @@ export default function VendorDashboardClient({
   const ordersLoading = false
   const productsLoading = false
   const marketDaysLoading = false
-  const currentOrders = orders.filter((o) => o.status === 'PENDING')
-  const pastOrders = orders.filter((o) => o.status !== 'PENDING')
+  const currentOrders = orders.filter((o) => o.status === OrderStatus.PENDING)
+  const pastOrders = orders.filter((o) => o.status !== OrderStatus.PENDING)
   const isProductDialogOpen = false
   const setIsProductDialogOpen = () => {}
   const editingProduct = null
@@ -66,7 +67,7 @@ export default function VendorDashboardClient({
   const isStatusDialogOpen = false
   const setIsStatusDialogOpen = () => {}
   const selectedOrder = null
-  const selectedStatus: 'processing' | 'processed' = 'processing'
+  const selectedStatus: OrderStatus = OrderStatus.PENDING
   const setSelectedStatus = () => {}
   const handleStatusUpdate = () => {}
   const isUpdating = false

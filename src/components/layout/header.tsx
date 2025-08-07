@@ -12,6 +12,7 @@ import { useCartActions } from '@/hooks/useCartActions'
 import MarketDaySelector from '@/components/shop/MarketDaySelector'
 import { useMarketDayStore } from '@/stores/useMarketDay'
 import { useMarketDays } from '@/hooks/useMarketDays'
+import { UserRole } from '@/generated/prisma/client'
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -27,8 +28,8 @@ export function Header() {
   const { selectedMarketDay, setSelectedMarketDay } = useMarketDayStore()
 
   // TODO: Replace with real role logic
-  const isVendor = user?.role === 'vendor'
-  const isAdmin = user?.role === 'admin'
+  const isVendor = user?.role === UserRole.VENDOR
+  const isAdmin = user?.role === UserRole.ADMIN
 
   const getUserInitials = () => {
     if (!user) return 'U'

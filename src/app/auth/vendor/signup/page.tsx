@@ -17,11 +17,11 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { toast } from 'sonner'
+import { signupVendor } from '@/app/auth/vendor/signup/action'
 import {
-  signupVendor,
-  type VendorSignupInput,
   vendorSignupSchema,
-} from '@/app/auth/vendor/signup/action'
+  type VendorSignupInput,
+} from '@/lib/schemas/vendor'
 
 export default function VendorSignupPage() {
   const router = useRouter()
@@ -37,6 +37,7 @@ export default function VendorSignupPage() {
       description: '',
       phone: '',
       address: '',
+      headerImageUrl: '',
     },
   })
 
@@ -195,6 +196,23 @@ export default function VendorSignupPage() {
                     <FormControl>
                       <Input
                         placeholder="123 Main St, City, State"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="headerImageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Header Image URL</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="https://example.com/image.jpg"
                         {...field}
                       />
                     </FormControl>

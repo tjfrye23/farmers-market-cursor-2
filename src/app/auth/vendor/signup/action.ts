@@ -4,27 +4,26 @@ import { hash } from 'bcryptjs'
 import { z } from 'zod'
 import { db } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-
-export const vendorSignupSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  businessName: z
-    .string()
-    .min(2, 'Business name must be at least 2 characters'),
-  description: z.string().optional(),
-  phone: z.string().optional(),
-  address: z.string().optional(),
-})
-
-export type VendorSignupInput = z.infer<typeof vendorSignupSchema>
+import { UserRole } from '@/generated/prisma/client'
+import {
+  vendorSignupSchema,
+  type VendorSignupInput,
+} from '@/lib/schemas/vendor'
 
 export async function signupVendor(data: VendorSignupInput) {
   try {
     // Validate input
     const validatedData = vendorSignupSchema.parse(data)
-    const { name, email, password, businessName, description, phone, address } =
-      validatedData
+    const {
+      name,
+      email,
+      password,
+      businessName,
+      description,
+      phone,
+      address,
+      headerImageUrl,
+    } = validatedData
 
     // Check if user already exists
     const existingUser = await db.user.findUnique({
@@ -46,7 +45,7 @@ export async function signupVendor(data: VendorSignupInput) {
           name,
           email,
           password: hashedPassword,
-          role: 'vendor',
+          role: UserRole.VENDOR,
         },
       })
 
@@ -55,7 +54,10 @@ export async function signupVendor(data: VendorSignupInput) {
         data: {
           userId: user.id,
           businessName,
-          description,
+          description: description,
+          specialty: businessName,
+          email: email,
+          headerImageUrl,
           phone,
           address,
         },

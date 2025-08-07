@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../src/generated/prisma/client'
+import { PrismaClient, UserRole } from '../../src/generated/prisma/client'
 import { hash } from 'bcryptjs'
 
 export async function seedUsers(prisma: PrismaClient) {
@@ -13,7 +13,7 @@ export async function seedUsers(prisma: PrismaClient) {
       email: 'admin@example.com',
       name: 'Admin User',
       password: adminPassword,
-      role: 'admin',
+      role: UserRole.ADMIN,
     },
   })
 
@@ -26,7 +26,7 @@ export async function seedUsers(prisma: PrismaClient) {
       email: 'vendor@example.com',
       name: 'TJ Boner',
       password: vendor1Password,
-      role: 'vendor',
+      role: UserRole.VENDOR,
       vendorProfile: {
         create: {
           businessName: 'Organic Farm Fresh',
@@ -58,7 +58,7 @@ export async function seedUsers(prisma: PrismaClient) {
       email: 'bakery@farmersmarket.com',
       name: 'A Vendor',
       password: vendor2Password,
-      role: 'vendor',
+      role: UserRole.VENDOR,
       vendorProfile: {
         create: {
           businessName: 'Fresh Baked Goods',
@@ -92,7 +92,7 @@ export async function seedUsers(prisma: PrismaClient) {
         email: `vendor${i}@farmersmarket.com`,
         name: `Vendor ${i}`,
         password,
-        role: 'vendor',
+        role: UserRole.VENDOR,
         vendorProfile: {
           create: {
             businessName: `Vendor Business ${i}`,
@@ -123,7 +123,7 @@ export async function seedUsers(prisma: PrismaClient) {
       email: 'customer@example.com',
       name: 'John Customer',
       password: customerPassword,
-      role: 'user',
+      role: UserRole.USER,
     },
   })
 

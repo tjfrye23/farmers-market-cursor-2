@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react'
 import MarketDayDetailClient from './MarketDayDetailClient'
 import { Metadata } from 'next'
 import { getMarketDayProducts } from '@/data/products'
+import { UserRole } from '@/generated/prisma/client'
 
 interface MarketDayDetailPageProps {
   params: Promise<{
@@ -38,7 +39,7 @@ export default async function MarketDayDetailPage({
 }: MarketDayDetailPageProps) {
   const session = await getServerSession(authOptions)
 
-  if (!session || session.user.role !== 'vendor') {
+  if (!session || session.user.role !== UserRole.VENDOR) {
     redirect('/auth/login')
   }
 

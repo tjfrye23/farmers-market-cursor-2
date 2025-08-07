@@ -1,19 +1,5 @@
-import { VendorStatus as PrismaVendorStatus } from '@/generated/prisma'
+import { VendorStatus } from '@/generated/prisma/client'
 
-export enum VendorStatus {
-  PENDING = 'PENDING',
-  ACTIVE = 'ACTIVE',
-  SUSPENDED = 'SUSPENDED',
-  INACTIVE = 'INACTIVE',
-  BANNED = 'BANNED',
-}
-
-// Helper function to convert Prisma enum to our enum
-export function toVendorStatus(status: PrismaVendorStatus): VendorStatus {
-  return status as VendorStatus
-}
-
-// Helper function to get display name for vendor status
 export function getVendorStatusDisplayName(status: VendorStatus): string {
   switch (status) {
     case VendorStatus.PENDING:
@@ -31,7 +17,6 @@ export function getVendorStatusDisplayName(status: VendorStatus): string {
   }
 }
 
-// Helper function to get badge variant for vendor status
 export function getVendorStatusVariant(
   status: VendorStatus
 ): 'default' | 'secondary' | 'destructive' | 'outline' {

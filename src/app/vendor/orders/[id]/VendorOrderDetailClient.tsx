@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import {
   Select,
   SelectContent,
@@ -12,14 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ArrowLeft, Save, ArrowRight, Phone, Mail } from 'lucide-react'
-import { Order } from '@/types/order'
+import { ArrowLeft, ArrowRight, Mail, Phone, Save } from 'lucide-react'
+import { ClientOrder, ClientOrderItem } from '@/types/order'
+import { OrderStatus } from '@/generated/prisma/client'
 import { Session } from 'next-auth'
-import { toast } from 'sonner'
 import { orderService } from '@/services/orderService'
+import { toast } from 'sonner'
 
 interface VendorOrderDetailClientProps {
-  order: Order
+  order: ClientOrder
   hasNextOrder: boolean
   nextOrderId?: number
   user: Session['user']
@@ -27,10 +28,14 @@ interface VendorOrderDetailClientProps {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'processed':
+    case 'COMPLETED':
       return 'bg-green-100 text-green-800'
-    case 'processing':
+    case 'CONFIRMED':
+      return 'bg-blue-100 text-blue-800'
+    case 'PENDING':
       return 'bg-yellow-100 text-yellow-800'
+    case 'CANCELLED':
+      return 'bg-red-100 text-red-800'
     default:
       return 'bg-gray-100 text-gray-800'
   }
@@ -42,49 +47,37 @@ export default function VendorOrderDetailClient({
   nextOrderId,
 }: VendorOrderDetailClientProps) {
   const router = useRouter()
-  const [order, setOrder] = useState(initialOrder)
-  const [selectedStatus, setSelectedStatus] = useState<
-    'processing' | 'processed'
-  >(initialOrder.status as 'processing' | 'processed')
+  const [order, setOrder] = useState<ClientOrder>(initialOrder)
+  const [selectedStatus, setSelectedStatus] = useState<OrderStatus>(
+    initialOrder.status
+  )
   const [isUpdating, setIsUpdating] = useState(false)
 
   // Sync selected status only on initial load
   useEffect(() => {
-    setSelectedStatus(initialOrder.status as 'processing' | 'processed')
+    setSelectedStatus(initialOrder.status)
   }, [initialOrder.status])
 
   const handleContactCustomer = () => {
-    if (!order?.user) return
-
-    const { email, name } = order.user
-    const subject = `Regarding your order ${order.id}`
-    const body = `Hi ${name},\n\nI hope this message finds you well. I'm reaching out regarding your recent order ${order.id}.\n\nBest regards`
-
-    // Create mailto link
-    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    window.open(mailtoLink, '_blank')
+    window.open(`mailto:${order.user.email}`, '_blank')
   }
 
   const handleCallCustomer = () => {
-    // Since we don't have phone in the current schema, we'll skip this for now
-    toast.info('Phone contact not available in current version')
+    // This would typically open a phone dialer or initiate a call
+    console.log('Calling customer...')
   }
 
   const handleStatusUpdate = async () => {
-    if (!order) return
+    if (selectedStatus === order.status) return
 
-    // Store the previous state for rollback
-    const previousOrder = { ...order }
-    const previousStatus = selectedStatus
+    const previousOrder = order
+    const previousStatus = order.status
 
     // Optimistic update - immediately update the UI
     const updatedOrder = {
       ...order,
       status: selectedStatus,
-      orderItems: order.orderItems.map((item) => ({
-        ...item,
-        status: selectedStatus,
-      })),
+      orderItems: order.orderItems, // Don't change order item statuses
     }
 
     setOrder(updatedOrder)
@@ -93,7 +86,7 @@ export default function VendorOrderDetailClient({
     try {
       await orderService.updateOrderStatus({
         orderId: order.id,
-        status: selectedStatus.toUpperCase() as 'PROCESSING' | 'PROCESSED',
+        status: selectedStatus,
       })
 
       toast.success('Order status updated successfully')
@@ -174,7 +167,7 @@ export default function VendorOrderDetailClient({
               <div className="flex-1">
                 <Select
                   value={selectedStatus}
-                  onValueChange={(value: 'processing' | 'processed') =>
+                  onValueChange={(value: OrderStatus) =>
                     setSelectedStatus(value)
                   }
                 >
@@ -182,8 +175,10 @@ export default function VendorOrderDetailClient({
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="processing">Processing</SelectItem>
-                    <SelectItem value="processed">Processed</SelectItem>
+                    <SelectItem value="PENDING">Pending</SelectItem>
+                    <SelectItem value="CONFIRMED">Confirmed</SelectItem>
+                    <SelectItem value="COMPLETED">Completed</SelectItem>
+                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -247,7 +242,7 @@ export default function VendorOrderDetailClient({
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {order.orderItems.map((item, index) => (
+              {order.orderItems.map((item: ClientOrderItem, index: number) => (
                 <div
                   key={index}
                   className="flex items-center justify-between rounded-lg bg-gray-50 p-3"

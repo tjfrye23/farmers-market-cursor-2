@@ -13,6 +13,7 @@ import {
 import { Edit, Trash2 } from 'lucide-react'
 import { MarketSchedule } from '@/types/marketSchedule'
 import { Session } from 'next-auth'
+import { UserRole } from '@/generated/prisma/client'
 
 interface AdminControlsProps {
   schedule: MarketSchedule
@@ -29,7 +30,7 @@ export function AdminControls({
   onEdit,
   onDelete,
 }: AdminControlsProps) {
-  const isAdmin = user?.role === 'admin'
+  const isAdmin = user?.role === UserRole.ADMIN
 
   if (!isAdmin || isEditing) {
     return null

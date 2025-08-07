@@ -1,9 +1,6 @@
 import { db } from '@/lib/prisma'
-import {
-  MarketSchedule,
-  MarketScheduleStatus,
-  toMarketScheduleStatus,
-} from '@/types/marketSchedule'
+import { MarketSchedule } from '@/types/marketSchedule'
+import { MarketScheduleStatus } from '@/generated/prisma/client'
 import { z } from 'zod'
 
 // Zod schemas for validation
@@ -44,7 +41,7 @@ export async function getMarketSchedules(): Promise<MarketSchedule[]> {
     endDate: new Date(schedule.endTime),
     onlineStartDate: new Date(schedule.onlineStartTime),
     onlineEndDate: new Date(schedule.onlineEndTime),
-    status: toMarketScheduleStatus(schedule.status),
+    status: schedule.status,
   }))
 }
 
@@ -68,7 +65,7 @@ export async function getMarketSchedulesWithSubscriptionStatus(
       endDate: new Date(schedule.endTime),
       onlineStartDate: new Date(schedule.onlineStartTime),
       onlineEndDate: new Date(schedule.onlineEndTime),
-      status: toMarketScheduleStatus(schedule.status),
+      status: schedule.status,
       isSubscribed: schedule.subscriptions.length > 0,
     })
   )
@@ -91,7 +88,7 @@ export async function getMarketScheduleById(
     endDate: new Date(schedule.endTime),
     onlineStartDate: new Date(schedule.onlineStartTime),
     onlineEndDate: new Date(schedule.onlineEndTime),
-    status: toMarketScheduleStatus(schedule.status),
+    status: schedule.status,
   }
 }
 
@@ -188,7 +185,7 @@ export async function updateMarketSchedule(
       endDate: new Date(updatedSchedule.endTime),
       onlineStartDate: new Date(updatedSchedule.onlineStartTime),
       onlineEndDate: new Date(updatedSchedule.onlineEndTime),
-      status: toMarketScheduleStatus(updatedSchedule.status),
+      status: updatedSchedule.status,
     }
   } catch (error) {
     console.error('Error updating market schedule:', error)

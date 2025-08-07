@@ -1,36 +1,16 @@
-import { MarketDayStatus as PrismaMarketDayStatus } from '@/generated/prisma'
+import { MarketDayStatus } from '@/generated/prisma/client'
+import {
+  isClientMarketDay,
+  ClientMarketDay as ClientMarketDayType,
+} from '@/lib/schemas/marketDay'
 
-export enum MarketDayStatus {
-  DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
-  CANCELLED = 'CANCELLED',
-  ACTIVE = 'ACTIVE',
-  COMPLETED = 'COMPLETED',
-}
+export type ClientMarketDay = ClientMarketDayType
 
-export interface ClientMarketDay {
-  id: number
-  name: string
-  startTime: string
-  endTime: string
-  onlineStartTime: string
-  onlineEndTime: string
-  location: string
-  description: string
-  status: MarketDayStatus
-  marketSchedule: {
-    id: number
-  }
-}
+export { isClientMarketDay }
 
-// Helper function to convert Prisma enum to our enum
-export function toMarketDayStatus(
-  status: PrismaMarketDayStatus
-): MarketDayStatus {
-  return status as MarketDayStatus
-}
+// Export MarketDay as an alias for backward compatibility
+export type MarketDay = ClientMarketDay
 
-// Helper function to get status display name
 export function getMarketDayStatusDisplayName(status: MarketDayStatus): string {
   switch (status) {
     case MarketDayStatus.DRAFT:
@@ -48,7 +28,6 @@ export function getMarketDayStatusDisplayName(status: MarketDayStatus): string {
   }
 }
 
-// Helper function to get status color variant
 export function getMarketDayStatusVariant(
   status: MarketDayStatus
 ): 'default' | 'secondary' | 'destructive' | 'outline' {

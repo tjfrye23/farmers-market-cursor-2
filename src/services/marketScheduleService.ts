@@ -1,5 +1,6 @@
 import { api } from './api'
-import { MarketSchedule, MarketScheduleStatus } from '@/types/marketSchedule'
+import { MarketSchedule } from '@/types/marketSchedule'
+import { MarketScheduleStatus } from '@/generated/prisma/client'
 
 export interface MarketScheduleService {
   subscribeToSchedule: (scheduleId: number) => Promise<void>

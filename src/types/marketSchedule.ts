@@ -1,20 +1,4 @@
-import { MarketScheduleStatus as PrismaMarketScheduleStatus } from '@/generated/prisma'
-
-export enum MarketScheduleStatus {
-  DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
-  CANCELLED = 'CANCELLED',
-  PENDING_REVIEW = 'PENDING_REVIEW',
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-}
-
-// Helper function to convert Prisma enum to our enum
-export function toMarketScheduleStatus(
-  status: PrismaMarketScheduleStatus
-): MarketScheduleStatus {
-  return status as MarketScheduleStatus
-}
+import { MarketScheduleStatus } from '@/generated/prisma/client'
 
 export interface MarketSchedule {
   id: number
@@ -27,3 +11,6 @@ export interface MarketSchedule {
   location: string
   status: MarketScheduleStatus
 }
+
+// Re-export MarketScheduleStatus for convenience
+export { MarketScheduleStatus }

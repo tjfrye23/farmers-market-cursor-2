@@ -3,14 +3,14 @@ import ProductDetailClient from './ProductDetailClient'
 import { getMarketDayProductById } from '@/data/products'
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default async function ProductDetailPage(props: Promise<Props>) {
-  const { params } = await props
-  const productId = parseInt(params.id)
+export default async function ProductDetailPage({ params }: Props) {
+  const { id } = await params
+  const productId = parseInt(id)
 
   if (isNaN(productId)) notFound()
 

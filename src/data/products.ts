@@ -6,7 +6,6 @@ import {
   ClientProductSimple,
   ClientProductVariation,
 } from '@/types/product'
-import { toMarketDayStatus } from '@/types/marketDay'
 
 export async function getUserFavoriteProducts(
   userId: number
@@ -266,7 +265,7 @@ export async function getMarketDayProductById(
       marketSchedule: product.marketDay.marketSchedule,
       location: product.marketDay.marketSchedule.location,
       description: product.marketDay.marketSchedule.description,
-      status: toMarketDayStatus(product.marketDay.status),
+      status: product.marketDay.status,
       startTime: product.marketDay.startTime.toISOString(),
       endTime: product.marketDay.endTime.toISOString(),
       onlineStartTime: product.marketDay.onlineStartTime.toISOString(),

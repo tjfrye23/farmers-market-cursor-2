@@ -1,17 +1,10 @@
 import { db } from '@/lib/prisma'
-import {
-  Order,
-  OrderStatus,
-  OrderItemStatus,
-  toOrderItemStatus,
-} from '@/types/order'
+import { ClientOrder } from '@/types/order'
+import { OrderStatus, OrderItemStatus } from '@/generated/prisma/client'
 
-/**
- * Fetch all orders relevant to a vendor, including nested product and user info.
- */
 export async function getVendorOrders(
   vendorProfileId: number
-): Promise<Order[]> {
+): Promise<ClientOrder[]> {
   const orders = await db.order.findMany({
     where: {
       orderItems: {
@@ -65,12 +58,12 @@ export async function getVendorOrders(
 
   const mappedOrders = orders.map((order) => {
     const computedStatus: OrderStatus = order.orderItems.some(
-      (item) => toOrderItemStatus(item.status) === OrderItemStatus.PROCESSING
+      (item) => item.status === OrderItemStatus.PROCESSING
     )
       ? OrderStatus.PENDING
       : OrderStatus.COMPLETED
 
-    const marketDay: Order['marketDay'] = {
+    const marketDay: ClientOrder['marketDay'] = {
       id: order.marketDay.id,
       name: order.marketDay.marketSchedule.name,
       date: order.marketDay.startTime
@@ -79,15 +72,15 @@ export async function getVendorOrders(
     }
 
     let vendorTotal = 0
-    const orderItems: Order['orderItems'] = order.orderItems.map(
-      (item): Order['orderItems'][number] => {
+    const orderItems: ClientOrder['orderItems'] = order.orderItems.map(
+      (item): ClientOrder['orderItems'][number] => {
         vendorTotal += item.price * item.quantity
         return {
           id: item.id,
           quantity: item.quantity,
           price: item.price,
           unit: item.marketDayProductVariation.productVariation.unit.name,
-          status: toOrderItemStatus(item.status),
+          status: item.status,
           name: item.marketDayProductVariation.productVariation.product.name,
           imageUrl:
             item.marketDayProductVariation.productVariation.product.imageUrl,
@@ -95,7 +88,7 @@ export async function getVendorOrders(
       }
     )
 
-    const vendorOrder: Order = {
+    const vendorOrder: ClientOrder = {
       id: order.id,
       date: order.createdAt.toISOString().split('T')[0],
       user: order.user,
@@ -111,13 +104,10 @@ export async function getVendorOrders(
   return mappedOrders
 }
 
-/**
- * Fetch a specific vendor order with full details
- */
 export async function getVendorOrderById(
   orderId: number,
   vendorProfileId: number
-): Promise<Order | null> {
+): Promise<ClientOrder | null> {
   const order = await db.order.findUnique({
     where: { id: orderId },
     include: {
@@ -179,7 +169,7 @@ export async function getVendorOrderById(
     date: order.createdAt.toISOString().split('T')[0],
     user: order.user,
     status: order.orderItems.some(
-      (item) => toOrderItemStatus(item.status) === OrderItemStatus.PROCESSING
+      (item) => item.status === OrderItemStatus.PROCESSING
     )
       ? OrderStatus.PENDING
       : OrderStatus.COMPLETED,
@@ -188,7 +178,7 @@ export async function getVendorOrderById(
       quantity: item.quantity,
       price: item.price,
       unit: item.unit.name,
-      status: toOrderItemStatus(item.status),
+      status: item.status,
       name: item.marketDayProductVariation.marketDayProduct.product.name,
       imageUrl:
         item.marketDayProductVariation.marketDayProduct.product.imageUrl,

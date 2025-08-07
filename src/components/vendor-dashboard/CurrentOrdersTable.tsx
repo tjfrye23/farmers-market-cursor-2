@@ -1,5 +1,5 @@
 import {
-  Order,
+  ClientOrder,
   getOrderItemStatusDisplayName,
   getOrderItemStatusVariant,
 } from '@/types/order'
@@ -22,9 +22,9 @@ import { MoreHorizontal, Eye, Edit } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface CurrentOrdersTableProps {
-  orders: Order[]
+  orders: ClientOrder[]
   loading: boolean
-  onUpdateStatus: (order: Order) => void
+  onUpdateStatus: (order: ClientOrder) => void
 }
 
 export default function CurrentOrdersTable({
@@ -34,7 +34,7 @@ export default function CurrentOrdersTable({
 }: CurrentOrdersTableProps) {
   const router = useRouter()
 
-  const getOrderStatus = (order: Order) => {
+  const getOrderStatus = (order: ClientOrder) => {
     return order.orderItems[0].status
   }
 

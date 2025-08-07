@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth, withValidation, withRateLimit } from '@/lib/api-handler'
 import { db } from '@/lib/prisma'
-import { updateProductSchema, type UpdateProductInput } from '../route'
+import {
+  updateProductSchema,
+  type UpdateProductInput,
+} from '@/lib/schemas/product'
 
 export const GET = withRateLimit(
-  async (req: NextRequest, context: { params: Record<string, string> }) => {
-    const id = parseInt(context.params.id, 10)
+  async (
+    req: NextRequest,
+    context: { params: Promise<Record<string, string>> }
+  ) => {
+    const params = await context.params
+    const id = parseInt(params.id, 10)
     if (isNaN(id)) {
       return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 })
     }
@@ -35,7 +42,8 @@ export const PUT = withRateLimit(
     withValidation(
       updateProductSchema,
       async (req, data: UpdateProductInput, context) => {
-        const id = parseInt(context.params.id, 10)
+        const params = await context.params
+        const id = parseInt(params.id, 10)
         if (isNaN(id)) {
           return NextResponse.json(
             { error: 'Invalid product ID' },
@@ -71,8 +79,12 @@ export const PUT = withRateLimit(
 
 export const DELETE = withRateLimit(
   withAuth(
-    async (req: NextRequest, context: { params: Record<string, string> }) => {
-      const id = parseInt(context.params.id, 10)
+    async (
+      req: NextRequest,
+      context: { params: Promise<Record<string, string>> }
+    ) => {
+      const params = await context.params
+      const id = parseInt(params.id, 10)
       if (isNaN(id)) {
         return NextResponse.json(
           { error: 'Invalid product ID' },

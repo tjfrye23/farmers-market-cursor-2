@@ -1,36 +1,5 @@
-import {
-  OrderStatus as PrismaOrderStatus,
-  OrderItemStatus as PrismaOrderItemStatus,
-} from '@/generated/prisma'
+import { OrderStatus, OrderItemStatus } from '@/generated/prisma/client'
 
-export enum OrderStatus {
-  PENDING = 'PENDING',
-  CONFIRMED = 'CONFIRMED',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-  REFUNDED = 'REFUNDED',
-}
-
-export enum OrderItemStatus {
-  PROCESSING = 'PROCESSING',
-  READY = 'READY',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-}
-
-// Helper function to convert Prisma enum to our enum
-export function toOrderStatus(status: PrismaOrderStatus): OrderStatus {
-  return status as OrderStatus
-}
-
-// Helper function to convert Prisma enum to our enum
-export function toOrderItemStatus(
-  status: PrismaOrderItemStatus
-): OrderItemStatus {
-  return status as OrderItemStatus
-}
-
-// Helper function to get display name for order status
 export function getOrderStatusDisplayName(status: OrderStatus): string {
   switch (status) {
     case OrderStatus.PENDING:
@@ -48,7 +17,6 @@ export function getOrderStatusDisplayName(status: OrderStatus): string {
   }
 }
 
-// Helper function to get display name for order item status
 export function getOrderItemStatusDisplayName(status: OrderItemStatus): string {
   switch (status) {
     case OrderItemStatus.PROCESSING:
@@ -64,7 +32,6 @@ export function getOrderItemStatusDisplayName(status: OrderItemStatus): string {
   }
 }
 
-// Helper function to get badge variant for order status
 export function getOrderStatusVariant(
   status: OrderStatus
 ): 'default' | 'secondary' | 'destructive' | 'outline' {
@@ -84,7 +51,6 @@ export function getOrderStatusVariant(
   }
 }
 
-// Helper function to get badge variant for order item status
 export function getOrderItemStatusVariant(
   status: OrderItemStatus
 ): 'default' | 'secondary' | 'destructive' | 'outline' {

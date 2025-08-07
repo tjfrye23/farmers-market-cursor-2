@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import PageHeader from '@/components/PageHeader'
 import ProductGrid from '@/components/shop/ProductGrid'
@@ -13,7 +13,7 @@ import { useMarketDayProducts } from '@/hooks/useMarketDayProducts'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useMarketDayStore } from '@/stores/useMarketDay'
 
-export default function ShopPage() {
+function ShopPageContent() {
   const searchParams = useSearchParams()
   const [filterVisible, setFilterVisible] = useState(false)
   const { selectedMarketDay } = useMarketDayStore()
@@ -97,5 +97,13 @@ export default function ShopPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ShopPageContent />
+    </Suspense>
   )
 }

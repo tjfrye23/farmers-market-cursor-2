@@ -1,4 +1,4 @@
-import { MarketScheduleStatus } from '@/types/marketSchedule'
+import { MarketScheduleStatus } from '@/generated/prisma/client'
 
 export const getStatusBadgeVariant = (status: MarketScheduleStatus) => {
   switch (status) {
@@ -40,11 +40,12 @@ export const isActiveStatus = (status: MarketScheduleStatus): boolean => {
 }
 
 export const isEditableStatus = (status: MarketScheduleStatus): boolean => {
-  return [
+  const editableStatuses = new Set([
     MarketScheduleStatus.DRAFT,
     MarketScheduleStatus.PENDING_REVIEW,
     MarketScheduleStatus.ACTIVE,
-  ].includes(status)
+  ]) as Set<MarketScheduleStatus>
+  return editableStatuses.has(status)
 }
 
 export const getAvailableStatusOptions = (): Array<{

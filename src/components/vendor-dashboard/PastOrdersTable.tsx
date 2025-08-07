@@ -1,4 +1,5 @@
-import { Order } from '@/types/order'
+import { ClientOrder, ClientOrderItem } from '@/types/order'
+import { OrderItemStatus } from '@/generated/prisma/client'
 import { Badge } from '@/components/ui/badge'
 import {
   Table,
@@ -11,7 +12,7 @@ import {
 import { useRouter } from 'next/navigation'
 
 interface PastOrdersTableProps {
-  orders: Order[]
+  orders: ClientOrder[]
   loading: boolean
 }
 
@@ -21,10 +22,12 @@ export default function PastOrdersTable({
 }: PastOrdersTableProps) {
   const router = useRouter()
 
-  const getOrderStatus = (order: Order) => {
+  const getOrderStatus = (order: ClientOrder) => {
     if (!order.orderItems.length) return 'N/A'
     const firstStatus = order.orderItems[0].status
-    return order.orderItems.every((i) => i.status === firstStatus)
+    return order.orderItems.every(
+      (i: ClientOrderItem) => i.status === firstStatus
+    )
       ? firstStatus
       : 'mixed'
   }
@@ -57,9 +60,9 @@ export default function PastOrdersTable({
             <TableCell>
               <Badge
                 variant={
-                  getOrderStatus(order) === 'processed'
+                  getOrderStatus(order) === OrderItemStatus.COMPLETED
                     ? 'secondary'
-                    : getOrderStatus(order) === 'processing'
+                    : getOrderStatus(order) === OrderItemStatus.PROCESSING
                       ? 'default'
                       : getOrderStatus(order) === 'mixed'
                         ? 'outline'

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PrismaClient } from '../../src/generated/prisma/client'
 
 export async function seedSubscriptions(

@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { MarketSchedule, MarketScheduleStatus } from '@/types/marketSchedule'
 import { Session } from 'next-auth'
+import { UserRole } from '@/generated/prisma/client'
 
 interface VendorSubscriptionControlsProps {
   schedule: MarketSchedule
@@ -33,7 +34,7 @@ export function VendorSubscriptionControls({
   onUnsubscribe,
 }: VendorSubscriptionControlsProps) {
   if (
-    user?.role !== 'vendor' ||
+    user?.role !== UserRole.VENDOR ||
     currentStatus !== MarketScheduleStatus.ACTIVE
   ) {
     return null

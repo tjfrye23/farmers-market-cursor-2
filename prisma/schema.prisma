@@ -65,12 +65,18 @@ enum OrderItemStatus {
   CANCELLED
 }
 
+enum UserRole {
+  USER
+  VENDOR
+  ADMIN
+}
+
 model User {
   id            Int       @id @default(autoincrement())
   name          String
   email         String    @unique
   password      String
-  role          String    @default("user")
+  role          UserRole    @default(USER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   emailVerified DateTime?

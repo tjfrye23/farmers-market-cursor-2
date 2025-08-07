@@ -5,13 +5,16 @@ import { authOptions } from './auth'
 
 export type ApiHandler = (
   req: NextRequest,
-  context: { params: Record<string, string> }
+  context: {
+    params: Promise<Record<string, string>>
+    session?: Session
+  }
 ) => Promise<NextResponse>
 
 export type AuthenticatedApiHandler = (
   req: NextRequest,
   context: {
-    params: Record<string, string>
+    params: Promise<Record<string, string>>
     session: Session
   }
 ) => Promise<NextResponse>
@@ -19,13 +22,16 @@ export type AuthenticatedApiHandler = (
 export type ValidationHandler<T extends z.ZodType> = (
   req: NextRequest,
   data: z.infer<T>,
-  context: { params: Record<string, string> }
+  context: {
+    params: Promise<Record<string, string>>
+    session?: Session
+  }
 ) => Promise<NextResponse>
 
 export function withAuth(handler: AuthenticatedApiHandler): ApiHandler {
   return async (
     req: NextRequest,
-    context: { params: Record<string, string> }
+    context: { params: Promise<Record<string, string>> }
   ) => {
     try {
       const session = await getServerSession(authOptions)
@@ -38,7 +44,7 @@ export function withAuth(handler: AuthenticatedApiHandler): ApiHandler {
       }
 
       const params = await context.params
-      return handler(req, { params, session })
+      return handler(req, { params: Promise.resolve(params), session })
     } catch (error) {
       console.error('API Error:', error)
       return NextResponse.json(
@@ -55,7 +61,10 @@ export function withValidation<T extends z.ZodType>(
 ): ApiHandler {
   return async (
     req: NextRequest,
-    context: { params: Record<string, string> }
+    context: {
+      params: Promise<Record<string, string>>
+      session?: Session
+    }
   ) => {
     try {
       const body = await req.json()
@@ -81,7 +90,7 @@ export function withRateLimit(
 
   return async (
     req: NextRequest,
-    context: { params: Record<string, string> }
+    context: { params: Promise<Record<string, string>> }
   ) => {
     const ip = req.headers.get('x-forwarded-for') || 'unknown'
     const now = Date.now()

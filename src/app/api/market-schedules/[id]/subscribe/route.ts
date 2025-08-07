@@ -9,7 +9,7 @@ import {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -22,7 +22,8 @@ export async function POST(
     }
 
     // Validate schedule ID
-    const scheduleIdResult = marketScheduleIdSchema.safeParse(params.id)
+    const { id } = await params
+    const scheduleIdResult = marketScheduleIdSchema.safeParse(id)
     if (!scheduleIdResult.success) {
       return NextResponse.json(
         { error: 'Invalid schedule ID' },
@@ -47,7 +48,7 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -60,7 +61,8 @@ export async function DELETE(
     }
 
     // Validate schedule ID
-    const scheduleIdResult = marketScheduleIdSchema.safeParse(params.id)
+    const { id } = await params
+    const scheduleIdResult = marketScheduleIdSchema.safeParse(id)
     if (!scheduleIdResult.success) {
       return NextResponse.json(
         { error: 'Invalid schedule ID' },

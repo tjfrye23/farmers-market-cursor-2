@@ -1,5 +1,5 @@
 import 'next-auth'
-import { UserRole } from '@/lib/auth'
+import { UserRole } from '@/generated/prisma/client'
 import { ClientVendor } from '@/types/vendors'
 
 // Extend next-auth types

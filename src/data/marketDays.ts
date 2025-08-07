@@ -1,5 +1,5 @@
 import { db } from '@/lib/prisma'
-import { ClientMarketDay, toMarketDayStatus } from '@/types/marketDay'
+import { ClientMarketDay } from '@/types/marketDay'
 
 /**
  * Fetch all market days, including schedules and vendors.
@@ -22,7 +22,7 @@ export async function getMarketDays(): Promise<ClientMarketDay[]> {
       onlineEndTime: marketDay.onlineEndTime.toISOString(),
       location: marketDay.marketSchedule.location,
       description: marketDay.marketSchedule.description,
-      status: toMarketDayStatus(marketDay.status),
+      status: marketDay.status,
       marketSchedule: {
         id: marketDay.marketSchedule.id,
       },
@@ -73,7 +73,7 @@ export async function getVendorMarketDays(
       onlineEndTime: marketDay.onlineEndTime.toISOString(),
       location: marketDay.marketSchedule.location,
       description: marketDay.marketSchedule.description,
-      status: toMarketDayStatus(marketDay.status),
+      status: marketDay.status,
       marketSchedule: {
         id: marketDay.marketSchedule.id,
       },
@@ -104,7 +104,7 @@ export async function getMarketDayById(
     onlineEndTime: marketDay.onlineEndTime.toISOString(),
     location: marketDay.marketSchedule.location,
     description: marketDay.marketSchedule.description,
-    status: toMarketDayStatus(marketDay.status),
+    status: marketDay.status,
     marketSchedule: {
       id: marketDay.marketSchedule.id,
     },

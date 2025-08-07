@@ -1,4 +1,5 @@
-import { PrismaClient } from '../../src/generated/prisma/client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { PrismaClient, UserRole } from '../../src/generated/prisma/client'
 import { hash } from 'bcryptjs'
 
 export async function seedOrders(
@@ -36,7 +37,7 @@ export async function seedOrders(
         email: 'sarah@example.com',
         name: 'Sarah Johnson',
         password: await hash('password123', 12),
-        role: 'user',
+        role: UserRole.USER,
       },
     })
 
@@ -47,7 +48,7 @@ export async function seedOrders(
         email: 'mike@example.com',
         name: 'Mike Chen',
         password: await hash('password123', 12),
-        role: 'user',
+        role: UserRole.USER,
       },
     })
 
@@ -58,7 +59,7 @@ export async function seedOrders(
         email: 'emma@example.com',
         name: 'Emma Davis',
         password: await hash('password123', 12),
-        role: 'user',
+        role: UserRole.USER,
       },
     })
 

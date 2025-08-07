@@ -1,9 +1,6 @@
 import { api } from './api'
 import type { Product } from '../generated/prisma/client'
-import {
-  CreateProductInput,
-  UpdateProductInput,
-} from '@/app/api/products/route'
+import { CreateProductInput, UpdateProductInput } from '@/lib/schemas/product'
 
 export const productsService = {
   async getAll(): Promise<Product[]> {

@@ -1,9 +1,6 @@
 import { CheckCircle, Clock, AlertTriangle, XCircle, Ban } from 'lucide-react'
-import {
-  ClientVendor,
-  VendorStatus,
-  getVendorStatusDisplayName,
-} from '@/types/vendors'
+import { ClientVendor, getVendorStatusDisplayName } from '@/types/vendors'
+import { VendorStatus } from '@/generated/prisma/client'
 
 interface ProfileStatusBannerProps {
   vendorProfile: ClientVendor

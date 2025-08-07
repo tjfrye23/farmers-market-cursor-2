@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
-import { UserRole } from '@/lib/auth'
+import { UserRole } from '@/generated/prisma/client'
 
 // Define protected routes and their required roles
 const protectedRoutes: Record<string, UserRole[]> = {
-  '/vendor/': ['vendor'],
-  '/admin/': ['admin'],
+  '/vendor/': [UserRole.VENDOR],
+  '/admin/': [UserRole.ADMIN],
 }
 
 export async function middleware(request: NextRequest) {

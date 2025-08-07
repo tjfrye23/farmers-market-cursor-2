@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { getVendorOrderById, getNextVendorOrder } from '@/data/orders'
 import VendorOrderDetailClient from './VendorOrderDetailClient'
+import { UserRole } from '@/generated/prisma/client'
 
 interface VendorOrderDetailPageProps {
   params: Promise<{
@@ -17,7 +18,7 @@ export default async function VendorOrderDetailPage({
 
   if (
     !session?.user ||
-    session.user.role !== 'vendor' ||
+    session.user.role !== UserRole.VENDOR ||
     !session.user.vendorProfile?.id
   ) {
     notFound()

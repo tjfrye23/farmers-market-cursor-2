@@ -1,8 +1,8 @@
-import { Order } from '@/types/order'
+import { ClientOrder } from '@/types/order'
 import PastOrdersTable from './PastOrdersTable'
 
 interface OrderHistoryTabProps {
-  pastOrders: Order[]
+  pastOrders: ClientOrder[]
   loading: boolean
 }
 

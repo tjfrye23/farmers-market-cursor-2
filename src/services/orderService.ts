@@ -1,8 +1,9 @@
 import { api } from './api'
+import { OrderStatus } from '@/generated/prisma/client'
 
 export interface UpdateOrderStatusRequest {
   orderId: number
-  status: 'PROCESSING' | 'PROCESSED'
+  status: OrderStatus
 }
 
 export interface OrderService {

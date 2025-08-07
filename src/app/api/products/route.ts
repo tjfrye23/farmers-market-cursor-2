@@ -1,35 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
 import { withAuth, withValidation, withRateLimit } from '@/lib/api-handler'
 import { db } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { ClientProduct, isCategory } from '@/types/product'
-import { ProductCategory } from '@/generated/prisma/client'
-
-// Validation schemas
-export const createProductSchema = z.object({
-  name: z.string().min(1, 'Product name is required'),
-  description: z.string().min(1, 'Description is required'),
-  category: z.nativeEnum(ProductCategory),
-  imageUrl: z.string().url('Please provide a valid image URL'),
-  organic: z.boolean().default(false),
-  local: z.boolean().default(false),
-  variations: z.array(
-    z.object({
-      name: z.string().min(1, 'Variation name is required'),
-      price: z.number().min(0, 'Price must be non-negative'),
-      size: z.number().min(1, 'Size must be at least 1'),
-      packaged: z.boolean().default(false),
-      unitId: z.number().min(1, 'Unit is required'),
-    })
-  ),
-})
-
-export const updateProductSchema = createProductSchema.partial()
-
-export type CreateProductInput = z.infer<typeof createProductSchema>
-export type UpdateProductInput = z.infer<typeof updateProductSchema>
+import {
+  createProductSchema,
+  type CreateProductInput,
+} from '@/lib/schemas/product'
 
 export async function GET(
   request: NextRequest

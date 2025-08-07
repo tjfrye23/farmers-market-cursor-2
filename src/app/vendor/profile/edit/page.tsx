@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { vendorService } from '@/services/vendorService'
+import { UserRole } from '@/generated/prisma/client'
 
 const profileSchema = z.object({
   businessName: z.string().min(1, 'Business name is required'),
@@ -39,7 +40,7 @@ const defaultProfile: ProfileForm = {
   location: '',
   specialty: '',
   description: '',
-  imageUrl: null,
+  imageUrl: undefined,
   website: '',
   facebook: '',
   instagram: '',
@@ -72,15 +73,15 @@ export default function VendorProfilePage() {
       .then((data) => {
         setProfile({
           businessName: data.businessName || '',
-          ownerName: data.user?.name || '',
+          ownerName: data.ownerName || '',
           location: data.address || '',
           specialty: data.specialty || '',
           description: data.description || '',
-          imageUrl: data.imageUrl ?? null,
-          website: data.website || '',
-          facebook: data.facebook || '',
-          instagram: data.instagram || '',
-          twitter: data.twitter || '',
+          imageUrl: data.headerImageUrl ?? undefined,
+          website: data.websiteUrl || '',
+          facebook: data.facebookHandle || '',
+          instagram: data.instagramHandle || '',
+          twitter: data.twitterHandle || '',
         })
         setIsLoading(false)
       })
@@ -131,7 +132,7 @@ export default function VendorProfilePage() {
         description: profile.description,
         address: profile.location,
         specialty: profile.specialty,
-        imageUrl: profile.imageUrl,
+        headerImageUrl: profile.imageUrl ?? undefined,
         website: profile.website,
         facebook: profile.facebook,
         instagram: profile.instagram,
@@ -155,7 +156,7 @@ export default function VendorProfilePage() {
       </div>
     )
   }
-  if (!user || user.role !== 'vendor') {
+  if (!user || user.role !== UserRole.VENDOR) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         You must be a vendor to view this page.

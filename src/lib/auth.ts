@@ -5,8 +5,8 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { db } from '@/lib/prisma'
 import { NextAuthOptions } from 'next-auth'
 import bcrypt from 'bcryptjs'
-
-export type UserRole = 'user' | 'vendor' | 'admin'
+import type { User } from 'next-auth'
+import { isValidUserRole } from '@/lib/schemas/auth'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
@@ -16,8 +16,8 @@ export const authOptions: NextAuthOptions = {
     //   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     // }),
     // AppleProvider({
-    //   clientId: process.env.APPLE_CLIENT_ID!,
-    //   clientSecret: process.env.APPLE_CLIENT_SECRET!,
+    //   clientId: process.env.APPLE_ID!,
+    //   clientSecret: process.env.APPLE_SECRET!,
     // }),
     CredentialsProvider({
       name: 'credentials',
@@ -25,7 +25,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials): Promise<User | null> {
         if (!credentials?.email || !credentials?.password) {
           return null
         }
@@ -50,6 +50,12 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
+        // Validate user role with Zod instead of type casting
+        if (!isValidUserRole(user.role)) {
+          console.error('Invalid user role:', user.role)
+          return null
+        }
+
         return {
           id: user.id,
           email: user.email,
@@ -58,7 +64,7 @@ export const authOptions: NextAuthOptions = {
           vendorProfile: user.vendorProfile
             ? {
                 id: user.vendorProfile.id,
-                name: user.vendorProfile.businessName,
+                businessName: user.vendorProfile.businessName,
               }
             : null,
         }
@@ -77,20 +83,6 @@ export const authOptions: NextAuthOptions = {
         token.id = typeof user.id === 'number' ? user.id : parseInt(user.id)
         token.role = user.role
         token.vendorProfile = user.vendorProfile
-        // if (user.vendorProfile) {
-        //   token.vendorProfile = user.vendorProfile
-        // } else if (user.role === 'vendor') {
-        //   const vendorProfile = await db.vendorProfile.findUnique({
-        //     where: { userId: token.id },
-        //     select: { id: true, businessName: true },
-        //   })
-        //   if (vendorProfile) {
-        //     token.vendorProfile = {
-        //       id: vendorProfile.id,
-        //       name: vendorProfile.businessName,
-        //     }
-        //   }
-        // }
       }
       return token
     },

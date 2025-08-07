@@ -1,10 +1,10 @@
-import { Order } from '@/types/order'
+import { ClientOrder } from '@/types/order'
 import CurrentOrdersTable from './CurrentOrdersTable'
 
 interface OrdersTabProps {
-  currentOrders: Order[]
+  currentOrders: ClientOrder[]
   loading: boolean
-  onUpdateStatus: (order: Order) => void
+  onUpdateStatus: (order: ClientOrder) => void
 }
 
 export default function OrdersTab({
