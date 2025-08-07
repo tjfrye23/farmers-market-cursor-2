@@ -1,48 +1,65 @@
 'use server'
 
-import { db } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { z } from 'zod'
+import {
+  createVerificationToken,
+  createUser,
+  findUserByEmail,
+} from '@/data/auth'
 import { sendVerificationEmail } from '@/lib/email'
 import crypto from 'crypto'
 
-export async function registerUser(formData: FormData) {
-  const name = formData.get('name')?.toString().trim()
-  const email = formData.get('email')?.toString().toLowerCase().trim()
-  const password = formData.get('password')?.toString()
+const signupSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+})
 
-  if (!name || !email || !password) {
-    return { success: false, error: 'All fields are required.' }
-  }
-  if (password.length < 6) {
-    return { success: false, error: 'Password must be at least 6 characters.' }
-  }
+export type SignupInput = z.infer<typeof signupSchema>
 
-  // Check for existing user
-  const existing = await db.user.findUnique({ where: { email } })
-  if (existing) {
-    return { success: false, error: 'Email is already registered.' }
-  }
+export async function signup(data: SignupInput) {
+  try {
+    const validatedData = signupSchema.parse(data)
+    const { name, email, password } = validatedData
 
-  const hashed = await bcrypt.hash(password, 10)
-  await db.user.create({
-    data: {
+    const existingUser = await findUserByEmail(email)
+    if (existingUser) {
+      return {
+        success: false,
+        error: 'User already exists',
+      }
+    }
+
+    // Create user using data layer
+    await createUser({
       name,
       email,
-      password: hashed,
-    },
-  })
+      password,
+    })
 
-  const token = crypto.randomBytes(32).toString('hex')
-  await db.verificationToken.create({
-    data: {
+    // Create verification token
+    const token = await createVerificationToken({
       identifier: email,
-      token,
+      token: crypto.randomUUID(),
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-    },
-  })
+    })
 
-  const verificationUrl = `${process.env.NEXTAUTH_URL}/auth/verify?token=${token}`
-  await sendVerificationEmail(email, verificationUrl)
+    const verificationUrl = `${process.env.NEXTAUTH_URL}/auth/verify?token=${token}`
+    await sendVerificationEmail(email, verificationUrl)
 
-  return { success: true }
+    return { success: true }
+  } catch (error) {
+    console.error('Signup error:', error)
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: 'Invalid input data',
+        details: error.errors,
+      }
+    }
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Something went wrong',
+    }
+  }
 }

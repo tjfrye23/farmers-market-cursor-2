@@ -1,128 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withAuth, withValidation, withRateLimit } from '@/lib/api-handler'
-import { db } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { ClientProduct, isCategory } from '@/types/product'
-import {
-  createProductSchema,
-  type CreateProductInput,
-} from '@/lib/schemas/product'
+import { withAuth, withRateLimit, withValidation } from '@/lib/api-handler'
+import { getMarketDayProductsByFilters, createProduct } from '@/data/products'
+import { findVendorByUserId } from '@/data/vendors'
+import { createProductSchema, productsQuerySchema } from '@/lib/schemas/product'
+import { ClientProduct, ClientProductVariation } from '@/types/product'
+import { z } from 'zod'
 
-export async function GET(
-  request: NextRequest
-): Promise<NextResponse<{ products: ClientProduct[] } | { error: string }>> {
-  try {
-    const searchParams = request.nextUrl.searchParams
-    const marketDayId = searchParams.get('marketDayId')
-    const categoryFilter = searchParams.getAll('category')
-    const vendorFilter = searchParams.getAll('vendorId')
+export const GET = withRateLimit(
+  async (
+    req: NextRequest
+  ): Promise<NextResponse<ClientProduct[] | { error: string }>> => {
+    try {
+      // Parse and validate query parameters
+      const queryParams = Object.fromEntries(req.nextUrl.searchParams.entries())
+      const validatedParams = productsQuerySchema.parse(queryParams)
 
-    if (!marketDayId) {
-      return NextResponse.json(
-        { error: 'Market day ID is required' },
-        { status: 400 }
+      const priceRange: [number, number] | undefined =
+        validatedParams.minPrice && validatedParams.maxPrice
+          ? [validatedParams.minPrice, validatedParams.maxPrice]
+          : undefined
+
+      const filters = {
+        categoryFilter: validatedParams.category?.length
+          ? validatedParams.category
+          : undefined,
+        vendorFilter: validatedParams.vendor?.length
+          ? validatedParams.vendor
+          : undefined,
+        priceRange,
+      }
+
+      const products = await getMarketDayProductsByFilters(
+        validatedParams.marketDayId,
+        filters
       )
-    }
 
-    // Convert category filter strings to ProductCategory enum values
-    const categoryFilterEnums = categoryFilter
-      .map((cat) => cat.toUpperCase())
-      .filter(isCategory)
-
-    if (categoryFilterEnums.length !== categoryFilter.length) {
-      return NextResponse.json(
-        { error: 'Invalid category filter' },
-        { status: 400 }
-      )
-    }
-
-    // Fetch all market day products for the market day, including product and vendor info
-    const products = await db.marketDayProduct.findMany({
-      where: {
-        marketDayId: parseInt(marketDayId),
-        isActive: true,
-        ...(categoryFilterEnums.length > 0 && {
-          product: {
-            category: {
-              in: categoryFilterEnums,
-            },
-          },
-        }),
-        ...(vendorFilter.length > 0 && {
-          product: {
-            vendorProfile: {
-              id: {
-                in: vendorFilter.map(Number),
-              },
-            },
-          },
-        }),
-      },
-      include: {
-        product: {
-          include: {
-            vendorProfile: {
-              select: {
-                id: true,
-                businessName: true,
-              },
-            },
-          },
-        },
-        variations: {
-          include: {
-            productVariation: {
-              include: {
-                unit: true,
-              },
-            },
-          },
-        },
-      },
-    })
-
-    const result = products.map((product): ClientProduct => {
-      const primary = product.variations[0]
-
-      return {
-        id: product.product.id,
+      const clientProducts = products.map<ClientProduct>((product) => ({
+        id: product.id,
         name: product.product.name,
         description: product.product.description,
-        price: primary.price,
         imageUrl: product.product.imageUrl,
         category: product.product.category,
-        vendor: {
-          id: product.product.vendorProfile.id,
-          businessName: product.product.vendorProfile.businessName,
-        },
-        unit: primary.productVariation.unit,
+        unit: product.variations[0].productVariation.unit,
+        price: product.variations[0].price,
         organic: product.product.organic,
         local: product.product.local,
-        variations: product.variations.map(
-          (v): ClientProduct['variations'][number] => ({
-            id: v.id,
-            name: v.productVariation.name,
-            size: v.productVariation.size,
-            packaged: v.productVariation.packaged,
-            unit: v.productVariation.unit,
-            price: v.price,
+        vendor: product.product.vendorProfile,
+        variations: product.variations.map<ClientProductVariation>(
+          (variation) => ({
+            id: variation.id,
+            name: variation.productVariation.name,
+            size: variation.productVariation.size,
+            packaged: variation.productVariation.packaged,
+            unit: variation.productVariation.unit,
+            price: variation.price,
           })
         ),
-      }
-    })
+      }))
 
-    return NextResponse.json({
-      products: result,
-    })
-  } catch (error) {
-    console.error('Error fetching market day products:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch market day products' },
-      { status: 500 }
-    )
-  }
-}
+      return NextResponse.json(clientProducts)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          { error: 'Invalid query parameters', details: error.errors },
+          { status: 400 }
+        )
+      }
+      throw error
+    }
+  },
+  { limit: 100, windowMs: 60 * 1000 }
+)
 
 export const POST = withRateLimit(
   withAuth(
@@ -130,36 +78,25 @@ export const POST = withRateLimit(
       createProductSchema,
       async (
         req,
-        data: CreateProductInput
+        data,
+        context
       ): Promise<NextResponse<ClientProduct | { error: string }>> => {
-        const session = await getServerSession(authOptions)
-        if (!session?.user) {
-          return new NextResponse('Unauthorized', { status: 401 })
+        const { session } = context
+
+        if (!session) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Get the vendor profile for the current user
-        const vendorProfile = await db.vendorProfile.findUnique({
-          where: { userId: session.user.id },
-        })
-
+        // Get vendor profile for the authenticated user
+        const vendorProfile = await findVendorByUserId(session.user.id)
         if (!vendorProfile) {
-          return new NextResponse('Vendor profile not found', { status: 404 })
+          return NextResponse.json(
+            { error: 'Vendor profile not found' },
+            { status: 404 }
+          )
         }
 
-        const product = await db.product.create({
-          data: {
-            name: data.name,
-            description: data.description,
-            category: data.category,
-            imageUrl: data.imageUrl,
-            organic: data.organic,
-            local: data.local,
-            vendorProfileId: vendorProfile.id,
-          },
-          include: {
-            vendorProfile: true,
-          },
-        })
+        const product = await createProduct(vendorProfile.id, data)
 
         const clientProduct: ClientProduct = {
           id: product.id,

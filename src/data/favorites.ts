@@ -78,3 +78,15 @@ export async function getUserFavorites(
     }
   })
 }
+
+export async function deleteUserFavorite(userId: number, productId: number) {
+  return await db.favorite.deleteMany({
+    where: { userId, productId },
+  })
+}
+
+export async function createUserFavorite(userId: number, productId: number) {
+  return await db.favorite.create({
+    data: { userId, productId },
+  })
+}

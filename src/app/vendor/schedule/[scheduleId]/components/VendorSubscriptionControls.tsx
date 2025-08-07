@@ -10,12 +10,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { MarketSchedule, MarketScheduleStatus } from '@/types/marketSchedule'
+import {
+  ClientMarketSchedule,
+  MarketScheduleStatus,
+} from '@/types/marketSchedule'
 import { Session } from 'next-auth'
 import { UserRole } from '@/generated/prisma/client'
 
 interface VendorSubscriptionControlsProps {
-  schedule: MarketSchedule
+  schedule: ClientMarketSchedule
   user: Session['user']
   isSubscribed: boolean
   isLoading: boolean

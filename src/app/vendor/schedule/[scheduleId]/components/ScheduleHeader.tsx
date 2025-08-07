@@ -1,6 +1,9 @@
 'use client'
 
-import { MarketSchedule, MarketScheduleStatus } from '@/types/marketSchedule'
+import {
+  ClientMarketSchedule,
+  MarketScheduleStatus,
+} from '@/types/marketSchedule'
 import { Session } from 'next-auth'
 import { HeaderNavigation } from './HeaderNavigation'
 import { VendorSubscriptionControls } from './VendorSubscriptionControls'
@@ -8,7 +11,7 @@ import { AdminControls } from './AdminControls'
 import { EditModeControls } from './EditModeControls'
 
 interface ScheduleHeaderProps {
-  schedule: MarketSchedule
+  schedule: ClientMarketSchedule
   user: Session['user']
   isSubscribed: boolean
   isLoading: boolean

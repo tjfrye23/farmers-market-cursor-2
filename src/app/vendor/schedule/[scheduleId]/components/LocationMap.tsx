@@ -1,10 +1,10 @@
 'use client'
 
 import { MapPin } from 'lucide-react'
-import { MarketSchedule } from '@/types/marketSchedule'
+import { ClientMarketSchedule } from '@/types/marketSchedule'
 
 interface LocationMapProps {
-  schedule: MarketSchedule
+  schedule: ClientMarketSchedule
 }
 
 export function LocationMap({ schedule }: LocationMapProps) {

@@ -3,10 +3,10 @@
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
-import { MarketSchedule } from '@/types/marketSchedule'
+import { ClientMarketSchedule } from '@/types/marketSchedule'
 
 interface HeaderNavigationProps {
-  schedule: MarketSchedule
+  schedule: ClientMarketSchedule
 }
 
 export function HeaderNavigation({ schedule }: HeaderNavigationProps) {

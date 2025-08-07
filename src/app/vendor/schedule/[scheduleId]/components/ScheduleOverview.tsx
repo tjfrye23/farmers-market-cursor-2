@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, Clock, Store } from 'lucide-react'
-import { MarketSchedule } from '@/types/marketSchedule'
+import { ClientMarketSchedule } from '@/types/marketSchedule'
 import {
   getStatusBadgeVariant,
   getStatusDisplayName,
@@ -11,7 +11,7 @@ import {
 import { LocationMap } from './LocationMap'
 
 interface ScheduleOverviewProps {
-  schedule: MarketSchedule
+  schedule: ClientMarketSchedule
   isEditing: boolean
 }
 

@@ -22,6 +22,7 @@ import {
   vendorSignupSchema,
   type VendorSignupInput,
 } from '@/lib/schemas/vendor'
+import { isVendorSignupResultError } from './type'
 
 export default function VendorSignupPage() {
   const router = useRouter()
@@ -47,7 +48,7 @@ export default function VendorSignupPage() {
 
       const result = await signupVendor(data)
 
-      if (!result.success) {
+      if (isVendorSignupResultError(result)) {
         throw new Error(result.error)
       }
 

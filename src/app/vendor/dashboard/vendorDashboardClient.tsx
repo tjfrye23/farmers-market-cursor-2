@@ -14,7 +14,7 @@ import { MarketSchedulesTable } from '@/components/MarketSchedulesTable'
 import { ClientProduct } from '@/types/product'
 import { ClientOrder } from '@/types/order'
 import { OrderStatus } from '@/generated/prisma/client'
-import { MarketSchedule } from '@/types/marketSchedule'
+import { ClientMarketSchedule } from '@/types/marketSchedule'
 import { Session } from 'next-auth'
 import { ClientVendor } from '@/types/vendors'
 import { ClientMarketDay } from '@/types/marketDay'
@@ -33,7 +33,7 @@ interface VendorDashboardClientProps {
   orders: ClientOrder[]
   metrics: Metrics
   marketDays: ClientMarketDay[]
-  marketSchedules: (MarketSchedule & { isSubscribed: boolean })[]
+  marketSchedules: (ClientMarketSchedule & { isSubscribed: boolean })[]
 }
 
 export default function VendorDashboardClient({

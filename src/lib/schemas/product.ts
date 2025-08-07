@@ -23,3 +23,45 @@ export const updateProductSchema = createProductSchema.partial()
 
 export type CreateProductInput = z.infer<typeof createProductSchema>
 export type UpdateProductInput = z.infer<typeof updateProductSchema>
+
+export const productsQuerySchema = z.object({
+  marketDayId: z.string().transform((val) => {
+    const parsed = parseInt(val, 10)
+    if (isNaN(parsed)) {
+      throw new Error('Invalid marketDayId')
+    }
+    return parsed
+  }),
+  category: z.array(z.nativeEnum(ProductCategory)).optional(),
+  vendor: z
+    .array(
+      z.string().transform((val) => {
+        const parsed = parseInt(val, 10)
+        if (isNaN(parsed)) {
+          throw new Error('Invalid vendor ID')
+        }
+        return parsed
+      })
+    )
+    .optional(),
+  minPrice: z
+    .string()
+    .transform((val) => {
+      const parsed = parseFloat(val)
+      if (isNaN(parsed)) {
+        throw new Error('Invalid minPrice')
+      }
+      return parsed
+    })
+    .optional(),
+  maxPrice: z
+    .string()
+    .transform((val) => {
+      const parsed = parseFloat(val)
+      if (isNaN(parsed)) {
+        throw new Error('Invalid maxPrice')
+      }
+      return parsed
+    })
+    .optional(),
+})

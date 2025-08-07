@@ -2,14 +2,17 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { MarketSchedule, MarketScheduleStatus } from '@/types/marketSchedule'
+import {
+  ClientMarketSchedule,
+  MarketScheduleStatus,
+} from '@/types/marketSchedule'
 import { Session } from 'next-auth'
 import { toast } from 'sonner'
 import { marketScheduleService } from '@/services/marketScheduleService'
 import { ScheduleHeader, StatusWarning, ScheduleOverview } from './components'
 
 interface MarketScheduleDetailClientProps {
-  schedule: MarketSchedule
+  schedule: ClientMarketSchedule
   user: Session['user']
   isSubscribed: boolean
 }

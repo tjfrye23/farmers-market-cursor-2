@@ -11,12 +11,12 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Edit, Trash2 } from 'lucide-react'
-import { MarketSchedule } from '@/types/marketSchedule'
+import { ClientMarketSchedule } from '@/types/marketSchedule'
 import { Session } from 'next-auth'
 import { UserRole } from '@/generated/prisma/client'
 
 interface AdminControlsProps {
-  schedule: MarketSchedule
+  schedule: ClientMarketSchedule
   user: Session['user']
   isEditing: boolean
   onEdit: () => void

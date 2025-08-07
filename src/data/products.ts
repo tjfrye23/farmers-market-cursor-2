@@ -6,6 +6,8 @@ import {
   ClientProductSimple,
   ClientProductVariation,
 } from '@/types/product'
+import { CreateProductInput, UpdateProductInput } from '@/lib/schemas/product'
+import { Prisma, ProductCategory } from '@/generated/prisma'
 
 export async function getUserFavoriteProducts(
   userId: number
@@ -273,4 +275,153 @@ export async function getMarketDayProductById(
       name: product.marketDay.marketSchedule.name,
     },
   }
+}
+
+export async function createProduct(
+  vendorProfileId: number,
+  data: CreateProductInput
+) {
+  return await db.product.create({
+    data: {
+      name: data.name,
+      description: data.description,
+      category: data.category,
+      imageUrl: data.imageUrl,
+      organic: data.organic,
+      local: data.local,
+      vendorProfileId,
+      variations: {
+        create: data.variations.map((variation) => ({
+          name: variation.name,
+          price: variation.price,
+          size: variation.size,
+          packaged: variation.packaged,
+          unit: {
+            connect: { id: variation.unitId },
+          },
+        })),
+      },
+    },
+    include: {
+      variations: {
+        include: {
+          unit: true,
+        },
+      },
+      vendorProfile: true,
+    },
+  })
+}
+
+export async function updateProduct(
+  productId: number,
+  data: UpdateProductInput
+) {
+  return await db.product.update({
+    where: { id: productId },
+    data: {
+      name: data.name,
+      description: data.description,
+      category: data.category,
+      imageUrl: data.imageUrl,
+      organic: data.organic,
+      local: data.local,
+      variations: {
+        deleteMany: {},
+        create: data.variations?.map((variation) => ({
+          name: variation.name,
+          price: variation.price,
+          size: variation.size,
+          packaged: variation.packaged,
+          unit: {
+            connect: { id: variation.unitId },
+          },
+        })),
+      },
+    },
+    include: {
+      variations: {
+        include: {
+          unit: true,
+        },
+      },
+      vendorProfile: true,
+    },
+  })
+}
+
+export async function deleteProduct(productId: number) {
+  return await db.product.delete({
+    where: { id: productId },
+  })
+}
+
+export async function getMarketDayProductsByFilters(
+  marketDayId: number,
+  filters: {
+    categoryFilter?: ProductCategory[]
+    vendorFilter?: number[]
+    priceRange?: [number, number]
+  }
+) {
+  const { categoryFilter, vendorFilter, priceRange } = filters
+
+  const where: Prisma.MarketDayProductWhereInput = {
+    marketDayId,
+    isActive: true,
+  }
+
+  // Build product filter conditions
+  const productConditions: Prisma.ProductWhereInput = {}
+
+  if (categoryFilter && categoryFilter.length > 0) {
+    productConditions.category = { in: categoryFilter }
+  }
+
+  if (vendorFilter && vendorFilter.length > 0) {
+    productConditions.vendorProfileId = { in: vendorFilter }
+  }
+
+  // Only add product filter if we have conditions
+  if (Object.keys(productConditions).length > 0) {
+    where.product = productConditions
+  }
+
+  if (priceRange) {
+    where.variations = {
+      some: {
+        price: {
+          gte: priceRange[0],
+          lte: priceRange[1],
+        },
+      },
+    }
+  }
+
+  return await db.marketDayProduct.findMany({
+    where,
+    include: {
+      product: {
+        include: {
+          vendorProfile: {
+            select: {
+              id: true,
+              businessName: true,
+            },
+          },
+        },
+      },
+      variations: {
+        where: { isActive: true },
+        include: {
+          productVariation: {
+            include: {
+              unit: true,
+            },
+          },
+        },
+        orderBy: { id: 'asc' },
+      },
+    },
+  })
 }

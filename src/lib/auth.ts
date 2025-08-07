@@ -7,6 +7,7 @@ import { NextAuthOptions } from 'next-auth'
 import bcrypt from 'bcryptjs'
 import type { User } from 'next-auth'
 import { isValidUserRole } from '@/lib/schemas/auth'
+import { findUserByEmail } from '@/data/auth'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
@@ -30,12 +31,7 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email },
-          include: {
-            vendorProfile: true,
-          },
-        })
+        const user = await findUserByEmail(credentials.email)
 
         if (!user || !user.password) {
           return null

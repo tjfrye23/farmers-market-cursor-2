@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { MarketSchedule } from '@/types/marketSchedule'
+import { ClientMarketSchedule } from '@/types/marketSchedule'
 import { useRouter } from 'next/navigation'
 import {
   getStatusBadgeVariant,
@@ -17,7 +17,7 @@ import {
 } from '@/lib/marketScheduleUtils'
 
 interface MarketSchedulesTableProps {
-  marketSchedules: (MarketSchedule & { isSubscribed?: boolean })[]
+  marketSchedules: (ClientMarketSchedule & { isSubscribed?: boolean })[]
   loading?: boolean
 }
 

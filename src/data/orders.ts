@@ -224,3 +224,38 @@ export async function getNextVendorOrder(
     orderBy: { id: 'asc' },
   })
 }
+
+export async function updateOrderItemStatus(
+  orderItemId: number,
+  status: OrderItemStatus
+) {
+  return await db.orderItem.update({
+    where: { id: orderItemId },
+    data: { status },
+  })
+}
+
+export async function getOrderById(orderId: number) {
+  return await db.order.findUnique({
+    where: { id: orderId },
+    include: {
+      orderItems: {
+        include: {
+          marketDayProductVariation: {
+            include: {
+              marketDayProduct: {
+                include: {
+                  product: {
+                    include: {
+                      vendorProfile: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+}

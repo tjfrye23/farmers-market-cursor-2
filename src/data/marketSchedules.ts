@@ -1,5 +1,5 @@
 import { db } from '@/lib/prisma'
-import { MarketSchedule } from '@/types/marketSchedule'
+import { ClientMarketSchedule } from '@/types/marketSchedule'
 import { MarketScheduleStatus } from '@/generated/prisma/client'
 import { z } from 'zod'
 
@@ -32,10 +32,10 @@ export type UpdateMarketScheduleInput = z.infer<
   typeof updateMarketScheduleSchema
 >
 
-export async function getMarketSchedules(): Promise<MarketSchedule[]> {
+export async function getMarketSchedules(): Promise<ClientMarketSchedule[]> {
   const schedules = await db.marketSchedule.findMany()
 
-  return schedules.map<MarketSchedule>((schedule) => ({
+  return schedules.map<ClientMarketSchedule>((schedule) => ({
     ...schedule,
     startDate: new Date(schedule.startTime),
     endDate: new Date(schedule.endTime),
@@ -47,7 +47,7 @@ export async function getMarketSchedules(): Promise<MarketSchedule[]> {
 
 export async function getMarketSchedulesWithSubscriptionStatus(
   vendorProfileId: number
-): Promise<Array<MarketSchedule & { isSubscribed: boolean }>> {
+): Promise<Array<ClientMarketSchedule & { isSubscribed: boolean }>> {
   const schedules = await db.marketSchedule.findMany({
     include: {
       subscriptions: {
@@ -58,7 +58,7 @@ export async function getMarketSchedulesWithSubscriptionStatus(
     },
   })
 
-  return schedules.map<MarketSchedule & { isSubscribed: boolean }>(
+  return schedules.map<ClientMarketSchedule & { isSubscribed: boolean }>(
     (schedule) => ({
       ...schedule,
       startDate: new Date(schedule.startTime),
@@ -73,7 +73,7 @@ export async function getMarketSchedulesWithSubscriptionStatus(
 
 export async function getMarketScheduleById(
   id: number
-): Promise<MarketSchedule | null> {
+): Promise<ClientMarketSchedule | null> {
   const schedule = await db.marketSchedule.findUnique({
     where: {
       id,
@@ -162,7 +162,7 @@ export async function unsubscribeVendorFromSchedule(
 export async function updateMarketSchedule(
   scheduleId: number,
   data: UpdateMarketScheduleInput
-): Promise<MarketSchedule> {
+): Promise<ClientMarketSchedule> {
   try {
     const updatedSchedule = await db.marketSchedule.update({
       where: { id: scheduleId },

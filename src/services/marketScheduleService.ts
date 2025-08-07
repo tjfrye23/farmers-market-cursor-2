@@ -1,5 +1,5 @@
 import { api } from './api'
-import { MarketSchedule } from '@/types/marketSchedule'
+import { ClientMarketSchedule } from '@/types/marketSchedule'
 import { MarketScheduleStatus } from '@/generated/prisma/client'
 
 export interface MarketScheduleService {
@@ -8,11 +8,11 @@ export interface MarketScheduleService {
   updateSchedule: (
     scheduleId: number,
     data: UpdateMarketScheduleData
-  ) => Promise<MarketSchedule>
+  ) => Promise<ClientMarketSchedule>
   updateScheduleStatus: (
     scheduleId: number,
     status: MarketScheduleStatus
-  ) => Promise<MarketSchedule>
+  ) => Promise<ClientMarketSchedule>
   deleteSchedule: (scheduleId: number) => Promise<void>
 }
 
@@ -40,17 +40,23 @@ export const marketScheduleService: MarketScheduleService = {
   async updateSchedule(
     scheduleId: number,
     data: UpdateMarketScheduleData
-  ): Promise<MarketSchedule> {
-    return api.put<MarketSchedule>(`/api/market-schedules/${scheduleId}`, data)
+  ): Promise<ClientMarketSchedule> {
+    return api.put<ClientMarketSchedule>(
+      `/api/market-schedules/${scheduleId}`,
+      data
+    )
   },
 
   async updateScheduleStatus(
     scheduleId: number,
     status: string
-  ): Promise<MarketSchedule> {
-    return api.put<MarketSchedule>(`/api/market-schedules/${scheduleId}`, {
-      status,
-    })
+  ): Promise<ClientMarketSchedule> {
+    return api.put<ClientMarketSchedule>(
+      `/api/market-schedules/${scheduleId}`,
+      {
+        status,
+      }
+    )
   },
 
   async deleteSchedule(scheduleId: number): Promise<void> {

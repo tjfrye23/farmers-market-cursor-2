@@ -1,16 +1,17 @@
 'use server'
 
-import { hash } from 'bcryptjs'
 import { z } from 'zod'
-import { db } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { UserRole } from '@/generated/prisma/client'
 import {
   vendorSignupSchema,
   type VendorSignupInput,
 } from '@/lib/schemas/vendor'
+import { createVendorWithProfile, findUserByEmail } from '@/data/auth'
+import { VendorSignupResult } from './type'
 
-export async function signupVendor(data: VendorSignupInput) {
+export async function signupVendor(
+  data: VendorSignupInput
+): Promise<VendorSignupResult> {
   try {
     // Validate input
     const validatedData = vendorSignupSchema.parse(data)
@@ -25,45 +26,24 @@ export async function signupVendor(data: VendorSignupInput) {
       headerImageUrl,
     } = validatedData
 
-    // Check if user already exists
-    const existingUser = await db.user.findUnique({
-      where: { email },
-    })
-
-    if (existingUser) {
-      throw new Error('User with this email already exists')
+    const user = await findUserByEmail(email)
+    if (user) {
+      return {
+        success: false,
+        error: 'User already exists',
+      }
     }
 
-    // Hash password
-    const hashedPassword = await hash(password, 12)
-
-    // Create user and vendor profile in a transaction
-    const result = await db.$transaction(async (tx) => {
-      // Create user
-      const user = await tx.user.create({
-        data: {
-          name,
-          email,
-          password: hashedPassword,
-          role: UserRole.VENDOR,
-        },
-      })
-
-      // Create vendor profile
-      const vendorProfile = await tx.vendorProfile.create({
-        data: {
-          userId: user.id,
-          businessName,
-          description: description,
-          specialty: businessName,
-          email: email,
-          headerImageUrl,
-          phone,
-          address,
-        },
-      })
-
-      return { user, vendorProfile }
+    // Create user and vendor profile using data layer
+    const result = await createVendorWithProfile({
+      name,
+      email,
+      password,
+      businessName,
+      description,
+      phone,
+      address,
+      headerImageUrl,
     })
 
     // Revalidate relevant paths
@@ -90,7 +70,6 @@ export async function signupVendor(data: VendorSignupInput) {
       return {
         success: false,
         error: 'Invalid input data',
-        details: error.errors,
       }
     }
     return {

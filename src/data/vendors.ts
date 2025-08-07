@@ -1,6 +1,7 @@
 import { db } from '@/lib/prisma'
 import { ClientProductSimple } from '@/types/product'
 import { ClientVendor } from '@/types/vendors'
+import { UpdateVendorProfileInput } from '@/lib/schemas/vendor'
 import z from 'zod'
 
 export const vendorProfileIdSchema = z
@@ -84,4 +85,36 @@ export async function getVendor(id: number): Promise<ClientVendor | null> {
     ownerName: vendor.user.name,
     status: vendor.status,
   }
+}
+
+export async function updateVendorProfile(
+  vendorId: number,
+  data: UpdateVendorProfileInput
+) {
+  return await db.vendorProfile.update({
+    where: { id: vendorId },
+    data: {
+      businessName: data.businessName,
+      description: data.description,
+      address: data.address,
+      specialty: data.specialty,
+      headerImageUrl: data.headerImageUrl,
+      websiteUrl: data.website,
+      facebookHandle: data.facebook,
+      instagramHandle: data.instagram,
+      twitterHandle: data.twitter,
+    },
+    include: {
+      user: true,
+    },
+  })
+}
+
+export async function findVendorByUserId(userId: number) {
+  return await db.vendorProfile.findUnique({
+    where: { userId },
+    include: {
+      user: true,
+    },
+  })
 }

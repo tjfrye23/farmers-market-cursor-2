@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from 'react'
 // TODO: Migrate any missing dependencies
 
-const MarketScheduleContext = createContext<any>(null)
+const MarketScheduleContext = createContext<unknown>(null)
 
 export function useMarketSchedule() {
   return useContext(MarketScheduleContext)

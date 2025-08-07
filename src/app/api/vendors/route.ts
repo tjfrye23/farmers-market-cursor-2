@@ -1,36 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { withRateLimit } from '@/lib/api-handler'
-import { db } from '@/lib/prisma'
+import { getVendorsPaginated } from '@/data/vendors'
 
 export const GET = withRateLimit(
-  async (req: NextRequest) => {
+  async (req) => {
     const searchParams = req.nextUrl.searchParams
-    const userId = searchParams.get('userId')
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const pageSize = parseInt(searchParams.get('pageSize') || '10', 10)
+    const search = searchParams.get('search') || undefined
 
-    const where = {
-      ...(userId && { userId: parseInt(userId, 10) }),
-    }
-
-    const vendorProfiles = await db.vendorProfile.findMany({
-      where,
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        products: {
-          select: {
-            id: true,
-            name: true,
-            imageUrl: true,
-          },
-        },
-      },
-    })
-
-    return NextResponse.json(vendorProfiles)
+    const result = await getVendorsPaginated(page, pageSize, search)
+    return NextResponse.json(result)
   },
-  { limit: 100, windowMs: 60 * 1000 } // 100 requests per minute
+  { limit: 100, windowMs: 60 * 1000 }
 )

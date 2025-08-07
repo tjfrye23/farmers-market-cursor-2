@@ -1,30 +1,14 @@
 import { NextResponse } from 'next/server'
 import { withRateLimit } from '@/lib/api-handler'
-import { db } from '@/lib/prisma'
+import { getMarketSchedules } from '@/data/marketSchedules'
+import { ClientMarketSchedule } from '@/types/marketSchedule'
 
 export const GET = withRateLimit(
-  async () => {
-    const schedules = await db.marketSchedule.findMany({
-      include: {
-        subscriptions: {
-          select: {
-            id: true,
-            businessName: true,
-          },
-        },
-      },
-    })
-
-    const formattedSchedules = schedules.map((schedule) => ({
-      ...schedule,
-      startTime: schedule.startTime.toISOString(),
-      endTime: schedule.endTime.toISOString(),
-      onlineStartTime: schedule.onlineStartTime.toISOString(),
-      onlineEndTime: schedule.onlineEndTime.toISOString(),
-      vendors: schedule.subscriptions,
-    }))
-
-    return NextResponse.json(formattedSchedules)
+  async (): Promise<
+    NextResponse<ClientMarketSchedule[] | { error: string }>
+  > => {
+    const schedules = await getMarketSchedules()
+    return NextResponse.json(schedules)
   },
   { limit: 100, windowMs: 60 * 1000 }
 )

@@ -1,6 +1,6 @@
 import { MarketScheduleStatus } from '@/generated/prisma/client'
 
-export interface MarketSchedule {
+export interface ClientMarketSchedule {
   id: number
   name: string
   description: string

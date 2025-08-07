@@ -1,46 +1,56 @@
 'use server'
 
-import { db } from '@/lib/prisma'
+import {
+  findVerificationToken,
+  findUserById,
+  updateUserVerification,
+  deleteVerificationToken,
+} from '@/data/auth'
 
-export async function verifyEmail(token: string) {
-  if (!token) {
-    return { status: 'error', message: 'Invalid verification link.' }
-  }
+export type VerifyEmailResult =
+  | VerifyEmailResultSuccess
+  | VerifyEmailResultError
 
+interface VerifyEmailResultSuccess {
+  success: true
+}
+
+interface VerifyEmailResultError {
+  success: false
+  error: string
+}
+
+export async function verifyEmail(token: string): Promise<VerifyEmailResult> {
   try {
-    const verificationToken = await db.verificationToken.findUnique({
-      where: { token },
-    })
-
+    // Find verification token
+    const verificationToken = await findVerificationToken(token)
     if (!verificationToken) {
-      return {
-        status: 'error',
-        message: 'Invalid or expired verification link.',
-      }
+      return { success: false, error: 'Invalid verification token' }
     }
 
-    const user = await db.user.findUnique({
-      where: { email: verificationToken.identifier },
-    })
+    // Check if token is expired
+    if (verificationToken.expires < new Date()) {
+      return { success: false, error: 'Verification token has expired' }
+    }
 
+    // Find user by email
+    const user = await findUserById(parseInt(verificationToken.identifier))
     if (!user) {
-      return { status: 'error', message: 'User not found.' }
+      return { success: false, error: 'User not found' }
     }
 
-    await db.user.update({
-      where: { id: user.id },
-      data: { emailVerified: new Date() },
-    })
+    // Update user verification status
+    await updateUserVerification(user.id)
 
-    await db.verificationToken.delete({
-      where: { token },
-    })
+    // Delete verification token
+    await deleteVerificationToken(token)
 
+    return { success: true }
+  } catch (error) {
+    console.error('Email verification error:', error)
     return {
-      status: 'success',
-      message: 'Email verified successfully! You can now log in.',
+      success: false,
+      error: error instanceof Error ? error.message : 'Something went wrong',
     }
-  } catch {
-    return { status: 'error', message: 'An error occurred. Please try again.' }
   }
 }

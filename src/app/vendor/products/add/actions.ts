@@ -3,93 +3,69 @@
 import { revalidatePath } from 'next/cache'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { db } from '@/lib/prisma'
-import { createProductSchema } from '@/types/product'
+import { createProduct } from '@/data/products'
+import { findVendorByUserId } from '@/data/vendors'
+import { createProductSchema } from '@/lib/schemas/product'
 import { ActionState } from '@/types/actions'
 
-export async function createProducts(
+export async function addProducts(
   prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
-    return {
-      message: 'Unauthorized',
-      success: false,
-    }
-  }
-
-  // Get the vendor profile for the current user
-  const vendorProfile = await db.vendorProfile.findUnique({
-    where: { userId: session.user.id },
-  })
-
-  if (!vendorProfile) {
-    return {
-      message: 'Vendor profile not found',
-      success: false,
-    }
-  }
-
-  // Parse the products data
-  const productsData = JSON.parse((formData.get('products') as string) || '[]')
-
-  if (productsData.length === 0) {
-    return {
-      message: 'No products to create',
-      success: false,
-    }
-  }
-
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user) {
+      return {
+        message: 'Unauthorized',
+        success: false,
+      }
+    }
+
+    // Get vendor profile for the authenticated user
+    const vendorProfile = await findVendorByUserId(session.user.id)
+    if (!vendorProfile) {
+      return {
+        message: 'Vendor profile not found',
+        success: false,
+      }
+    }
+
+    const productsData = JSON.parse(
+      (formData.get('products') as string) || '[]'
+    )
+
+    if (!Array.isArray(productsData) || productsData.length === 0) {
+      return {
+        message: 'No products to create',
+        success: false,
+      }
+    }
+
     const createdProducts = []
 
-    for (const rawData of productsData) {
-      const validatedData = createProductSchema.parse(rawData)
-
-      // Create the product with variations
-      const product = await db.product.create({
-        data: {
-          name: validatedData.name,
-          description: validatedData.description,
-          category: validatedData.category,
-          imageUrl: validatedData.imageUrl,
-          organic: validatedData.organic,
-          local: validatedData.local,
-          vendorProfileId: vendorProfile.id,
-          variations: {
-            create: validatedData.variations.map((variation) => ({
-              name: variation.name,
-              price: variation.price,
-              size: variation.size,
-              packaged: variation.packaged,
-              productUnitId: variation.unitId,
-            })),
-          },
-        },
-        include: {
-          vendorProfile: true,
-        },
-      })
-
+    for (const productData of productsData) {
+      const parsedProductData = createProductSchema.parse(productData)
+      const product = await createProduct(vendorProfile.id, parsedProductData)
       createdProducts.push(product)
     }
 
-    // Revalidate the vendor dashboard and products pages
-    revalidatePath('/vendor/dashboard')
     revalidatePath('/vendor/products')
+    revalidatePath('/vendor/dashboard')
 
     return {
       success: true,
       count: createdProducts.length,
     }
   } catch (error) {
-    console.error('Error creating products:', error)
+    console.error('Add products error:', error)
     return {
       message:
         error instanceof Error ? error.message : 'Failed to create products',
       success: false,
+      errors: {
+        products: ['Failed to create products'],
+      },
     }
   }
 }

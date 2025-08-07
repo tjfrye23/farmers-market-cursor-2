@@ -22,13 +22,15 @@ function VerifyContent() {
       }
 
       const result = await verifyEmail(token)
-      setStatus(result.status as 'success' | 'error')
-      setMessage(result.message)
-
-      if (result.status === 'success') {
+      if (result.success) {
+        setStatus('success')
+        setMessage('Email verified successfully! You can now log in.')
         setTimeout(() => {
           router.push('/auth/login')
         }, 2000)
+      } else {
+        setStatus('error')
+        setMessage(result.error || 'Verification failed.')
       }
     }
 

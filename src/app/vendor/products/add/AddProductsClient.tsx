@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import PageHeader from '@/components/PageHeader'
 import { ProductFormData } from '@/data/product-data'
-import { createProducts } from './actions'
+import { addProducts } from './actions'
 import HeaderActions from './components/HeaderActions'
 import ProductFormSection from './components/ProductFormSection'
 import EmptyState from '@/components/EmptyState'
@@ -57,7 +57,7 @@ export default function AddProductsClient({
     setIsSubmitting(true)
 
     try {
-      const result = await createProducts(
+      const result = await addProducts(
         { success: false, message: '' },
         formData
       )
